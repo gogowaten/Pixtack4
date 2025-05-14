@@ -115,7 +115,7 @@
         <Grid x:Name="MyGridMyItemsTree" DockPanel.Dock="Left" Width="200"
               DataContext="{Binding MyRoot, UpdateSourceTrigger=PropertyChanged}">
           <ScrollViewer VerticalScrollBarVisibility="Auto">
-            <TreeView ItemsSource="{Binding MyThumbs}"  Background="{x:Static SystemColors.ScrollBarBrush}">
+            <TreeView ItemsSource="{Binding MyThumbs}"  Background="WhiteSmoke">
               <!--<TreeView.Resources>
                 <Style TargetType="{x:Type TreeViewItem}">
                   <Setter Property="HorizontalContentAlignment" Value="Center"/>
