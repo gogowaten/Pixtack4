@@ -48,13 +48,15 @@
               </StackPanel>
             </TabItem>
             <TabItem Header="AppData" DataContext="{Binding MyAppData}">
-              <StackPanel Orientation="Vertical">
-                <TextBlock Text="{Binding CurrentOpenFilePath, StringFormat=CurrentOpenFilePath _ {0:0}}"/>
-                <TextBlock Text="{Binding InitialDirectory, StringFormat=InitialDirectory _ {0:0}}"/>
-                <TextBlock Text="{Binding IsFileNameDescendingOrder, StringFormat=IsFileNameDescendingOrder _ {0:0}}"/>
-                <TextBlock Text="{Binding DefaultSaveFileName, StringFormat=DefaultSaveFileName _ {0:0}}"/>
-                <TextBlock Text="{Binding MyJpegQuality, StringFormat=MyJpegQuality _ {0:0}}"/>
-              </StackPanel>
+              <ScrollViewer>
+              <DockPanel>
+                <TextBlock DockPanel.Dock="Top" Text="{Binding CurrentOpenFilePath, StringFormat=CurrentOpenFilePath _ {0:0}}"/>
+                  <TextBlock DockPanel.Dock="Top" Text="{Binding InitialDirectory, StringFormat=InitialDirectory _ {0:0}}"/>
+                  <TextBlock DockPanel.Dock="Top" Text="{Binding IsFileNameDescendingOrder, StringFormat=IsFileNameDescendingOrder _ {0:0}}"/>
+                  <TextBlock DockPanel.Dock="Top" Text="{Binding DefaultSaveFileName, StringFormat=DefaultSaveFileName _ {0:0}}"/>
+                  <TextBlock DockPanel.Dock="Top" Text="{Binding MyJpegQuality, StringFormat=MyJpegQuality _ {0:0}}"/>
+                </DockPanel>
+              </ScrollViewer>
             </TabItem>
             <TabItem Header="tab3">
               <WrapPanel Orientation="Horizontal">
@@ -63,16 +65,25 @@
                     <Setter Property="Margin" Value="2"/>
                   </Style>
                 </WrapPanel.Resources>
+                <Button Content="グループ化" Click="Button_Click_Grouping"/>
+                <Button Content="グループ解除" Click="Button_Click_UnGroup"/>
+                <Grid Background="Red" Width="10"/>
+                <Button Content="グループIN" Click="Button_Click_ChangeActiveGroupToInside"/>
+                <Button Content="グループOUT" Click="Button_Click_ChangeActiveGroupToOutside"/>
+                <Button Content="ClickItemまでIN" Click="Button_Click_ChangeActiveGroupClickedParent"/>
+                <Button Content="RootまでOUT" Click="Button_Click_ChangeActiveGroupRootActivate"/>
+                <Grid Background="Red" Width="10"/>
+                <Button Content="ZUp" Click="Button_Click_ZUp"/>
+                <Button Content="ZDown" Click="Button_Click_ZDown"/>
+                <Button Content="最前面" Click="Button_Click_ZtoTop"/>
+                <Button Content="最背面" Click="Button_Click_ZtoBottom"/>
 
                 <TextBlock Text="👈️👆️できた｜まだ👇️👉️"/>
-
-                <Button Content="グループ化"/>
-                <Button Content="グループ解除"/>
-                <Button Content="グループIN"/>
-                <Button Content="グループOUT"/>
-                <Button Content="ClickItemまでIN"/>
-                <Button Content="RootまでOUT"/>
-                <Button Content="グリッド変更"/>
+                <Button Content="グリッドサイズ変更"/>
+                <Button Content="クリップボードから画像貼り付け"/>
+                <Button Content="クリップボードに画像としてコピー"/>
+                <Button Content="複製"/>
+                <Button Content="画像として複製"/>
 
               </WrapPanel>
             </TabItem>
@@ -100,24 +111,37 @@
           <Button Content="ItemsTree" Click="Button_Click_ItemsTreePanelVisible"/>
         </Menu>
 
-        <Grid x:Name="MyGridMyItemsTree" DockPanel.Dock="Left" DataContext="{Binding MyRoot.MyThumbs, UpdateSourceTrigger=PropertyChanged}">
-          <ScrollViewer>
-            <TreeView ItemsSource="{Binding}">
+        <!--動作は問題なけどTreeViewにバインドエラーが出る-->
+        <Grid x:Name="MyGridMyItemsTree" DockPanel.Dock="Left" Width="200"
+              DataContext="{Binding MyRoot, UpdateSourceTrigger=PropertyChanged}">
+          <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <TreeView ItemsSource="{Binding MyThumbs}"  Background="{x:Static SystemColors.ScrollBarBrush}">
+              <!--<TreeView.Resources>
+                <Style TargetType="{x:Type TreeViewItem}">
+                  <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                  <Setter Property="VerticalContentAlignment" Value="Center"/>
+                </Style>
+              </TreeView.Resources>-->
               <TreeView.ItemTemplate>
-                <HierarchicalDataTemplate DataType="local:RootThumb" ItemsSource="{Binding}">
-                  <StackPanel Orientation="Vertical">
-                    <TextBlock Text="{Binding MyThumbType}" VerticalAlignment="Center" Margin="10"/>
-                    <!--<TextBlock Text="{Binding MyItemData.MyZIndex, StringFormat=z {0:0}}"/>
-        <TextBlock Text="{Binding IsSelectable, StringFormat=selectable {0:0}}"/>
-        <TextBlock Text="{Binding IsSelected, StringFormat=selected {0:0}}"/>-->
-                    <Rectangle Width="50" Height="50">
-                      <Rectangle.Fill>
-                        <VisualBrush Visual="{Binding}" Stretch="Uniform"/>
-                      </Rectangle.Fill>
-                    </Rectangle>
-                  </StackPanel>
+                <HierarchicalDataTemplate  ItemsSource="{Binding MyThumbs}">
+                  <Border BorderBrush="Silver" BorderThickness="1" Margin="1">
+                    <StackPanel Orientation="Horizontal">
+                      <Rectangle Width="20" Height="20">
+                        <Rectangle.Fill>
+                          <VisualBrush Visual="{Binding}" Stretch="Uniform"/>
+                        </Rectangle.Fill>
+                      </Rectangle>
+                      <TextBlock Text="{Binding MyThumbType}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                  </Border>
                 </HierarchicalDataTemplate>
               </TreeView.ItemTemplate>
+              <!--<TreeView.ItemContainerStyle>
+                <Style TargetType="{x:Type TreeViewItem}">
+                  <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                  <Setter Property="VerticalAlignment" Value="Center"/>
+                </Style>
+              </TreeView.ItemContainerStyle>-->
             </TreeView>
           </ScrollViewer>
         </Grid>
@@ -125,7 +149,7 @@
         <Grid x:Name="MyRootStatusView" DockPanel.Dock="Left"
               Width="200"
               DataContext="{Binding MyRoot, UpdateSourceTrigger=PropertyChanged}"
-              Visibility="Visible">
+              Visibility="Collapsed">
           <StackPanel>
             <GroupBox Header="Root状態確認用" DataContext="{Binding UpdateSourceTrigger=PropertyChanged}">
               <StackPanel>
@@ -165,6 +189,12 @@
         <Grid x:Name="MyPanelSelectedItemsProperty" DockPanel.Dock="Right" Width="200" DataContext="{Binding MyRoot.MySelectedThumbs}" Visibility="Visible">
           <GroupBox Header="SelectedItems">
             <ListBox ItemsSource="{Binding}" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+              <ListBox.Resources>
+                <Style TargetType="ListBoxItem">
+                  <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                  <Setter Property="VerticalContentAlignment" Value="Center"/>
+                </Style>
+              </ListBox.Resources>
               <ListBox.ItemsPanel>
                 <ItemsPanelTemplate>
                   <WrapPanel Orientation="Horizontal"/>
@@ -182,6 +212,8 @@
               <ListBox.ItemContainerStyle>
                 <Style TargetType="{x:Type ListBoxItem}">
                   <Setter Property="Padding" Value="0"/>
+                  <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                  <Setter Property="VerticalContentAlignment" Value="Center"/>
                 </Style>
               </ListBox.ItemContainerStyle>
             </ListBox>

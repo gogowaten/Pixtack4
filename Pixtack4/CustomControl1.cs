@@ -582,6 +582,17 @@ namespace Pixtack4
         #endregion イベントハンドラ
 
         #region 依存関係プロパティ
+        public ObservableCollection<KisoThumb> MyThumbs
+        {
+            get { return (ObservableCollection<KisoThumb>)GetValue(MyThumbsProperty); }
+            set { SetValue(MyThumbsProperty, value); }
+        }
+        public static readonly DependencyProperty MyThumbsProperty =
+            DependencyProperty.Register(nameof(MyThumbs), typeof(ObservableCollection<KisoThumb>), typeof(KisoThumb),
+                new FrameworkPropertyMetadata(null,
+                    FrameworkPropertyMetadataOptions.AffectsRender |
+                    FrameworkPropertyMetadataOptions.AffectsMeasure |
+                    FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
         //実際の位置？使う？Offsetと併用
         public double MyActualLeft
@@ -814,8 +825,11 @@ namespace Pixtack4
         #region ZIndex
         //ZIndexの変更
         //変更するThumb自体と、その前後のThumbも変更する必要がある、さらに
-        //親ThumbのMyThumbsと、親ThumbのMyItemData.MyThumbsItemDataも変更する必要がある
+        //親のMyThumbsと、親のMyItemData.MyThumbsItemDataも変更する必要がある
 
+        /// <summary>
+        /// ZIndex変更、自身を一つ上げる
+        /// </summary>
         public void ZIndexUp()
         {
             if (MyParentThumb is GroupThumb gt)
@@ -831,7 +845,7 @@ namespace Pixtack4
         }
 
         /// <summary>
-        /// 最前面へ移動
+        /// ZIndex変更、最前面へ移動
         /// </summary>
         public void ZIndexTop()
         {
@@ -846,7 +860,9 @@ namespace Pixtack4
             }
         }
 
-
+        /// <summary>
+        /// ZIndex変更、自身を一つ下げる
+        /// </summary>
         public void ZIndexDown()
         {
             if (MyParentThumb is GroupThumb gt)
@@ -861,7 +877,7 @@ namespace Pixtack4
         }
 
         /// <summary>
-        /// 最背面へ移動
+        /// ZIndex変更、最背面へ移動
         /// </summary>
         public void ZIndexBottom()
         {
@@ -1149,17 +1165,17 @@ namespace Pixtack4
         #region 依存関係プロパティ
 
 
-        public ObservableCollection<KisoThumb> MyThumbs
-        {
-            get { return (ObservableCollection<KisoThumb>)GetValue(MyThumbsProperty); }
-            set { SetValue(MyThumbsProperty, value); }
-        }
-        public static readonly DependencyProperty MyThumbsProperty =
-            DependencyProperty.Register(nameof(MyThumbs), typeof(ObservableCollection<KisoThumb>), typeof(GroupThumb),
-                new FrameworkPropertyMetadata(null,
-                    FrameworkPropertyMetadataOptions.AffectsRender |
-                    FrameworkPropertyMetadataOptions.AffectsMeasure |
-                    FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+        //public ObservableCollection<KisoThumb> MyThumbs
+        //{
+        //    get { return (ObservableCollection<KisoThumb>)GetValue(MyThumbsProperty); }
+        //    set { SetValue(MyThumbsProperty, value); }
+        //}
+        //public static readonly DependencyProperty MyThumbsProperty =
+        //    DependencyProperty.Register(nameof(MyThumbs), typeof(ObservableCollection<KisoThumb>), typeof(GroupThumb),
+        //        new FrameworkPropertyMetadata(null,
+        //            FrameworkPropertyMetadataOptions.AffectsRender |
+        //            FrameworkPropertyMetadataOptions.AffectsMeasure |
+        //            FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
         #endregion 依存関係プロパティ
 
@@ -1356,7 +1372,7 @@ namespace Pixtack4
 
 
         /// <summary>
-        /// 再配置、ReLayoutからの改変、余計な処理をなくした。
+        /// 再配置、
         /// 子要素全体での左上座標を元に子要素全部と自身の位置を修正する
         /// ただし、自身がrootだった場合は子要素だけを修正する
         /// </summary>
@@ -1366,11 +1382,8 @@ namespace Pixtack4
             double left = double.MaxValue; double top = double.MaxValue;
             foreach (var item in MyThumbs)
             {
-
-
                 if (left > item.MyItemData.MyLeft) { left = item.MyItemData.MyLeft; }
                 if (top > item.MyItemData.MyTop) { top = item.MyItemData.MyTop; }
-
             }
 
             if (left != MyItemData.MyLeft)
@@ -1401,7 +1414,7 @@ namespace Pixtack4
 
     /// <summary>
     /// root用Thumb
-    /// rootは移動させない、というか移動させないときの識別用クラス
+    /// rootは移動させない
     /// </summary>
     public class RootThumb : GroupThumb
     {
@@ -1796,6 +1809,19 @@ namespace Pixtack4
 
         #region ActiveGroupThumbの変更
 
+        /// <summary>
+        /// ActiveGroupをRootに変更する
+        /// </summary>
+        public void ChangeActiveGroupToRootActivate()
+        {
+            if (ChangeActiveGroupThumb(this))
+            {
+                //FocusThumbとSelectedThumbを更新
+                KisoThumb? item = GetSelectableThumb(MyFocusThumb);
+                MyFocusThumb = item;
+                SelectedThumbsClearAndAddThumb(item);
+            }
+        }
 
         /// <summary>
         /// ActiveGroupThumbを外(Root)側のGroupThumbへ変更
@@ -1809,7 +1835,6 @@ namespace Pixtack4
                 {
                     SelectedThumbsToAdd(motoGroup);
                 }
-                ;
             }
         }
 
@@ -1844,19 +1869,18 @@ namespace Pixtack4
                 {
                     SelectedThumbsToAdd(MyClickedThumb);
                 }
-                ;
             }
         }
 
         /// <summary>
         /// ActiveGroupThumbの変更
         /// </summary>
-        /// <param name="newGroupThumb">指定GroupThumb</param>
-        private bool ChangeActiveGroupThumb(GroupThumb newGroupThumb)
+        /// <param name="group">指定GroupThumb</param>
+        private bool ChangeActiveGroupThumb(GroupThumb group)
         {
-            if (MyActiveGroupThumb != newGroupThumb)
+            if (MyActiveGroupThumb != group)
             {
-                MyActiveGroupThumb = newGroupThumb;
+                MyActiveGroupThumb = group;
                 return true;
             }
             return false;
@@ -2327,7 +2351,7 @@ namespace Pixtack4
         /// <summary>
         /// SelectedThumbsからGroupThumbを生成、ActiveThumbに追加
         /// </summary>
-        public void AddGroupFromSelected()
+        public void AddGroupingFromSelected()
         {
             //グループ化しない、
             //要素数が2個未満のとき、

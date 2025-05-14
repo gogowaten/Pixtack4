@@ -95,7 +95,9 @@ namespace Pixtack4
 
 
 
-
+    /// <summary>
+    /// アプリの設定用
+    /// </summary>
     public class AppData : ItemDataKiso
     {
         public AppData() { }
@@ -279,7 +281,9 @@ namespace Pixtack4
 
 
 
-
+    /// <summary>
+    /// アイテム用
+    /// </summary>
     //[DataContract]
     [KnownType(typeof(ItemData))]
 

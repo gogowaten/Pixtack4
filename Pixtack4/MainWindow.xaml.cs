@@ -247,17 +247,65 @@ namespace Pixtack4
 
         #region ボタンクリック        
         //確認テスト用
+        
         private void Button_Click(object sender, RoutedEventArgs e)
         {
 
             var neko = MyAppWindowData;
-
+            var inu = MyAppData;
+        }
+        
+        private void Button_Click_ZUp(object sender, RoutedEventArgs e)
+        {
+            MyRoot.MyFocusThumb?.ZIndexUp();
+        }
+        private void Button_Click_ZDown(object sender, RoutedEventArgs e)
+        {
+            MyRoot.MyFocusThumb?.ZIndexDown();
+        }
+        private void Button_Click_ZtoTop(object sender, RoutedEventArgs e)
+        {
+            MyRoot.MyFocusThumb?.ZIndexTop();
+        }
+        private void Button_Click_ZtoBottom(object sender, RoutedEventArgs e)
+        {
+            MyRoot.MyFocusThumb?.ZIndexBottom();
         }
 
 
 
-
         #region 完了
+
+
+        private void Button_Click_ChangeActiveGroupRootActivate(object sender, RoutedEventArgs e)
+        {
+            MyRoot.ChangeActiveGroupToRootActivate();// ActiveGroupをRootに変更する
+        }
+
+        private void Button_Click_ChangeActiveGroupClickedParent(object sender, RoutedEventArgs e)
+        {
+            MyRoot.ActiveGroupFromClickedThumbsParent();// ClickedのParentをActiveGroupThumbにする
+        }
+
+        private void Button_Click_ChangeActiveGroupToOutside(object sender, RoutedEventArgs e)
+        {
+            MyRoot.ActiveGroupToOutside();// ActiveGroupThumbを外(Root)側のGroupThumbへ変更
+        }
+
+        private void Button_Click_ChangeActiveGroupToInside(object sender, RoutedEventArgs e)
+        {
+            MyRoot.ActiveGroupToInside();// ActiveGroupThumbを内側のGroupThumbへ変更
+        }
+
+        private void Button_Click_UnGroup(object sender, RoutedEventArgs e)
+        {
+            MyRoot.UngroupFocusThumb();// グループ解除、FocusThumbが対象
+        }
+
+        private void Button_Click_Grouping(object sender, RoutedEventArgs e)
+        {
+            MyRoot.AddGroupingFromSelected();// SelectedThumbsからGroupThumbを生成、ActiveThumbに追加
+        }
 
         private void Button_Click_ItemsTreePanelVisible(object sender, RoutedEventArgs e)
         {
