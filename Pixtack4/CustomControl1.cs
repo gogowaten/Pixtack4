@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Eventing.Reader;
 using System.IO;
 using System.IO.Compression;
@@ -1929,6 +1930,38 @@ namespace Pixtack4
             //開けなかったファイルリストを表示
             ShowMessageBoxStringList(errorList);
         }
+
+        /// <summary>
+        /// ファイルを開いてThumb作成して追加する
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <returns>追加することができたときはTrueを返す</returns>
+        public bool OpenFile(string filePath)
+        {
+            var extension = System.IO.Path.GetExtension(filePath).TrimStart('.');
+            if (extension == "px4" || extension == "px4item")
+            {
+                if (LoadItemData(filePath) is ItemData data)
+                {
+                    //RootはGroupに変更
+                    if (data.MyThumbType == ThumbType.Root)
+                    {
+                        data.MyThumbType = ThumbType.Group;
+                    }
+                    AddNewThumbFromItemData(data);
+                    return true;
+                }
+            }
+            //px4とpx4item以外は画像として開いてImageItemとして追加する
+            else if (GetBitmap(filePath) is BitmapSource bmp)
+            {
+                AddImageThumb(bmp);
+                return true;
+            }
+            //開けなかったらfalse
+            return false;
+        }
+
 
         /// <summary>
         /// BitmapSourceをImageThumbとして追加

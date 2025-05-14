@@ -247,14 +247,14 @@ namespace Pixtack4
 
         #region ボタンクリック        
         //確認テスト用
-        
+
         private void Button_Click(object sender, RoutedEventArgs e)
         {
 
             var neko = MyAppWindowData;
             var inu = MyAppData;
         }
-        
+
         private void Button_Click_ZUp(object sender, RoutedEventArgs e)
         {
             MyRoot.MyFocusThumb?.ZIndexUp();
@@ -493,10 +493,11 @@ namespace Pixtack4
             if (MakeBitmapFromThumb(item) is RenderTargetBitmap bb)// ThumbをBitmapに変換
             {
                 // Bitmapをファイル保存
-                var (result, filePath) = SaveBitmap(bb, MyAppData.DefaultSaveFileName, MyAppData.MyJpegQuality);
+                var (result, filePath) = SaveBitmap(bb, MyAppData.DefaultSaveImageFileName, MyAppData.MyJpegQuality);
                 if (result)
                 {
-                    MyAppData.DefaultSaveFileName = System.IO.Path.GetFileNameWithoutExtension(filePath);
+                    //既定ファイル名の更新
+                    MyAppData.DefaultSaveImageFileName = System.IO.Path.GetFileNameWithoutExtension(filePath);
                     return true;
                 }
             }
@@ -662,7 +663,7 @@ namespace Pixtack4
 
         #endregion 画像保存
 
-        #region Save
+        #region SaveData
 
 
         /// <summary>
@@ -678,7 +679,7 @@ namespace Pixtack4
                 if (MyRoot.SaveItemData(thumb.MyItemData, dialog.FileName))
                 {
                     //保存ファイル名の既定値更新
-                    MyAppData.DefaultSaveFileName = System.IO.Path.GetFileNameWithoutExtension(dialog.FileName);
+                    MyAppData.DefaultSaveDataFileName = System.IO.Path.GetFileNameWithoutExtension(dialog.FileName);
                     // Rootの場合はCurrentPath更新
                     if (thumb.MyItemData.MyThumbType == ThumbType.Root)
                     {
@@ -725,7 +726,8 @@ namespace Pixtack4
             {
                 MyAppData.CurrentOpenFilePath = filePath;
                 MyStatusMessage.Text = MakeStatusMessage("保存完了");
-                MyAppData.DefaultSaveFileName = System.IO.Path.GetFileNameWithoutExtension(filePath);
+                //既定ファイル名の更新
+                MyAppData.DefaultSaveDataFileName = System.IO.Path.GetFileNameWithoutExtension(filePath);
                 return true;
             }
             MyStatusMessage.Text = MakeStatusMessage("保存できなかった");
@@ -741,7 +743,7 @@ namespace Pixtack4
         private SaveFileDialog MakeSaveFileDialog(ItemData data)
         {
             SaveFileDialog dialog = new();
-            dialog.FileName = MyAppData.DefaultSaveFileName;
+            dialog.FileName = MyAppData.DefaultSaveDataFileName;
             if (data.MyThumbType == ThumbType.Root)
             {
                 dialog.Filter = "*.px4|*.px4";
@@ -760,7 +762,8 @@ namespace Pixtack4
         }
 
 
-        #endregion Save
+        #endregion SaveData
+
 
         #region その他
 
@@ -820,7 +823,7 @@ namespace Pixtack4
                     "|すべて | *.* "
             };
 
-            //取得したファイルパスはファイル名でソート
+            //ダイアログから開く
             if (dialog.ShowDialog() == true)
             {
                 OpenFiles(dialog.FileNames);
@@ -836,7 +839,54 @@ namespace Pixtack4
         {
             Array.Sort(paths);//ファイル名でソート
             if (MyAppData.IsFileNameDescendingOrder) { Array.Reverse(paths); }
-            MyRoot.OpenFiles(paths);
+            List<string> errors = [];
+
+            //Item作成して追加、追加できなかったファイルはメッセージボックスで表示
+            foreach (var item in paths)
+            {
+                //開いて追加できたら、既定ファイル名の更新
+                if (MyRoot.OpenFile(item))
+                {
+                    string ext = System.IO.Path.GetExtension(item).Trim('.');
+                    string fileName = System.IO.Path.GetFileNameWithoutExtension(item);
+                    if (ext == "px4" || ext == "px4item")
+                    {
+                        //データファイル既定名
+                        MyAppData.DefaultSaveDataFileName = fileName + "_";
+                    }
+                    else
+                    {
+                        //画像ファイル既定名
+                        MyAppData.DefaultSaveImageFileName = fileName + "_";
+                    }
+                    
+                }
+                //開けなかったファイル名をリストに追加
+                else { errors.Add(System.IO.Path.GetFileName(item)); }
+            }
+            if (errors.Count > 0)
+            {
+                ShowMessageBoxStringList(errors, "開くことができなかったファイル一覧");
+            }
+            //MyRoot.OpenFiles(paths);
+        }
+
+
+        /// <summary>
+        /// 文字列リストをメッセージボックスに表示
+        /// </summary>
+        /// <param name="list"></param>
+        public static void ShowMessageBoxStringList(List<string> list, string caption)
+        {
+            if (list.Count != 0)
+            {
+                string text = "";
+                foreach (var name in list)
+                {
+                    text += $"{name}\n";
+                }
+                MessageBox.Show(text, caption, MessageBoxButton.OK, MessageBoxImage.Information);
+            }
         }
 
 

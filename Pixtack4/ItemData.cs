@@ -102,11 +102,13 @@ namespace Pixtack4
     {
         public AppData() { }
 
+        //画像とし保存時の既定ファイル名
+        private string _defaultSaveImageFileName = string.Empty;
+        [DataMember] public string DefaultSaveImageFileName { get => _defaultSaveImageFileName; set => SetProperty(ref _defaultSaveImageFileName, value); }
 
-
-        //保存ファイル名の既定値
-        private string _defaultSaveFileName = string.Empty;
-        [DataMember] public string DefaultSaveFileName { get => _defaultSaveFileName; set => SetProperty(ref _defaultSaveFileName, value); }
+        //保存Dataファイル名の既定値
+        private string _defaultSaveDataFileName = string.Empty;
+        [DataMember] public string DefaultSaveDataFileName { get => _defaultSaveDataFileName; set => SetProperty(ref _defaultSaveDataFileName, value); }
 
         //jpeg保存時の品質
         private int _myJpegQuality = 90;

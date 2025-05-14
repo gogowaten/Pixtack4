@@ -53,12 +53,13 @@
                 <TextBlock DockPanel.Dock="Top" Text="{Binding CurrentOpenFilePath, StringFormat=CurrentOpenFilePath _ {0:0}}"/>
                   <TextBlock DockPanel.Dock="Top" Text="{Binding InitialDirectory, StringFormat=InitialDirectory _ {0:0}}"/>
                   <TextBlock DockPanel.Dock="Top" Text="{Binding IsFileNameDescendingOrder, StringFormat=IsFileNameDescendingOrder _ {0:0}}"/>
-                  <TextBlock DockPanel.Dock="Top" Text="{Binding DefaultSaveFileName, StringFormat=DefaultSaveFileName _ {0:0}}"/>
+                  <TextBlock DockPanel.Dock="Top" Text="{Binding DefaultSaveDataFileName, StringFormat=DefaultSaveFileName _ {0:0}}"/>
+                  <TextBlock DockPanel.Dock="Top" Text="{Binding DefaultSaveImageFileName, StringFormat=DefaultSaveImageFileName _ {0:0}}"/>
                   <TextBlock DockPanel.Dock="Top" Text="{Binding MyJpegQuality, StringFormat=MyJpegQuality _ {0:0}}"/>
                 </DockPanel>
               </ScrollViewer>
             </TabItem>
-            <TabItem Header="tab3">
+            <TabItem Header="Group_Zindex">
               <WrapPanel Orientation="Horizontal">
                 <WrapPanel.Resources>
                   <Style TargetType="{x:Type Button}">
@@ -84,7 +85,12 @@
                 <Button Content="クリップボードに画像としてコピー"/>
                 <Button Content="複製"/>
                 <Button Content="画像として複製"/>
-
+                <TextBlock Text="{Binding MyAppData.MyJpegQuality, StringFormat=jpeg品質 {0:0}}"/>
+                <Slider Minimum="50" Maximum="100" Value="{Binding MyAppData.MyJpegQuality}" Width="100"/>
+                
+                <TextBlock Text="{Binding MyAppData.MyJpegQuality, StringFormat=jpeg品質 {0:0}}"/>
+                <Slider Minimum="50" Maximum="100" Value="{Binding MyAppData.MyJpegQuality}" Width="100"/>
+                
               </WrapPanel>
             </TabItem>
           </TabControl>
