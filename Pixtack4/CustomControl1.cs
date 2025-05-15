@@ -452,9 +452,10 @@ namespace Pixtack4
         /// <summary>
         /// ドラッグ移動開始時
         /// アンカーThumbを作成追加、
-        /// ぼやけ回避のため、座標を四捨五入してドットに合わせる
+        /// ぼやけ回避のため、座標を四捨五入してドットに合わせる。
+        /// グリッドスナップさせる
         /// </summary>
-        internal void KisoThumb_DragStarted2(object sender, DragStartedEventArgs e)
+        internal void KisoThumb_DragStarted3(object sender, DragStartedEventArgs e)
         {
             if (sender is KisoThumb kiso)
             {
@@ -467,40 +468,46 @@ namespace Pixtack4
                             //Parentの自動リサイズを停止する
                             canvas.IsAutoResize = false;
                         }
-                        //parent.AddAnchorThumb(current);
-                        //座標を四捨五入で整数にしてぼやけ回避
+                        // グリッドスナップさせる、ぼやけ回避にもなる
+                        //最寄りの座標に移動、四捨五入？
                         current.MyItemData.MyLeft = (int)(current.MyItemData.MyLeft + 0.5);
                         current.MyItemData.MyTop = (int)(current.MyItemData.MyTop + 0.5);
+
+
                         e.Handled = true;
                     }
                 }
             }
-
         }
 
-        /// <summary>
-        /// PointをSelectableなParentまでのRenderTransformを適用して返す
-        /// </summary>
-        /// <param name="parent"></param>
-        /// <param name="poi"></param>
-        /// <returns></returns>
-        private Point GetRenderTransrormsPoint(GroupThumb parent, Point poi)
-        {
-            poi = parent.MyInsideElement.RenderTransform.Transform(poi);
-            if (parent.IsSelectable)
-            {
-                return poi;
-            }
-            else if (parent.MyParentThumb is GroupThumb nextParent)
-            {
-                return GetRenderTransrormsPoint(nextParent, poi);
-            }
-            else
-            {
-                return poi;
-            }
+        ///// <summary>
+        ///// ドラッグ移動開始時
+        ///// アンカーThumbを作成追加、
+        ///// ぼやけ回避のため、座標を四捨五入してドットに合わせる。
+        ///// </summary>
+        //internal void KisoThumb_DragStarted2(object sender, DragStartedEventArgs e)
+        //{
+        //    if (sender is KisoThumb kiso)
+        //    {
+        //        if (GetSelectableThumb(kiso) is KisoThumb current)
+        //        {
+        //            if (current.MyParentThumb is GroupThumb parent)
+        //            {
+        //                if (parent.MyExCanvas is ExCanvas canvas)
+        //                {
+        //                    //Parentの自動リサイズを停止する
+        //                    canvas.IsAutoResize = false;
+        //                }
+        //                //parent.AddAnchorThumb(current);
+        //                //座標を四捨五入で整数にしてぼやけ回避
+        //                current.MyItemData.MyLeft = (int)(current.MyItemData.MyLeft + 0.5);
+        //                current.MyItemData.MyTop = (int)(current.MyItemData.MyTop + 0.5);
+        //                e.Handled = true;
+        //            }
+        //        }
+        //    }
+        //}
 
-        }
         /// <summary>
         /// SelectedThumb全てを移動
         /// 移動距離を四捨五入(丸めて)整数ドラッグ移動
@@ -515,6 +522,7 @@ namespace Pixtack4
                 var ori = e.OriginalSource;
                 var hori = e.HorizontalChange;
                 var vert = e.VerticalChange;
+                int gridSize = 1;
 
                 //回転対応
                 //Parentが回転していると、その分の移動方向も回転されてしまい、
@@ -522,11 +530,17 @@ namespace Pixtack4
                 Point poi = new(e.HorizontalChange, e.VerticalChange);
                 if (e.OriginalSource is KisoThumb kiso && kiso.MyParentThumb is GroupThumb parent)
                 {
-                    poi = GetRenderTransrormsPoint(parent, poi);
+                    poi = GetRenderTransformsPoint(parent, poi);
+                    //Parentのグリッドサイズ
+                    gridSize = parent.MyItemData.GridSize;
                 }
 
-                int yoko = (int)(poi.X + 0.5);
-                int tate = (int)(poi.Y + 0.5);
+                //グリッドスナップ移動のため、移動距離をグリッドサイズで切り捨ての割り算
+                int yoko = (int)(poi.X / gridSize) * gridSize;
+                int tate = (int)(poi.Y / gridSize) * gridSize;
+                //int yoko = (int)(poi.X / gridSize + 0.5) * gridSize;
+                //int tate = (int)(poi.Y / gridSize + 0.5) * gridSize;
+
                 if (GetRootThumb() is RootThumb root)
                 {
                     foreach (var item in root.MySelectedThumbs)
@@ -575,6 +589,31 @@ namespace Pixtack4
                     e.Handled = true;
                 }
             }
+        }
+
+
+        /// <summary>
+        /// PointをSelectableなParentまでのRenderTransformを適用して返す
+        /// </summary>
+        /// <param name="parent"></param>
+        /// <param name="poi"></param>
+        /// <returns></returns>
+        private Point GetRenderTransformsPoint(GroupThumb parent, Point poi)
+        {
+            poi = parent.MyInsideElement.RenderTransform.Transform(poi);
+            if (parent.IsSelectable)
+            {
+                return poi;
+            }
+            else if (parent.MyParentThumb is GroupThumb nextParent)
+            {
+                return GetRenderTransformsPoint(nextParent, poi);
+            }
+            else
+            {
+                return poi;
+            }
+
         }
 
 

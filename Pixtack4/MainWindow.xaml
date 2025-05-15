@@ -16,6 +16,7 @@
       <DockPanel DockPanel.Dock="Top">
         <Grid Height="100">
           <TabControl>
+            
             <TabItem Header="tab1">
               <StackPanel Orientation="Vertical">
                 <WrapPanel>
@@ -47,6 +48,7 @@
                 </WrapPanel>
               </StackPanel>
             </TabItem>
+            
             <TabItem Header="AppData" DataContext="{Binding MyAppData}">
               <ScrollViewer>
               <DockPanel>
@@ -59,6 +61,7 @@
                 </DockPanel>
               </ScrollViewer>
             </TabItem>
+            
             <TabItem Header="Group_Zindex">
               <WrapPanel Orientation="Horizontal">
                 <WrapPanel.Resources>
@@ -88,8 +91,8 @@
                 <TextBlock Text="{Binding MyAppData.MyJpegQuality, StringFormat=jpeg品質 {0:0}}"/>
                 <Slider Minimum="50" Maximum="100" Value="{Binding MyAppData.MyJpegQuality}" Width="100"/>
                 
-                <TextBlock Text="{Binding MyAppData.MyJpegQuality, StringFormat=jpeg品質 {0:0}}"/>
-                <Slider Minimum="50" Maximum="100" Value="{Binding MyAppData.MyJpegQuality}" Width="100"/>
+                <TextBlock Text="{Binding MyRoot.MyActiveGroupThumb.MyItemData.GridSize, StringFormat=GridSize {0:0}}"/>
+                <Slider Minimum="1" Maximum="128" Value="{Binding MyRoot.MyActiveGroupThumb.MyItemData.GridSize}" Width="100"/>
                 
               </WrapPanel>
             </TabItem>

@@ -24,10 +24,7 @@ namespace Pixtack4
         public RootThumb MyRoot { get; private set; } = null!;// 確認用でパブリックにしている
         private ManageExCanvas MyManageExCanvas { get; set; } = null!;
 
-        //今開いているファイルパスを保持
-        //private string CurrentOpenFilePath = string.Empty;
-
-        //
+       
         //private string ROOT_DATA_FILE_NAME = "RootData.px4";
         //RootのDataの拡張子はpx4
         //それ以外のDataの拡張子はpx4item
@@ -255,6 +252,11 @@ namespace Pixtack4
             var inu = MyAppData;
         }
 
+
+        #region 完了
+
+
+
         private void Button_Click_ZUp(object sender, RoutedEventArgs e)
         {
             MyRoot.MyFocusThumb?.ZIndexUp();
@@ -271,11 +273,6 @@ namespace Pixtack4
         {
             MyRoot.MyFocusThumb?.ZIndexBottom();
         }
-
-
-
-        #region 完了
-
 
         private void Button_Click_ChangeActiveGroupRootActivate(object sender, RoutedEventArgs e)
         {

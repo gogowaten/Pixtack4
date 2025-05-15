@@ -568,14 +568,16 @@ namespace Pixtack4
 
         #region Group, Root用
 
-        //private int _myJpegQuality;
-        //public int MyJpegQuality { get => _myJpegQuality; set => SetProperty(ref _myJpegQuality, value); }
+        //スナップ移動で使うグリッドサイズ
+        private int _gridSize = 8;
+        [DataMember] public int GridSize { get => _gridSize; set => SetProperty(ref _gridSize, value); }
 
+        //Thumb追加時の基準からの距離
         private double _myAddOffsetLeft = 32;
-        public double MyAddOffsetLeft { get => _myAddOffsetLeft; set => SetProperty(ref _myAddOffsetLeft, value); }
+        [DataMember] public double MyAddOffsetLeft { get => _myAddOffsetLeft; set => SetProperty(ref _myAddOffsetLeft, value); }
 
         private double _myAddOffsetTop = 32;
-        public double MyAddOffsetTop { get => _myAddOffsetTop; set => SetProperty(ref _myAddOffsetTop, value); }
+        [DataMember] public double MyAddOffsetTop { get => _myAddOffsetTop; set => SetProperty(ref _myAddOffsetTop, value); }
 
         #endregion Group, Root用
 
