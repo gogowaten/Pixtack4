@@ -54,7 +54,7 @@ namespace Pixtack4
         public MainWindow()
         {
             InitializeComponent();
-            
+
             MyInitialize();
             MyInitialize2();
             Closing += MainWindow_Closing;
@@ -252,6 +252,54 @@ namespace Pixtack4
             var inu = MyAppData;
         }
 
+
+        private void Button_Click_ChangeGridSize(object sender, RoutedEventArgs e)
+        {
+            ChangeGridSize();
+        }
+
+        /// <summary>
+        /// ユーザー入力に基づいて、アクティブなグループアイテムのグリッドサイズを更新します。
+        /// </summary>
+        /// <remarks>ユーザーは、-1080～1080 の範囲で新しいグリッドサイズを入力するよう求められます。
+        /// 入力した値がこの範囲外の場合、ユーザーは値を確認して適用するかどうかを選択できます。
+        /// グリッドサイズを変更すると、新しいサイズが以前のサイズの公倍数または約数でない場合、
+        /// アイテムの位置が異なる場合があります。</remarks>
+        private void ChangeGridSize()
+        {
+            ItemData data = MyRoot.MyActiveGroupThumb.MyItemData;
+            InputBox box = new(
+                "今のサイズの公約数or公倍数以外にするとずれる\n" +
+                "例\n" +
+                "グリッドサイズ10で50にスナップしているItemがある状態の時に\n" +
+                "グリッドサイズを7に変更してから、そのItemをクリックすると56にスナップ(移動)する\n" +
+                "\n" +
+                "入力できる範囲は-1080から1080",
+
+                "ActiveGroupItemのグリッドサイズの変更",
+                data.GridSize.ToString());
+            box.Owner = this;
+            if (box.ShowDialog() == true && int.TryParse(box.MyTextBox.Text, out var result))
+            {
+                if (-1080 <= result && result <= 1080)
+                {
+                    data.GridSize = result;
+                }
+                else
+                {
+                    MessageBoxResult mbResult =
+                        MessageBox.Show(
+                            "範囲を超えているけど、それでも実行する？",
+                            "確認",
+                            MessageBoxButton.YesNo,
+                            MessageBoxImage.Question,
+                            MessageBoxResult.No);
+
+                    if (mbResult == MessageBoxResult.Yes) { data.GridSize = result; }
+
+                }
+            }
+        }
 
         #region 完了
 

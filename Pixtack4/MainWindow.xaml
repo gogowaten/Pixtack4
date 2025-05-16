@@ -83,7 +83,8 @@
                 <Button Content="最背面" Click="Button_Click_ZtoBottom"/>
 
                 <TextBlock Text="👈️👆️できた｜まだ👇️👉️"/>
-                <Button Content="グリッドサイズ変更"/>
+                <Button Content="グリッドサイズ変更" Click="Button_Click_ChangeGridSize"/>
+                <TextBlock Text="{Binding MyRoot.MyActiveGroupThumb.MyItemData.GridSize, StringFormat=GridSize {0:0}}"/>
                 <Button Content="クリップボードから画像貼り付け"/>
                 <Button Content="クリップボードに画像としてコピー"/>
                 <Button Content="複製"/>
@@ -91,8 +92,7 @@
                 <TextBlock Text="{Binding MyAppData.MyJpegQuality, StringFormat=jpeg品質 {0:0}}"/>
                 <Slider Minimum="50" Maximum="100" Value="{Binding MyAppData.MyJpegQuality}" Width="100"/>
                 
-                <TextBlock Text="{Binding MyRoot.MyActiveGroupThumb.MyItemData.GridSize, StringFormat=GridSize {0:0}}"/>
-                <Slider Minimum="1" Maximum="128" Value="{Binding MyRoot.MyActiveGroupThumb.MyItemData.GridSize}" Width="100"/>
+                
 
                 <TextBlock Text="{Binding MyRoot.MyActiveGroupThumb.MyItemData.MyAddOffsetLeft, StringFormat=MyAddOffsetLeft {0:0}}"/>
                 <Slider Minimum="-128" Maximum="128" Value="{Binding MyRoot.MyActiveGroupThumb.MyItemData.MyAddOffsetLeft}" Width="100"/>

@@ -2072,7 +2072,7 @@ namespace Pixtack4
                 ItemData focesData = MyFocusThumb.MyItemData;
                 var atoLeft = GetIntLocate(groupData.GridSize, groupData.MyAddOffsetLeft, focesData.MyLeft);
                 var atoTop = GetIntLocate(groupData.GridSize, groupData.MyAddOffsetTop, focesData.MyTop);
-                
+
                 thumb.MyItemData.MyLeft = atoLeft;
                 thumb.MyItemData.MyTop = atoTop;
                 group.MyThumbs.Add(thumb);
@@ -2081,7 +2081,7 @@ namespace Pixtack4
             MySelectedThumbs.Clear();
             SelectedThumbsToAdd(thumb);
         }
-        
+
         private int GetIntLocate(int grid, int offset, double kiso)
         {
             if (offset < 0) { return (int)Math.Floor((kiso + offset) / grid) * grid; }
