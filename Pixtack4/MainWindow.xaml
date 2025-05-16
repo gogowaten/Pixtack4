@@ -93,6 +93,12 @@
                 
                 <TextBlock Text="{Binding MyRoot.MyActiveGroupThumb.MyItemData.GridSize, StringFormat=GridSize {0:0}}"/>
                 <Slider Minimum="1" Maximum="128" Value="{Binding MyRoot.MyActiveGroupThumb.MyItemData.GridSize}" Width="100"/>
+
+                <TextBlock Text="{Binding MyRoot.MyActiveGroupThumb.MyItemData.MyAddOffsetLeft, StringFormat=MyAddOffsetLeft {0:0}}"/>
+                <Slider Minimum="-128" Maximum="128" Value="{Binding MyRoot.MyActiveGroupThumb.MyItemData.MyAddOffsetLeft}" Width="100"/>
+                
+                <TextBlock Text="{Binding MyRoot.MyActiveGroupThumb.MyItemData.MyAddOffsetTop, StringFormat=MyAddOffsetTop {0:0}}"/>
+                <Slider Minimum="-128" Maximum="128" Value="{Binding MyRoot.MyActiveGroupThumb.MyItemData.MyAddOffsetTop}" Width="100"/>
                 
               </WrapPanel>
             </TabItem>
@@ -195,7 +201,8 @@
           <Button Content="SelectedItemsPanel" Click="Button_Click_SelectedItemsPropertyPanelVisible"/>
         </StatusBar>
 
-        <Grid x:Name="MyPanelSelectedItemsProperty" DockPanel.Dock="Right" Width="200" DataContext="{Binding MyRoot.MySelectedThumbs}" Visibility="Visible">
+        <Grid x:Name="MyPanelSelectedItemsProperty" DockPanel.Dock="Right" Width="200"
+              DataContext="{Binding MyRoot.MySelectedThumbs}" Visibility="Visible">
           <GroupBox Header="SelectedItems">
             <ListBox ItemsSource="{Binding}" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
               <ListBox.Resources>
@@ -275,10 +282,10 @@
               <TextBlock Text="{Binding MyThumbType, StringFormat=MyThumbType  {0}}"/>
               <TextBlock Text="{Binding ActualWidth, StringFormat=ActualWidth  {0:0}}"/>
               <TextBlock Text="{Binding ActualHeight, StringFormat=ActualHeight  {0:0}}"/>
-              <TextBlock Text="{Binding MyActualTop, StringFormat=ActualTop  {0:0}}"/>
-              <TextBlock Text="{Binding MyActualLeft, StringFormat=ActualLeft  {0:0}}"/>
-              <TextBlock Text="{Binding MyItemData.MyLeft, StringFormat=MyLeft  {0:0}}"/>
-              <TextBlock Text="{Binding MyItemData.MyTop, StringFormat=MyTop  {0:0}}"/>
+              <TextBlock Text="{Binding MyActualTop, StringFormat=ActualTop  {0:0.0}}"/>
+              <TextBlock Text="{Binding MyActualLeft, StringFormat=ActualLeft  {0:0.0}}"/>
+              <TextBlock Text="{Binding MyItemData.MyLeft, StringFormat=MyLeft  {0:0.0}}"/>
+              <TextBlock Text="{Binding MyItemData.MyTop, StringFormat=MyTop  {0:0.0}}"/>
               <TextBlock Text="{Binding MyItemData.MyZIndex, StringFormat=MyZIndex  {0:0}}"/>
             </StackPanel>
           </GroupBox>
@@ -297,10 +304,10 @@
               <TextBlock Text="{Binding MyThumbType, StringFormat=MyThumbType  {0}}"/>
               <TextBlock Text="{Binding ActualWidth, StringFormat=ActualWidth  {0:0}}"/>
               <TextBlock Text="{Binding ActualHeight, StringFormat=ActualHeight  {0:0}}"/>
-              <TextBlock Text="{Binding MyActualTop, StringFormat=ActualTop  {0:0}}"/>
-              <TextBlock Text="{Binding MyActualLeft, StringFormat=ActualLeft  {0:0}}"/>
-              <TextBlock Text="{Binding MyItemData.MyLeft, StringFormat=MyLeft  {0:0}}"/>
-              <TextBlock Text="{Binding MyItemData.MyTop, StringFormat=MyTop  {0:0}}"/>
+              <TextBlock Text="{Binding MyActualTop, StringFormat=ActualTop  {0:0.0}}"/>
+              <TextBlock Text="{Binding MyActualLeft, StringFormat=ActualLeft  {0:0.0}}"/>
+              <TextBlock Text="{Binding MyItemData.MyLeft, StringFormat=MyLeft  {0:0.0}}"/>
+              <TextBlock Text="{Binding MyItemData.MyTop, StringFormat=MyTop  {0:0.0}}"/>
               <TextBlock Text="{Binding MyItemData.MyZIndex, StringFormat=MyZIndex  {0:0}}"/>
             </StackPanel>
           </GroupBox>

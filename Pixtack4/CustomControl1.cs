@@ -218,7 +218,7 @@ namespace Pixtack4
             PreviewMouseDown += KisoThumb_PreviewMouseDown2;
             PreviewMouseUp += KisoThumb_PreviewMouseUp2;
 
-            DragStarted += KisoThumb_DragStarted2;
+            DragStarted += KisoThumb_DragStarted3;
             DragDelta += Thumb_DragDelta3;
             DragCompleted += KisoThumb_DragCompleted3;
 
@@ -469,10 +469,10 @@ namespace Pixtack4
                             canvas.IsAutoResize = false;
                         }
                         // グリッドスナップさせる、ぼやけ回避にもなる
-                        //最寄りの座標に移動、四捨五入？
-                        current.MyItemData.MyLeft = (int)(current.MyItemData.MyLeft + 0.5);
-                        current.MyItemData.MyTop = (int)(current.MyItemData.MyTop + 0.5);
-
+                        //最寄りの座標に移動、切り捨ての割り算
+                        int grid = parent.MyItemData.GridSize;
+                        current.MyItemData.MyLeft = (int)(current.MyItemData.MyLeft / grid) * grid;
+                        current.MyItemData.MyTop = (int)(current.MyItemData.MyTop / grid) * grid;
 
                         e.Handled = true;
                     }
@@ -1476,7 +1476,7 @@ namespace Pixtack4
             //MyItemData.MyThumbType = ThumbType.Root;
             MySelectedThumbs = [];
             DragDelta -= Thumb_DragDelta3;
-            DragStarted -= KisoThumb_DragStarted2;
+            DragStarted -= KisoThumb_DragStarted3;
             //DragCompleted -= KisoThumb_DragCompleted2;
             DragCompleted -= KisoThumb_DragCompleted3;
             PreviewMouseDown -= KisoThumb_PreviewMouseDown2;
@@ -2056,24 +2056,38 @@ namespace Pixtack4
             AddNewThumbFromItemData(data, MyActiveGroupThumb);
         }
 
-        public void AddThumb(KisoThumb thumb, GroupThumb parent)
+        public void AddThumb(KisoThumb thumb, GroupThumb group)
         {
             thumb.MyItemData.MyLeft = 0;
             thumb.MyItemData.MyTop = 0;
             if (MyFocusThumb is null)
             {
-                parent.MyThumbs.Add(thumb);
+                group.MyThumbs.Add(thumb);
             }
             else
             {
-                thumb.MyItemData.MyLeft += MyFocusThumb.MyItemData.MyLeft + MyItemData.MyAddOffsetLeft;
-                thumb.MyItemData.MyTop += MyFocusThumb.MyItemData.MyTop + MyItemData.MyAddOffsetTop;
-                parent.MyThumbs.Add(thumb);
+                //グリッドスナップ、FocusThumbの位置を基準に追加位置を決める
+                //常に0から遠い方へ丸める割り算
+                ItemData groupData = group.MyItemData;
+                ItemData focesData = MyFocusThumb.MyItemData;
+                var atoLeft = GetIntLocate(groupData.GridSize, groupData.MyAddOffsetLeft, focesData.MyLeft);
+                var atoTop = GetIntLocate(groupData.GridSize, groupData.MyAddOffsetTop, focesData.MyTop);
+                
+                thumb.MyItemData.MyLeft = atoLeft;
+                thumb.MyItemData.MyTop = atoTop;
+                group.MyThumbs.Add(thumb);
             }
 
             MySelectedThumbs.Clear();
             SelectedThumbsToAdd(thumb);
         }
+        
+        private int GetIntLocate(int grid, int offset, double kiso)
+        {
+            if (offset < 0) { return (int)Math.Floor((kiso + offset) / grid) * grid; }
+            else { return (int)Math.Ceiling((kiso + offset) / grid) * grid; }
+        }
+
         public void AddThumbToActiveGroup(KisoThumb thumb, GroupThumb parent)
         {
             AddThumb(thumb, parent);

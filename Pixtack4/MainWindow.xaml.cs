@@ -24,7 +24,7 @@ namespace Pixtack4
         public RootThumb MyRoot { get; private set; } = null!;// 確認用でパブリックにしている
         private ManageExCanvas MyManageExCanvas { get; set; } = null!;
 
-       
+
         //private string ROOT_DATA_FILE_NAME = "RootData.px4";
         //RootのDataの拡張子はpx4
         //それ以外のDataの拡張子はpx4item
@@ -54,6 +54,7 @@ namespace Pixtack4
         public MainWindow()
         {
             InitializeComponent();
+            
             MyInitialize();
             MyInitialize2();
             Closing += MainWindow_Closing;
@@ -247,7 +248,6 @@ namespace Pixtack4
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-
             var neko = MyAppWindowData;
             var inu = MyAppData;
         }
@@ -856,7 +856,7 @@ namespace Pixtack4
                         //画像ファイル既定名
                         MyAppData.DefaultSaveImageFileName = fileName + "_";
                     }
-                    
+
                 }
                 //開けなかったファイル名をリストに追加
                 else { errors.Add(System.IO.Path.GetFileName(item)); }

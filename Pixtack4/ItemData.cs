@@ -573,11 +573,11 @@ namespace Pixtack4
         [DataMember] public int GridSize { get => _gridSize; set => SetProperty(ref _gridSize, value); }
 
         //Thumb追加時の基準からの距離
-        private double _myAddOffsetLeft = 32;
-        [DataMember] public double MyAddOffsetLeft { get => _myAddOffsetLeft; set => SetProperty(ref _myAddOffsetLeft, value); }
+        private int _myAddOffsetLeft = 32;
+        [DataMember] public int MyAddOffsetLeft { get => _myAddOffsetLeft; set => SetProperty(ref _myAddOffsetLeft, value); }
 
-        private double _myAddOffsetTop = 32;
-        [DataMember] public double MyAddOffsetTop { get => _myAddOffsetTop; set => SetProperty(ref _myAddOffsetTop, value); }
+        private int _myAddOffsetTop = 32;
+        [DataMember] public int MyAddOffsetTop { get => _myAddOffsetTop; set => SetProperty(ref _myAddOffsetTop, value); }
 
         #endregion Group, Root用
 
