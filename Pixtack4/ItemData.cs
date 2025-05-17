@@ -102,6 +102,11 @@ namespace Pixtack4
     {
         public AppData() { }
 
+        //Itemの枠表示、RootThumbのものとバインドする
+        private Visibility _isWakuVisible = Visibility.Collapsed;
+        public Visibility IsWakuVisible { get => _isWakuVisible; set => SetProperty(ref _isWakuVisible, value); }
+
+
         //画像とし保存時の既定ファイル名
         private string _defaultSaveImageFileName = string.Empty;
         [DataMember] public string DefaultSaveImageFileName { get => _defaultSaveImageFileName; set => SetProperty(ref _defaultSaveImageFileName, value); }

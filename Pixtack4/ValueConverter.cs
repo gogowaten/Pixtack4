@@ -8,6 +8,26 @@ namespace Pixtack4
 {
 
     /// <summary>
+    /// Visibilityとboolの相互変換、Collapsedをfalse、Visibleをtrue
+    /// </summary>
+    public class MyConvVisibleCollapsedIsBoolFalse : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            var visi = (Visibility)value;
+            if (visi == Visibility.Visible) { return true; }
+            return false;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            var b = (bool)value;
+            if (b) { return Visibility.Visible; }
+            return Visibility.Collapsed;
+        }
+    }
+
+    /// <summary>
     /// フルパスからファイル名だけにする
     /// </summary>
     public class MyConvPathFileName : IValueConverter

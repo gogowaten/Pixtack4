@@ -21,9 +21,15 @@ namespace Pixtack4
     /// </summary>
     public partial class MainWindow : Window
     {
-        public RootThumb MyRoot { get; private set; } = null!;// 確認用でパブリックにしている
         private ManageExCanvas MyManageExCanvas { get; set; } = null!;
 
+        public RootThumb MyRoot
+        {
+            get => (RootThumb)GetValue(MyRootProperty);
+            private set => SetValue(MyRootProperty, value);
+        }
+        public static readonly DependencyProperty MyRootProperty =
+            DependencyProperty.Register(nameof(MyRoot), typeof(RootThumb), typeof(MainWindow), new PropertyMetadata(null));
 
         //private string ROOT_DATA_FILE_NAME = "RootData.px4";
         //RootのDataの拡張子はpx4
@@ -127,10 +133,6 @@ namespace Pixtack4
             else { MyAppData = new AppData(); }
 
 
-
-
-
-
         }
 
 
@@ -155,7 +157,7 @@ namespace Pixtack4
 
         private void MyBind()
         {
-            //今開いているファイルのフルパスからファイル名だけを表示
+            //今開いているファイル名をステータスバーに表示
             MyStatusCurrentFileName.SetBinding(TextBlock.TextProperty, new Binding(nameof(MyAppData.CurrentOpenFilePath)) { Source = MyAppData, Converter = new MyConvPathFileName() });
         }
 
@@ -248,6 +250,7 @@ namespace Pixtack4
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
+            var uma = MyPanelSelectedItemsProperty.DataContext;
             var neko = MyAppWindowData;
             var inu = MyAppData;
         }
@@ -379,10 +382,10 @@ namespace Pixtack4
 
         private void Button_Click_RemoveSelectedItems(object sender, RoutedEventArgs e)
         {
-            MyRoot.RemoveSelectedThumbs();// 選択Item削除
+            MyRoot.RemoveSelectedThumbs();// 選択Itemすべての削除
         }
 
-        private void Button_Click_FocusItemToImageFile(object sender, RoutedEventArgs e)
+        private void Button_Click_SaveFocusItemToImageFile(object sender, RoutedEventArgs e)
         {
             // FocusItemを画像として保存する
             if (MyRoot.MyFocusThumb != null)
@@ -391,17 +394,30 @@ namespace Pixtack4
             }
         }
 
-        private void Button_Click_RootToImageFile(object sender, RoutedEventArgs e)
+        private void Button_Click_SaveRootToImageFile(object sender, RoutedEventArgs e)
         {
             // RootItemを画像として保存する
             if (SaveItemToImageFile(MyRoot)) { MyStatusMessage.Text = MakeStatusMessage("保存完了"); }
         }
 
-        //破線枠の表示切替
+        //破線枠の表示
         private void Button_Click_SwitchWaku(object sender, RoutedEventArgs e)
         {
-            if (MyRoot.IsWakuVisible == Visibility.Visible) { MyRoot.IsWakuVisible = Visibility.Collapsed; }
-            else { MyRoot.IsWakuVisible = Visibility.Visible; }
+            //if (MyRoot.IsWakuVisible == Visibility.Visible)
+            //{
+            //    MyRoot.IsWakuVisible = Visibility.Collapsed;
+            //}
+            //else { MyRoot.IsWakuVisible = Visibility.Collapsed; }
+            var neko = MyRoot.IsWakuVisible;
+            if (MyAppData.IsWakuVisible == Visibility.Visible)
+            {
+                MyAppData.IsWakuVisible = Visibility.Collapsed;
+            }
+            else
+            {
+                MyAppData.IsWakuVisible = Visibility.Visible;
+            }
+            var inu = MyRoot.IsWakuVisible;
         }
 
         private void Button_Click_SaveFocusItem(object sender, RoutedEventArgs e)
@@ -446,7 +462,7 @@ namespace Pixtack4
             SaveItemOverwriteCurrentFilePath();// 上書き保存
         }
 
-        private void Button_Click_1(object sender, RoutedEventArgs e)
+        private void Button_Click_ResetWindow(object sender, RoutedEventArgs e)
         {
             ResetWindowState();// ウィンドウの位置とサイズをリセット
         }
@@ -477,7 +493,7 @@ namespace Pixtack4
         {
             if (MyRoot.MyThumbs.Count == 0)
             {
-                return MakeStatusMessage("Item数が0だったのでリセットされなかった");
+                return MakeStatusMessage("Item数が0だったのでリセットの必要がなかった");
             }
 
             MessageBoxResult result = MessageBox.Show(
@@ -506,12 +522,12 @@ namespace Pixtack4
         /// </summary>
         private void MyInitializeRootThumb()
         {
-            var data = new ItemData(ThumbType.Root);
-            MyRoot = new RootThumb(data);
-            var manager = new ManageExCanvas(MyRoot, new ManageData());
-            MyManageExCanvas = manager;
+            MyRoot = new RootThumb(new ItemData(ThumbType.Root));
+            _ = MyRoot.SetBinding(KisoThumb.IsWakuVisibleProperty, new Binding(nameof(AppData.IsWakuVisible)) { Source = MyAppData, Mode = BindingMode.TwoWay });
+            MyManageExCanvas = new ManageExCanvas(MyRoot, new ManageData());
             MyScrollViewer.Content = MyManageExCanvas;
             //MyGridMyItemsTree.DataContext = MyRoot.MyThumbs;
+            //DataContext = this;
 
         }
 

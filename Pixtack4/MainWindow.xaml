@@ -10,13 +10,116 @@
         ResizeMode="CanResizeWithGrip"
         AllowDrop="True"
         Drop="Window_Drop">
+  <Window.Resources>
+    <local:MyConvVisibleCollapsedIsBoolFalse x:Key="visibleTrue"/>
+  </Window.Resources>
   <Grid x:Name="MyRootGrid">
     <DockPanel>
 
+      <!--上段-->
       <DockPanel DockPanel.Dock="Top">
+        <Menu DockPanel.Dock="Top">
+
+          <Menu.Resources>
+            <Style x:Key="itemMargin" TargetType="{x:Type MenuItem}">
+              <Setter Property="Margin" Value="0,2"/>
+            </Style>
+            <Style x:Key="itemTextBlock" TargetType="{x:Type TextBlock}">
+              <Setter Property="Margin" Value="10"/>
+              <Setter Property="VerticalAlignment" Value="Center"/>
+            </Style>
+
+          </Menu.Resources>
+
+          <MenuItem Header="ファイル(_F)">
+            <MenuItem Header="新規作成(リセット)" Click="Button_Click_ResetRoot"/>
+            <MenuItem Header="名前を付けて保存(_S)">
+              <MenuItem Style="{StaticResource itemMargin}" Click="Button_Click_SaveData">
+                <MenuItem.Header>
+                  <StackPanel Orientation="Horizontal">
+                    <Rectangle Width="50" Height="50">
+                      <Rectangle.Fill>
+                        <VisualBrush Stretch="Uniform" Visual="{Binding MyRoot}"/>
+                      </Rectangle.Fill>
+                    </Rectangle>
+                    <TextBlock Text="Rootを保存" Style="{StaticResource itemTextBlock}"/>
+                  </StackPanel>
+                </MenuItem.Header>
+              </MenuItem>
+
+              <MenuItem Style="{StaticResource itemMargin}" Click="Button_Click_SaveFocusItem">
+                <MenuItem.Header>
+                  <StackPanel Orientation="Horizontal">
+                    <Rectangle Width="50" Height="50">
+                      <Rectangle.Fill>
+                        <VisualBrush Stretch="Uniform" Visual="{Binding MyRoot.MyFocusThumb}"/>
+                      </Rectangle.Fill>
+                    </Rectangle>
+                    <TextBlock Text="Focusを保存" Style="{StaticResource itemTextBlock}"/>
+                  </StackPanel>
+                </MenuItem.Header>
+              </MenuItem>
+              <MenuItem Header="Clicked" IsEnabled="False"/>
+            </MenuItem>
+            <MenuItem Header="画像として保存">
+              <MenuItem Style="{StaticResource itemMargin}" Click="Button_Click_SaveRootToImageFile">
+                <MenuItem.Header>
+                  <StackPanel Orientation="Horizontal">
+                    <Rectangle Width="50" Height="50">
+                      <Rectangle.Fill>
+                        <VisualBrush Stretch="Uniform" Visual="{Binding MyRoot}"/>
+                      </Rectangle.Fill>
+                    </Rectangle>
+                    <TextBlock Text="Rootを保存" Style="{StaticResource itemTextBlock}"/>
+                  </StackPanel>
+                </MenuItem.Header>
+              </MenuItem>
+
+              <MenuItem Style="{StaticResource itemMargin}" Click="Button_Click_SaveFocusItemToImageFile">
+                <MenuItem.Header>
+                  <StackPanel Orientation="Horizontal">
+                    <Rectangle Width="50" Height="50">
+                      <Rectangle.Fill>
+                        <VisualBrush Stretch="Uniform" Visual="{Binding MyRoot.MyFocusThumb}"/>
+                      </Rectangle.Fill>
+                    </Rectangle>
+                    <TextBlock Text="Focusを保存" Style="{StaticResource itemTextBlock}"/>
+                  </StackPanel>
+                </MenuItem.Header>
+              </MenuItem>
+
+              <MenuItem Header="Clicked" IsEnabled="False"/>
+            </MenuItem>
+            <MenuItem Header="上書き保存" Click="Button_Click_OverwriteSave"/>
+            <MenuItem Header="開く" Click="Button_Click_OpenPx4File"/>
+            <MenuItem Header="追加" Click="Button_Click_OpenFile" ToolTip="Itemとして追加する"/>
+          </MenuItem>
+          <MenuItem Header="編集(_E)">
+            <MenuItem Style="{StaticResource itemMargin}" Click="Button_Click_RemoveSelectedItems">
+              <MenuItem.Header>
+                <StackPanel Orientation="Horizontal">
+                  <TextBlock Text="選択Item"/>
+                  <TextBlock Text="{Binding MyRoot.MySelectedThumbs.Count}" HorizontalAlignment="Center"/>
+                  <TextBlock Text="個を削除"/>
+                </StackPanel>
+              </MenuItem.Header>
+            </MenuItem>
+            <MenuItem Header="FocusItemを削除" IsEnabled="False"/>
+            <Separator/>
+            <MenuItem Header="全Item削除" Click="Button_Click_RemoveAllItems"/>
+
+          </MenuItem>
+          <MenuItem Header="表示(_V)">
+            <CheckBox Content="Itemの枠表示" IsChecked="{Binding MyAppData.IsWakuVisible, Converter={StaticResource visibleTrue}}"/>
+          </MenuItem>
+          <MenuItem Header="ウィンドウ(_W)">
+            <MenuItem Header="サイズと位置をリセット" Click="Button_Click_ResetWindow"/>
+          </MenuItem>
+
+        </Menu>
+
         <Grid Height="100">
           <TabControl>
-            
             <TabItem Header="tab1">
               <StackPanel Orientation="Vertical">
                 <WrapPanel>
@@ -25,7 +128,7 @@
                       <Setter Property="Margin" Value="2"/>
                     </Style>
                   </WrapPanel.Resources>
-                  <Button Content="ウィンドウのリセット" Click="Button_Click_1"/>
+                  <Button Content="ウィンドウのリセット" Click="Button_Click_ResetWindow"/>
                   <Button Content="Rootをリセット" Click="Button_Click_ResetRoot"/>
                   <Grid Background="Red" Width="10"/>
                   <Button Content="名前を付けて保存" Click="Button_Click_SaveData"/>
@@ -35,8 +138,8 @@
                   <Button Content="ファイルを開く(px4)" Click="Button_Click_OpenPx4File"/>
                   <Button Content="ファイルから追加" Click="Button_Click_OpenFile"/>
                   <Grid Background="Red" Width="10"/>
-                  <Button Content="Rootを画像で保存" Click="Button_Click_RootToImageFile"/>
-                  <Button Content="Focusを画像で保存" Click="Button_Click_FocusItemToImageFile"/>
+                  <Button Content="Rootを画像で保存" Click="Button_Click_SaveRootToImageFile"/>
+                  <Button Content="Focusを画像で保存" Click="Button_Click_SaveFocusItemToImageFile"/>
                   <Grid Background="Red" Width="10"/>
                   <Button Content="破線枠の表示切替" Click="Button_Click_SwitchWaku"/>
                   <Button Content="選択Itemを削除" Click="Button_Click_RemoveSelectedItems"/>
@@ -48,11 +151,11 @@
                 </WrapPanel>
               </StackPanel>
             </TabItem>
-            
+
             <TabItem Header="AppData" DataContext="{Binding MyAppData}">
               <ScrollViewer>
-              <DockPanel>
-                <TextBlock DockPanel.Dock="Top" Text="{Binding CurrentOpenFilePath, StringFormat=CurrentOpenFilePath _ {0:0}}"/>
+                <DockPanel>
+                  <TextBlock DockPanel.Dock="Top" Text="{Binding CurrentOpenFilePath, StringFormat=CurrentOpenFilePath _ {0:0}}"/>
                   <TextBlock DockPanel.Dock="Top" Text="{Binding InitialDirectory, StringFormat=InitialDirectory _ {0:0}}"/>
                   <TextBlock DockPanel.Dock="Top" Text="{Binding IsFileNameDescendingOrder, StringFormat=IsFileNameDescendingOrder _ {0:0}}"/>
                   <TextBlock DockPanel.Dock="Top" Text="{Binding DefaultSaveDataFileName, StringFormat=DefaultSaveFileName _ {0:0}}"/>
@@ -61,7 +164,7 @@
                 </DockPanel>
               </ScrollViewer>
             </TabItem>
-            
+
             <TabItem Header="Group_Zindex">
               <WrapPanel Orientation="Horizontal">
                 <WrapPanel.Resources>
@@ -91,15 +194,15 @@
                 <Button Content="画像として複製"/>
                 <TextBlock Text="{Binding MyAppData.MyJpegQuality, StringFormat=jpeg品質 {0:0}}"/>
                 <Slider Minimum="50" Maximum="100" Value="{Binding MyAppData.MyJpegQuality}" Width="100"/>
-                
-                
+
+
 
                 <TextBlock Text="{Binding MyRoot.MyActiveGroupThumb.MyItemData.MyAddOffsetLeft, StringFormat=MyAddOffsetLeft {0:0}}"/>
                 <Slider Minimum="-128" Maximum="128" Value="{Binding MyRoot.MyActiveGroupThumb.MyItemData.MyAddOffsetLeft}" Width="100"/>
-                
+
                 <TextBlock Text="{Binding MyRoot.MyActiveGroupThumb.MyItemData.MyAddOffsetTop, StringFormat=MyAddOffsetTop {0:0}}"/>
                 <Slider Minimum="-128" Maximum="128" Value="{Binding MyRoot.MyActiveGroupThumb.MyItemData.MyAddOffsetTop}" Width="100"/>
-                
+
               </WrapPanel>
             </TabItem>
           </TabControl>
@@ -115,7 +218,9 @@
         </StatusBar>
       </DockPanel>
 
+      <!--中間-->
       <DockPanel DockPanel.Dock="Bottom">
+        <!--左端ライン-->
         <Menu DockPanel.Dock="Left">
           <Menu.LayoutTransform>
             <RotateTransform Angle="90"/>
@@ -126,6 +231,7 @@
           <Button Content="ItemsTree" Click="Button_Click_ItemsTreePanelVisible"/>
         </Menu>
 
+        <!--左側1、TreeVew-->
         <!--動作は問題なけどTreeViewにバインドエラーが出る-->
         <Grid x:Name="MyGridMyItemsTree" DockPanel.Dock="Left" Width="200"
               DataContext="{Binding MyRoot, UpdateSourceTrigger=PropertyChanged}">
@@ -161,6 +267,7 @@
           </ScrollViewer>
         </Grid>
 
+        <!--左側2-->
         <Grid x:Name="MyRootStatusView" DockPanel.Dock="Left"
               Width="200"
               DataContext="{Binding MyRoot, UpdateSourceTrigger=PropertyChanged}"
@@ -189,6 +296,7 @@
           </StackPanel>
         </Grid>
 
+        <!--右端ライン-->
         <StatusBar DockPanel.Dock="Right" TextOptions.TextFormattingMode="Display">
           <StatusBar.LayoutTransform>
             <RotateTransform Angle="90"/>
@@ -201,6 +309,7 @@
           <Button Content="SelectedItemsPanel" Click="Button_Click_SelectedItemsPropertyPanelVisible"/>
         </StatusBar>
 
+        <!--右側1-->
         <Grid x:Name="MyPanelSelectedItemsProperty" DockPanel.Dock="Right" Width="200"
               DataContext="{Binding MyRoot.MySelectedThumbs}" Visibility="Visible">
           <GroupBox Header="SelectedItems">
@@ -271,6 +380,7 @@
           </GroupBox>
         </Grid>
 
+        <!--右側2-->
         <Grid x:Name="MyPanelActiveGroupItemProperty" DockPanel.Dock="Right" Width="200" DataContext="{Binding MyRoot.MyActiveGroupThumb}" Visibility="Collapsed">
           <GroupBox Header="ActiveGroupItem">
             <StackPanel>
@@ -292,7 +402,7 @@
         </Grid>
 
 
-
+        <!--右側3-->
         <Grid x:Name="MyPanelFocusItemProperty" DockPanel.Dock="Right" Width="200" DataContext="{Binding MyRoot.MyFocusThumb}" Visibility="Collapsed">
           <GroupBox Header="FocusItem">
             <StackPanel>
@@ -313,6 +423,7 @@
           </GroupBox>
         </Grid>
 
+        <!--右側4、メインパネル-->
         <ScrollViewer x:Name="MyScrollViewer" UseLayoutRounding="True" DockPanel.Dock="Right" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" VerticalAlignment="Top">
           <!--<Canvas Width="2000" Height="1000" Background="AliceBlue">
             <TextBlock>
@@ -321,6 +432,7 @@
           </Canvas>-->
         </ScrollViewer>
       </DockPanel>
+      <!--中間ここまで-->
 
     </DockPanel>
 
