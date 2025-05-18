@@ -259,10 +259,42 @@ namespace Pixtack4
         {
 
         }
+
+        private void Button_Click_DuplicateFocusItem(object sender, RoutedEventArgs e)
+        {
+
+        }
+
         #region 完了
 
 
 
+
+
+        private void Button_Click_CopyAsImageForRoot(object sender, RoutedEventArgs e)
+        {
+            CopyAsImageForItem(MyRoot);// Rootを画像としてコピーする
+        }
+
+        private void Button_Click_CopyAsImageForFocusItem(object sender, RoutedEventArgs e)
+        {
+            CopyAsImageForItem(MyRoot.MyFocusThumb);// FocusItemを画像としてコピーする
+        }
+
+        private void Button_Click_CopyAsImageForClickedItem(object sender, RoutedEventArgs e)
+        {
+            CopyAsImageForItem(MyRoot.MyClickedThumb);// ClickedItemを画像としてコピーする
+        }
+
+        private void Button_Click_AddImageFromClipboardPng(object sender, RoutedEventArgs e)
+        {
+            AddImageFromClipboardPng();// クリップボードから画像取得して追加する。PNG形式優先で取得
+        }
+
+        private void Button_Click_AddImageFromClipboardBmp(object sender, RoutedEventArgs e)
+        {
+            AddImageFromClipboardBmp();// クリップボードから画像取得して追加する。画像は完全不透明で取得
+        }
 
 
         private void Button_Click_ChangeGridSizeUp(object sender, RoutedEventArgs e)
@@ -513,6 +545,111 @@ namespace Pixtack4
         }
 
         #endregion 初期化、リセット系
+
+        #region クリップボード
+
+
+        /// <summary>
+        /// 対象Itemを画像としてコピーする
+        /// </summary>
+        private void CopyAsImageForItem(KisoThumb? item)
+        {
+            if (item == null) { return; }
+            if (MakeBitmapFromThumb(item) is RenderTargetBitmap bmp)
+            {
+                SetImageToClipboard(bmp);
+            }
+        }
+
+        ///// <summary>
+        ///// RootItemを画像としてコピーする
+        ///// </summary>
+        //private void CopyAsImageForRoot()
+        //{
+        //    if (MakeBitmapFromThumb(MyRoot) is RenderTargetBitmap bmp)
+        //    {
+        //        SetImageToClipboard(bmp);
+        //    }
+        //}
+
+        ///// <summary>
+        ///// FocusItemを画像としてコピーする
+        ///// </summary>
+        //private void CopyAsImageForFocusItem()
+        //{
+        //    if (MakeBitmapFromThumb(MyRoot.MyFocusThumb) is RenderTargetBitmap bmp)
+        //    {
+        //        SetImageToClipboard(bmp);
+        //    }
+        //}
+
+
+        //アルファ値を失わずに画像のコピペできた、.NET WPFのClipboard - 午後わてんのブログ
+        //        https://gogowaten.hatenablog.com/entry/2021/02/10/134406
+
+        /// <summary>
+        /// 画像をクリップボードにコピーする。BitmapSourceとそれをPNG形式に変換したもの両方をセットする
+        /// </summary>
+        /// <param name="source"></param>
+        public void SetImageToClipboard(BitmapSource source)
+        {
+            //DataObjectに入れたいデータを入れて、それをクリップボードにセットする
+            DataObject data = new();
+
+            //BitmapSource形式そのままでセット
+            data.SetData(typeof(BitmapSource), source);
+
+            //PNG形式にエンコードしたものをMemoryStreamして、それをセット
+            //画像をPNGにエンコード
+            PngBitmapEncoder pngEnc = new();
+            pngEnc.Frames.Add(BitmapFrame.Create(source));
+
+            //エンコードした画像をMemoryStreamにSava
+            using MemoryStream ms = new();
+            pngEnc.Save(ms);
+            data.SetData("PNG", ms);
+
+            //クリップボードにセット
+            Clipboard.SetDataObject(data, true);
+        }
+
+        /// <summary>
+        /// クリップボードから画像取得して追加する。画像は完全不透明で取得
+        /// </summary>
+        private void AddImageFromClipboardBmp()
+        {
+            if (MyClipboard.GetImageConvertedBgr32() is BitmapSource bmp)
+            {
+                MyRoot.AddImageThumb(bmp);
+            }
+            else
+            {
+                MessageBox.Show("クリップボードから画像取得できなかった");
+            }
+        }
+
+        /// <summary>
+        /// クリップボードから画像取得して追加する。PNG形式優先で取得
+        /// </summary>
+        private void AddImageFromClipboardPng()
+        {
+            //if (MyClipboard.GetImageAlphaFixPng() is BitmapSource bmp) //エラー
+            //if (MyClipboard.GetImageFromClipboardWithAlphaFix() is BitmapSource bmp)//図形はいいけどグラフが変
+            //if(MyClipboard.GetPngImageFromStream() is BitmapSource bmp)//図形はいいけどグラフが拡大、通常がエラー
+            //if(MyClipboard.GetImageConvertedBgr32() is BitmapSource bmp)//不透明だけどグラフが正常
+            //if(MyClipboard.GetBgr32FromPng() is BitmapSource bmp)//通常がエラー、グラフ拡大、不透明
+            //if(MyClipboard.GetImageFromClipboard() is BitmapSource bmp)//グラフ正常、不透明
+            if (MyClipboard.GetImagePreferPNG() is BitmapSource bmp)//すべて正常            
+            {
+                MyRoot.AddImageThumb(bmp);
+            }
+            else
+            {
+                MessageBox.Show("クリップボードから画像取得できなかった");
+            }
+        }
+
+        #endregion クリップボード
 
         #region 画像保存
 

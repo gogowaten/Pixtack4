@@ -318,6 +318,67 @@ namespace Pixtack4
 
         #region シリアライズ
 
+        //Pixtack3rd/Pixtack3rd/Pixtack3rd/Data.cs at main · gogowaten/Pixtack3rd
+        //https://github.com/gogowaten/Pixtack3rd/blob/main/Pixtack3rd/Pixtack3rd/Data.cs
+        //ディープコピーはこれのコピペ改変
+
+        /// <summary>
+        /// ディープコピー
+        /// </summary>
+        /// <returns></returns>
+        public ItemData? DeepCopy()
+        {
+            try
+            {
+                using System.IO.MemoryStream stream = new();
+                DataContractSerializer serializer = new(typeof(ItemData));
+                serializer.WriteObject(stream, this);
+                stream.Position = 0;
+                if (serializer.ReadObject(stream) is ItemData data)
+                {
+                    data.MyGuid = System.Guid.NewGuid().ToString();//GUIDは新規作成
+                    //画像はBitmapFrameで複製
+                    if (data.MyThumbType == ThumbType.Image)
+                    {
+                        data.MyBitmapSource = BitmapFrame.Create(this.MyBitmapSource);
+                    }
+                    else if (data.MyThumbType == ThumbType.Root || data.MyThumbType == ThumbType.Group)
+                    {
+                        DatasDeepCopy(this.MyThumbsItemData, data.MyThumbsItemData);
+                    }
+                    return data;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+                throw;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// RootとGroupのItemDataのディープコピー用
+        /// </summary>
+        /// <param name="moto"></param>
+        /// <param name="saki"></param>
+        private void DatasDeepCopy(ObservableCollection<ItemData> moto, ObservableCollection<ItemData> saki)
+        {
+            for (int i = 0; i < moto.Count; i++)
+            {
+                ItemData motoItem = moto[i];
+                ItemData sakiItem = saki[i];
+                sakiItem.MyGuid = System.Guid.NewGuid().ToString();
+                if (motoItem.MyThumbType != ThumbType.Image)
+                {
+                    sakiItem.MyBitmapSource = BitmapFrame.Create(motoItem.MyBitmapSource);
+                }
+                else if (motoItem.MyThumbType == ThumbType.Group)
+                {
+                    DatasDeepCopy(motoItem.MyThumbsItemData, sakiItem.MyThumbsItemData);
+                }
+            }
+        }
 
         public bool Serialize(string filePath)
         {

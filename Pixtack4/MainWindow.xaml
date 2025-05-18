@@ -96,12 +96,15 @@
           </MenuItem>
 
           <MenuItem Header="編集(_E)">
-            <MenuItem Header="クリップボードから画像貼り付け" IsEnabled="False"/>
-            <MenuItem Header="クリップボードに画像としてコピー" IsEnabled="False"/>
             <MenuItem Header="複製" IsEnabled="False"/>
             <MenuItem Header="画像として複製" IsEnabled="False"/>
             <Separator/>
             <TextBlock Text="完了👇️｜👆️まだ"/>
+            <MenuItem Header="RootItemをクリップボードに画像としてコピー" Click="Button_Click_CopyAsImageForRoot"/>
+            <MenuItem Header="FocusItemをクリップボードに画像としてコピー" Click="Button_Click_CopyAsImageForFocusItem"/>
+            <MenuItem Header="ClickedItemをクリップボードに画像としてコピー" Click="Button_Click_CopyAsImageForClickedItem"/>
+            <MenuItem Header="クリップボードの画像を追加(png)" Click="Button_Click_AddImageFromClipboardPng" ToolTip="通常はこれ"/>
+            <MenuItem Header="クリップボードの画像を追加(bmp)" Click="Button_Click_AddImageFromClipboardBmp" ToolTip="エクセルのグラフや図形などはこれ"/>
             <Separator/>
             <MenuItem Header="グループ化" Click="Button_Click_Grouping"/>
             <MenuItem Header="グループ解除" Click="Button_Click_UnGroup"/>
