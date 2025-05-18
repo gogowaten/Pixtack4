@@ -94,9 +94,12 @@
             <MenuItem Header="開く" Click="Button_Click_OpenPx4File"/>
             <MenuItem Header="追加" Click="Button_Click_OpenFile" ToolTip="Itemとして追加する"/>
           </MenuItem>
-          
+
           <MenuItem Header="編集(_E)">
-            <MenuItem Header="グリッドサイズ縮小" Click="Button_Click_ChangeGridSizeDown"/>
+            <MenuItem Header="クリップボードから画像貼り付け" IsEnabled="False"/>
+            <MenuItem Header="クリップボードに画像としてコピー" IsEnabled="False"/>
+            <MenuItem Header="複製" IsEnabled="False"/>
+            <MenuItem Header="画像として複製" IsEnabled="False"/>
             <Separator/>
             <TextBlock Text="完了👇️｜👆️まだ"/>
             <Separator/>
@@ -111,11 +114,22 @@
             </MenuItem>
             <MenuItem Header="Z移動">
               <MenuItem Header="最前面" Click="Button_Click_ZtoTop"/>
-              <MenuItem Header="1Up" Click="Button_Click_ZUp"/>
-              <MenuItem Header="1Down" Click="Button_Click_ZDown"/>
+              <MenuItem Header="Up" Click="Button_Click_ZUp"/>
+              <MenuItem Header="Down" Click="Button_Click_ZDown"/>
               <MenuItem Header="最背面" Click="Button_Click_ZtoBottom"/>
             </MenuItem>
-            <MenuItem Header="グリッドサイズ変更" Click="Button_Click_ChangeGridSize"/>
+            <MenuItem Header="グリッドサイズ変更">
+              <MenuItem
+                
+                IsEnabled="False">
+                <MenuItem.Header>
+                  <TextBlock Text="{Binding MyRoot.MyActiveGroupThumb.MyItemData.GridSize, StringFormat=今のサイズ {0:0}}"/>
+                </MenuItem.Header>
+              </MenuItem>
+              <Button Content="サイズUp" Click="Button_Click_ChangeGridSizeUp"/>
+              <Button Content="サイズDown" Click="Button_Click_ChangeGridSizeDown"/>
+              <MenuItem Header="サイズ指定" Click="Button_Click_ChangeGridSize"/>
+            </MenuItem>
             <MenuItem Style="{StaticResource itemMargin}" Click="Button_Click_RemoveSelectedItems">
               <MenuItem.Header>
                 <StackPanel Orientation="Horizontal">
@@ -418,6 +432,11 @@
               <TextBlock Text="{Binding MyItemData.MyLeft, StringFormat=MyLeft  {0:0.0}}"/>
               <TextBlock Text="{Binding MyItemData.MyTop, StringFormat=MyTop  {0:0.0}}"/>
               <TextBlock Text="{Binding MyItemData.MyZIndex, StringFormat=MyZIndex  {0:0}}"/>
+              <TextBlock Text="{Binding MyItemData.GridSize, StringFormat=GridSize  {0:0}}"/>
+              <UniformGrid Columns="2">
+                <TextBlock Text="GridSize" HorizontalAlignment="Right"/>
+                <TextBlock Text="{Binding MyItemData.GridSize}" HorizontalAlignment="Center"/>
+              </UniformGrid>
             </StackPanel>
           </GroupBox>
         </Grid>

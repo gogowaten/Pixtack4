@@ -103,7 +103,7 @@ namespace Pixtack4
         public AppData() { }
 
         //GridSizeの下限値
-        private int _minGridSize = -1080;
+        private int _minGridSize = 1;
         [DataMember] public int MinGridSize { get => _minGridSize; set => SetProperty(ref _minGridSize, value); }
 
         private int _maxGridSize = 1080;

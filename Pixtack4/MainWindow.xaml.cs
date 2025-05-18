@@ -259,25 +259,16 @@ namespace Pixtack4
         {
 
         }
-
-        private void Button_Click_ChangeGridSizeUp(object sender, RoutedEventArgs e)
-        {
-            int gs = MyRoot.MyActiveGroupThumb.MyItemData.GridSize * 2;
-            if(gs > MyAppData.MinGridSize &&  gs < MyAppData.MaxGridSize)
-            {
-                MyRoot.MyActiveGroupThumb.MyItemData.GridSize = gs;
-            }
-            else
-            {
-
-            }
-        }
-
-
         #region 完了
 
 
 
+
+
+        private void Button_Click_ChangeGridSizeUp(object sender, RoutedEventArgs e)
+        {
+            ChangeGridSizeUp();// アクティブグループの現在のグリッドサイズを2倍にして、許容範囲内に収まるようにします。
+        }
 
         private void Button_Click_ChangeGridSizeDown(object sender, RoutedEventArgs e)
         {
@@ -810,6 +801,30 @@ namespace Pixtack4
         #region その他
 
         /// <summary>
+        /// アクティブグループの現在のグリッドサイズを2倍にして、許容範囲内に収まるようにします。
+        /// </summary>
+        /// <remarks>計算されたグリッドサイズが最小値より小さいか最大値より大きい場合、
+        /// 問題を示すメッセージボックスが表示され、グリッドサイズは更新されません。</remarks>
+        private void ChangeGridSizeUp()
+        {
+            int gs = MyRoot.MyActiveGroupThumb.MyItemData.GridSize * 2;
+            int min = MyAppData.MinGridSize;
+            int max = MyAppData.MaxGridSize;
+            if (gs < min)
+            {
+                MessageBox.Show($"変更できなかった、指定値{gs}、下限値{min}");
+            }
+            else if (gs > max)
+            {
+                MessageBox.Show($"変更できなかった、指定値{gs}、上限値{max}");
+            }
+            else
+            {
+                MyRoot.MyActiveGroupThumb.MyItemData.GridSize = gs;
+            }
+        }
+
+        /// <summary>
         /// アクティブグループのグリッドサイズを、次に小さい有効な値に縮小します。
         /// </summary>
         /// <remarks>このメソッドは、現在アクティブなグループのグリッドサイズを、
@@ -898,15 +913,18 @@ namespace Pixtack4
                 "グリッドサイズ10で50にスナップしているItemがある状態の時に\n" +
                 "グリッドサイズを7に変更してから、そのItemをクリックすると56にスナップ(移動)する\n" +
                 "\n" +
-                "入力できる範囲は基本的には -1080 から 1080",
+                "入力できる範囲は基本的には 1 から 1080",
 
-                "ActiveGroupItemのグリッドサイズの変更",
+                "ActiveGroupのグリッドサイズの変更",
                 data.GridSize.ToString());
             box.Owner = this;
             if (box.ShowDialog() == true && int.TryParse(box.MyTextBox.Text, out var result))
             {
-                //if (-1080 <= result && result <= 1080)
-                if (MyAppData.MinGridSize <= result && result <= MyAppData.MaxGridSize)
+                if (result <= 0)
+                {
+                    MessageBox.Show($"変更できなかった。指定できる範囲は1以上{MyAppData.MaxGridSize}以下");
+                }
+                else if (result <= MyAppData.MaxGridSize)
                 {
                     data.GridSize = result;
                 }
