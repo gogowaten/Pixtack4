@@ -94,7 +94,28 @@
             <MenuItem Header="開く" Click="Button_Click_OpenPx4File"/>
             <MenuItem Header="追加" Click="Button_Click_OpenFile" ToolTip="Itemとして追加する"/>
           </MenuItem>
+          
           <MenuItem Header="編集(_E)">
+            <MenuItem Header="グリッドサイズ縮小" Click="Button_Click_ChangeGridSizeDown"/>
+            <Separator/>
+            <TextBlock Text="完了👇️｜👆️まだ"/>
+            <Separator/>
+            <MenuItem Header="グループ化" Click="Button_Click_Grouping"/>
+            <MenuItem Header="グループ解除" Click="Button_Click_UnGroup"/>
+            <Separator/>
+            <MenuItem Header="ActiveGroupの変更">
+              <MenuItem Header="IN" Click="Button_Click_ChangeActiveGroupToInside"/>
+              <MenuItem Header="OUT" Click="Button_Click_ChangeActiveGroupToOutside"/>
+              <MenuItem Header="Clicked" Click="Button_Click_ChangeActiveGroupClickedParent"/>
+              <MenuItem Header="ToRoot" Click="Button_Click_ChangeActiveGroupRootActivate"/>
+            </MenuItem>
+            <MenuItem Header="Z移動">
+              <MenuItem Header="最前面" Click="Button_Click_ZtoTop"/>
+              <MenuItem Header="1Up" Click="Button_Click_ZUp"/>
+              <MenuItem Header="1Down" Click="Button_Click_ZDown"/>
+              <MenuItem Header="最背面" Click="Button_Click_ZtoBottom"/>
+            </MenuItem>
+            <MenuItem Header="グリッドサイズ変更" Click="Button_Click_ChangeGridSize"/>
             <MenuItem Style="{StaticResource itemMargin}" Click="Button_Click_RemoveSelectedItems">
               <MenuItem.Header>
                 <StackPanel Orientation="Horizontal">
@@ -104,7 +125,7 @@
                 </StackPanel>
               </MenuItem.Header>
             </MenuItem>
-            <MenuItem Header="FocusItemを削除" IsEnabled="False"/>
+
             <Separator/>
             <MenuItem Header="全Item削除" Click="Button_Click_RemoveAllItems"/>
 

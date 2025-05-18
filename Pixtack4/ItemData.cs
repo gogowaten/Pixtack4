@@ -102,9 +102,17 @@ namespace Pixtack4
     {
         public AppData() { }
 
-        //Itemの枠表示、RootThumbのものとバインドする
+        //GridSizeの下限値
+        private int _minGridSize = -1080;
+        [DataMember] public int MinGridSize { get => _minGridSize; set => SetProperty(ref _minGridSize, value); }
+
+        private int _maxGridSize = 1080;
+        [DataMember] public int MaxGridSize { get => _maxGridSize; set => SetProperty(ref _maxGridSize, value); }
+
+
+        //Itemの枠表示状態、RootThumbのものとバインドする
         private Visibility _isWakuVisible = Visibility.Collapsed;
-        public Visibility IsWakuVisible { get => _isWakuVisible; set => SetProperty(ref _isWakuVisible, value); }
+        [DataMember] public Visibility IsWakuVisible { get => _isWakuVisible; set => SetProperty(ref _isWakuVisible, value); }
 
 
         //画像とし保存時の既定ファイル名

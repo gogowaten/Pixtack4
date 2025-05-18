@@ -255,58 +255,39 @@ namespace Pixtack4
             var inu = MyAppData;
         }
 
-
-        private void Button_Click_ChangeGridSize(object sender, RoutedEventArgs e)
+        private void Button_Click_(object sender, RoutedEventArgs e)
         {
-            ChangeGridSize();
+
         }
 
-        /// <summary>
-        /// ユーザー入力に基づいて、アクティブなグループアイテムのグリッドサイズを更新します。
-        /// </summary>
-        /// <remarks>ユーザーは、-1080～1080 の範囲で新しいグリッドサイズを入力するよう求められます。
-        /// 入力した値がこの範囲外の場合、ユーザーは値を確認して適用するかどうかを選択できます。
-        /// グリッドサイズを変更すると、新しいサイズが以前のサイズの公倍数または約数でない場合、
-        /// アイテムの位置が異なる場合があります。</remarks>
-        private void ChangeGridSize()
+        private void Button_Click_ChangeGridSizeUp(object sender, RoutedEventArgs e)
         {
-            ItemData data = MyRoot.MyActiveGroupThumb.MyItemData;
-            InputBox box = new(
-                "今のサイズの公約数or公倍数以外にするとずれる\n" +
-                "例\n" +
-                "グリッドサイズ10で50にスナップしているItemがある状態の時に\n" +
-                "グリッドサイズを7に変更してから、そのItemをクリックすると56にスナップ(移動)する\n" +
-                "\n" +
-                "入力できる範囲は-1080から1080",
-
-                "ActiveGroupItemのグリッドサイズの変更",
-                data.GridSize.ToString());
-            box.Owner = this;
-            if (box.ShowDialog() == true && int.TryParse(box.MyTextBox.Text, out var result))
+            int gs = MyRoot.MyActiveGroupThumb.MyItemData.GridSize * 2;
+            if(gs > MyAppData.MinGridSize &&  gs < MyAppData.MaxGridSize)
             {
-                if (-1080 <= result && result <= 1080)
-                {
-                    data.GridSize = result;
-                }
-                else
-                {
-                    MessageBoxResult mbResult =
-                        MessageBox.Show(
-                            "範囲を超えているけど、それでも実行する？",
-                            "確認",
-                            MessageBoxButton.YesNo,
-                            MessageBoxImage.Question,
-                            MessageBoxResult.No);
+                MyRoot.MyActiveGroupThumb.MyItemData.GridSize = gs;
+            }
+            else
+            {
 
-                    if (mbResult == MessageBoxResult.Yes) { data.GridSize = result; }
-
-                }
             }
         }
+
 
         #region 完了
 
 
+
+
+        private void Button_Click_ChangeGridSizeDown(object sender, RoutedEventArgs e)
+        {
+            ChangeGridSizeDown();// アクティブグループのグリッドサイズを、次に小さい有効な値に縮小します。
+        }
+
+        private void Button_Click_ChangeGridSize(object sender, RoutedEventArgs e)
+        {
+            ChangeGridSize();// ユーザー入力に基づいて、アクティブなグループアイテムのグリッドサイズを更新します。
+        }
 
         private void Button_Click_ZUp(object sender, RoutedEventArgs e)
         {
@@ -827,6 +808,124 @@ namespace Pixtack4
 
 
         #region その他
+
+        /// <summary>
+        /// アクティブグループのグリッドサイズを、次に小さい有効な値に縮小します。
+        /// </summary>
+        /// <remarks>このメソッドは、現在アクティブなグループのグリッドサイズを、
+        /// <see cref="GetYakusuu"/> メソッドによって決定された次に小さい有効な値に設定することで調整します。
+        /// 新しいグリッドサイズは、アクティブグループのアイテムデータに適用されます。</remarks>
+        private void ChangeGridSizeDown()
+        {
+            MyRoot.MyActiveGroupThumb.MyItemData.GridSize = GetYakusuu(MyRoot.MyActiveGroupThumb.MyItemData.GridSize);
+        }
+
+        /// <summary>
+        /// 最大約数の一個下の約数を返す、自然数の100まで対応
+        /// </summary>
+        /// <remarks>素数で割り切れるかどうかで判定</remarks>
+        /// <param name="a"></param>
+        /// <returns></returns>
+        private int GetYakusuu(int a)
+        {
+            List<int> sosuu = [2, 3, 5, 7, 11, 13, 17, 19, 23, 19, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97];
+            foreach (var item in sosuu)
+            {
+                if (a % item == 0) { return a / item; }
+            }
+            return a;
+        }
+
+        //最大公約数とは？最大公約数の簡単な求め方を1から解説！ | 明光プラス
+        //https://www.meikogijuku.jp/meiko-plus/study/common-divisor.html
+        //数学の質問です。19と0の最大公約数は19ですか？０ですか？または違... - Yahoo!知恵袋
+        //https://detail.chiebukuro.yahoo.co.jp/qa/question_detail/q14115930874
+        /// <summary>
+        /// ユークリッドの互除法を用いて、2つの整数の最大公約数 (GCD) を計算します。
+        /// </summary>
+        /// <remarks>このメソッドは、ユークリッドの互除法の再帰実装を用いて、GCD を計算します。
+        /// GCD とは、2つの入力整数を余りなく割り切れる最大の正の整数です。
+        /// </remarks>
+        /// <param name="a">最初の整数。負でない値である必要があります。</param>
+        /// <param name="b">2番目の整数。負でない値である必要があります。</param>
+        /// <returns> <paramref name="a"/> と <paramref name="b"/> の最大公約数。両方の値が0の場合、結果は未定義です。</returns>
+        private int GetKouyakusuu(int a, int b)
+        {
+            if (b == 0) { return a; }
+            int amari = a % b;
+            if (amari == 0) { return b; }
+            else
+            {
+                a = b;
+                b = amari;
+                return GetKouyakusuu(a, b);
+            }
+        }
+
+        /// <summary>
+        /// 2つの整数の最大公約数（GCD）をユークリッドの互除法で求める
+        /// </summary>
+        /// <param name="a">1つ目の整数（0以上）</param>
+        /// <param name="b">2つ目の整数（0以上）</param>
+        /// <returns>aとbの最大公約数（両方0の場合は0）</returns>
+        public static int GetGCD_SaidaiKouyakusuu(int a, int b)
+        {
+            if (a == 0) return b;
+            if (b == 0) return a;
+            while (b != 0)
+            {
+                int temp = b;
+                b = a % b;
+                a = temp;
+            }
+            return Math.Abs(a);
+        }
+
+
+        /// <summary>
+        /// ユーザー入力に基づいて、アクティブなグループアイテムのグリッドサイズを更新します。
+        /// </summary>
+        /// <remarks>ユーザーは、-1080～1080 の範囲で新しいグリッドサイズを入力するよう求められます。
+        /// 入力した値がこの範囲外の場合、ユーザーは値を確認して適用するかどうかを選択できます。
+        /// グリッドサイズを変更すると、新しいサイズが以前のサイズの公倍数または約数でない場合、
+        /// アイテムの位置が異なる場合があります。</remarks>
+        private void ChangeGridSize()
+        {
+            ItemData data = MyRoot.MyActiveGroupThumb.MyItemData;
+            InputBox box = new(
+                "今のサイズの公約数or公倍数以外にするとずれる\n" +
+                "例\n" +
+                "グリッドサイズ10で50にスナップしているItemがある状態の時に\n" +
+                "グリッドサイズを7に変更してから、そのItemをクリックすると56にスナップ(移動)する\n" +
+                "\n" +
+                "入力できる範囲は基本的には -1080 から 1080",
+
+                "ActiveGroupItemのグリッドサイズの変更",
+                data.GridSize.ToString());
+            box.Owner = this;
+            if (box.ShowDialog() == true && int.TryParse(box.MyTextBox.Text, out var result))
+            {
+                //if (-1080 <= result && result <= 1080)
+                if (MyAppData.MinGridSize <= result && result <= MyAppData.MaxGridSize)
+                {
+                    data.GridSize = result;
+                }
+                else
+                {
+                    MessageBoxResult mbResult =
+                        MessageBox.Show(
+                            "範囲を超えているけど、それでも実行する？",
+                            "確認",
+                            MessageBoxButton.YesNo,
+                            MessageBoxImage.Question,
+                            MessageBoxResult.No);
+
+                    if (mbResult == MessageBoxResult.Yes) { data.GridSize = result; }
+
+                }
+            }
+        }
+
 
         /// <summary>
         /// パネルの表示非表示を切り替える、Visible or Collapsed
