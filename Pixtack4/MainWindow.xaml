@@ -96,10 +96,10 @@
           </MenuItem>
 
           <MenuItem Header="編集(_E)">
-            <MenuItem Header="複製" IsEnabled="False"/>
-            <MenuItem Header="画像として複製" IsEnabled="False"/>
             <Separator/>
             <TextBlock Text="完了👇️｜👆️まだ"/>
+            <MenuItem Header="画像として複製" Click="Button_Click_DupulicateAsImageForFocusItem"/>
+            <MenuItem Header="複製" Click="Button_Click_DuplicateFocusItem"/>
             <MenuItem Header="RootItemをクリップボードに画像としてコピー" Click="Button_Click_CopyAsImageForRoot"/>
             <MenuItem Header="FocusItemをクリップボードに画像としてコピー" Click="Button_Click_CopyAsImageForFocusItem"/>
             <MenuItem Header="ClickedItemをクリップボードに画像としてコピー" Click="Button_Click_CopyAsImageForClickedItem"/>
@@ -154,6 +154,9 @@
             <MenuItem Header="サイズと位置をリセット" Click="Button_Click_ResetWindow"/>
           </MenuItem>
 
+          <MenuItem Header="まだ">
+            <MenuItem Header="文字入力"/>
+          </MenuItem>
         </Menu>
 
         <Grid Height="100">
@@ -462,6 +465,9 @@
               <TextBlock Text="{Binding MyItemData.MyLeft, StringFormat=MyLeft  {0:0.0}}"/>
               <TextBlock Text="{Binding MyItemData.MyTop, StringFormat=MyTop  {0:0.0}}"/>
               <TextBlock Text="{Binding MyItemData.MyZIndex, StringFormat=MyZIndex  {0:0}}"/>
+              <TextBlock Text="{Binding MyItemData.MyGuid, StringFormat=Guid  {0:0}}"/>
+              <TextBlock Text="{Binding MyItemData.MyThumbsItemData.Count, StringFormat=MyThumbsItemData.Count  {0:0}}"/>
+              
             </StackPanel>
           </GroupBox>
         </Grid>

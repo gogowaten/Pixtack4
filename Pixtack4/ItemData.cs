@@ -369,7 +369,7 @@ namespace Pixtack4
                 ItemData motoItem = moto[i];
                 ItemData sakiItem = saki[i];
                 sakiItem.MyGuid = System.Guid.NewGuid().ToString();
-                if (motoItem.MyThumbType != ThumbType.Image)
+                if (motoItem.MyThumbType == ThumbType.Image)
                 {
                     sakiItem.MyBitmapSource = BitmapFrame.Create(motoItem.MyBitmapSource);
                 }

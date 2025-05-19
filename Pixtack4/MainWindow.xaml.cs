@@ -259,17 +259,22 @@ namespace Pixtack4
         {
 
         }
-
-        private void Button_Click_DuplicateFocusItem(object sender, RoutedEventArgs e)
-        {
-
-        }
-
         #region 完了
 
 
 
 
+
+
+        private void Button_Click_DupulicateAsImageForFocusItem(object sender, RoutedEventArgs e)
+        {
+            _ = DupulicateAsImage(MyRoot.MyFocusThumb);// 指定されたItemを画像として複製
+        }
+
+        private void Button_Click_DuplicateFocusItem(object sender, RoutedEventArgs e)
+        {
+            DupulicateFocusItem();// Data複製
+        }
 
         private void Button_Click_CopyAsImageForRoot(object sender, RoutedEventArgs e)
         {
@@ -936,6 +941,34 @@ namespace Pixtack4
 
 
         #region その他
+
+        /// <summary>
+        /// 指定されたItemを画像として複製し、ルートコンテナに追加します。
+        /// </summary>
+        /// <param name="thumb">複製するItem</param>
+        /// <returns><see langword="true"/> の場合、Itemが正常に複製され、ルートコンテナに追加されました。
+        /// それ以外の場合は <see langword="false"/> です。</returns>
+        private bool DupulicateAsImage(KisoThumb? thumb)
+        {
+            if (MakeBitmapFromThumb(thumb) is RenderTargetBitmap bmp)
+            {
+                MyRoot.AddImageThumb(bmp);
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Data複製
+        /// </summary>
+        private void DupulicateFocusItem()
+        {
+            if (MyRoot.MyFocusThumb?.MyItemData.DeepCopy() is ItemData data)
+            {
+                MyRoot.AddNewThumbFromItemData(data);
+            }
+        }
+
 
         /// <summary>
         /// アクティブグループの現在のグリッドサイズを2倍にして、許容範囲内に収まるようにします。
