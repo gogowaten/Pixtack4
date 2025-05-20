@@ -96,8 +96,19 @@
           </MenuItem>
 
           <MenuItem Header="編集(_E)">
+            <MenuItem Header="文字追加" IsEnabled="False"/>
+            <MenuItem Header="図形追加" IsEnabled="False"/>
+            <MenuItem Header="範囲選択" IsEnabled="False"/>
+            <MenuItem Header="右クリックメニュー" IsEnabled="False"/>
+            <MenuItem Header="ホットキー" IsEnabled="False"/>
+            <MenuItem Header="クリップボード監視" IsEnabled="False"/>
+            <MenuItem Header="フリーハンド図形" IsEnabled="False"/>
+            <MenuItem Header="ツリーでの選択リンク" IsEnabled="False"/>
+            <MenuItem Header="Focusの上下Item表示" IsEnabled="False"/>
+            <MenuItem Header="NumericUpDown" IsEnabled="False"/>
             <Separator/>
             <TextBlock Text="完了👇️｜👆️まだ"/>
+            <Separator/>
             <MenuItem Header="画像として複製" Click="Button_Click_DupulicateAsImageForFocusItem"/>
             <MenuItem Header="複製" Click="Button_Click_DuplicateFocusItem"/>
             <MenuItem Header="RootItemをクリップボードに画像としてコピー" Click="Button_Click_CopyAsImageForRoot"/>
@@ -115,10 +126,10 @@
               <MenuItem Header="Clicked" Click="Button_Click_ChangeActiveGroupClickedParent"/>
               <MenuItem Header="ToRoot" Click="Button_Click_ChangeActiveGroupRootActivate"/>
             </MenuItem>
-            <MenuItem Header="Z移動">
+            <MenuItem Header="FocusItemのZ移動">
               <MenuItem Header="最前面" Click="Button_Click_ZtoTop"/>
-              <MenuItem Header="Up" Click="Button_Click_ZUp"/>
-              <MenuItem Header="Down" Click="Button_Click_ZDown"/>
+              <MenuItem Header="前面" Click="Button_Click_ZUp"/>
+              <MenuItem Header="背面" Click="Button_Click_ZDown"/>
               <MenuItem Header="最背面" Click="Button_Click_ZtoBottom"/>
             </MenuItem>
             <MenuItem Header="グリッドサイズ変更">
@@ -159,7 +170,7 @@
           </MenuItem>
         </Menu>
 
-        <Grid Height="100">
+        <Expander Header="exp" IsExpanded="False">
           <TabControl>
             <TabItem Header="tab1">
               <StackPanel Orientation="Vertical">
@@ -247,7 +258,7 @@
               </WrapPanel>
             </TabItem>
           </TabControl>
-        </Grid>
+        </Expander>
       </DockPanel>
 
       <!--最下段のStatusBar-->
@@ -288,7 +299,7 @@
                 <HierarchicalDataTemplate  ItemsSource="{Binding MyThumbs}">
                   <Border BorderBrush="Silver" BorderThickness="1" Margin="1">
                     <StackPanel Orientation="Horizontal">
-                      <Rectangle Width="20" Height="20">
+                      <Rectangle Width="40" Height="40">
                         <Rectangle.Fill>
                           <VisualBrush Visual="{Binding}" Stretch="Uniform"/>
                         </Rectangle.Fill>
@@ -350,9 +361,150 @@
           <Button Content="SelectedItemsPanel" Click="Button_Click_SelectedItemsPropertyPanelVisible"/>
         </StatusBar>
 
+        <Grid x:Name="MyPanelRightBase"
+              DockPanel.Dock="Right"
+              Width="220"
+              DataContext="{Binding MyRoot}"
+              TextOptions.TextFormattingMode="Display">
+          <TabControl TabStripPlacement="Right" BorderThickness="0">
+            <TabControl.Resources>
+              <Style TargetType="TabItem">
+                <Setter Property="LayoutTransform">
+                  <Setter.Value>
+                    <RotateTransform Angle="90"/>
+                  </Setter.Value>
+                </Setter>
+              </Style>
+            </TabControl.Resources>
+            <TabItem Header="選択Item" DataContext="{Binding MySelectedThumbs}">
+              <GroupBox Header="選択Item">
+                <ListBox ItemsSource="{Binding}" ScrollViewer.HorizontalScrollBarVisibility="Disabled" BorderThickness="0">
+                  <ListBox.Resources>
+                    <Style TargetType="ListBoxItem">
+                      <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                      <Setter Property="VerticalContentAlignment" Value="Center"/>
+                    </Style>
+                  </ListBox.Resources>
+                  <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                      <WrapPanel Orientation="Horizontal"/>
+                    </ItemsPanelTemplate>
+                  </ListBox.ItemsPanel>
+                  <ListBox.ItemTemplate>
+                    <DataTemplate>
+                      <Rectangle Width="50" Height="50">
+                        <Rectangle.Fill>
+                          <VisualBrush Stretch="Uniform" Visual="{Binding}"/>
+                        </Rectangle.Fill>
+                      </Rectangle>
+                    </DataTemplate>
+                  </ListBox.ItemTemplate>
+                  <ListBox.ItemContainerStyle>
+                    <Style TargetType="{x:Type ListBoxItem}">
+                      <Setter Property="Padding" Value="0"/>
+                      <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                      <Setter Property="VerticalContentAlignment" Value="Center"/>
+                    </Style>
+                  </ListBox.ItemContainerStyle>
+                </ListBox>
+
+              </GroupBox>
+            </TabItem>
+            <TabItem Header="Group" DataContext="{Binding MyActiveGroupThumb}">
+              <GroupBox Header="ActiveGroupItem">
+                <StackPanel>
+                  <Canvas Width="100" Height="100">
+                    <Canvas.Background>
+                      <VisualBrush Visual="{Binding}" Stretch="Uniform"/>
+                    </Canvas.Background>
+                  </Canvas>
+                  <TextBlock Text="{Binding MyThumbType, StringFormat=MyThumbType  {0}}"/>
+                  <TextBlock Text="{Binding ActualWidth, StringFormat=ActualWidth  {0:0}}"/>
+                  <TextBlock Text="{Binding ActualHeight, StringFormat=ActualHeight  {0:0}}"/>
+                  <TextBlock Text="{Binding MyActualTop, StringFormat=ActualTop  {0:0.0}}"/>
+                  <TextBlock Text="{Binding MyActualLeft, StringFormat=ActualLeft  {0:0.0}}"/>
+                  <TextBlock Text="{Binding MyItemData.MyLeft, StringFormat=MyLeft  {0:0.0}}"/>
+                  <TextBlock Text="{Binding MyItemData.MyTop, StringFormat=MyTop  {0:0.0}}"/>
+                  <TextBlock Text="{Binding MyItemData.MyZIndex, StringFormat=MyZIndex  {0:0}}"/>
+                  <TextBlock Text="{Binding MyItemData.GridSize, StringFormat=GridSize  {0:0}}"/>
+                  <UniformGrid Columns="2">
+                    <TextBlock Text="GridSize" HorizontalAlignment="Right"/>
+                    <TextBlock Text="{Binding MyItemData.GridSize}" HorizontalAlignment="Center"/>
+                  </UniformGrid>
+                </StackPanel>
+              </GroupBox>
+            </TabItem>
+            <TabItem Header="Focus" DataContext="{Binding MyFocusThumb}">
+              <GroupBox Header="FocusItem">
+                <StackPanel>
+                  <Canvas Width="100" Height="100">
+                    <Canvas.Background>
+                      <VisualBrush Visual="{Binding}" Stretch="Uniform"/>
+                    </Canvas.Background>
+                  </Canvas>
+                  <TextBlock Text="{Binding MyThumbType, StringFormat=MyThumbType  {0}}"/>
+                  <TextBlock Text="{Binding ActualWidth, StringFormat=ActualWidth  {0:0}}"/>
+                  <TextBlock Text="{Binding ActualHeight, StringFormat=ActualHeight  {0:0}}"/>
+                  <TextBlock Text="{Binding MyActualTop, StringFormat=ActualTop  {0:0.0}}"/>
+                  <TextBlock Text="{Binding MyActualLeft, StringFormat=ActualLeft  {0:0.0}}"/>
+                  <TextBlock Text="{Binding MyItemData.MyLeft, StringFormat=MyLeft  {0:0.0}}"/>
+                  <TextBlock Text="{Binding MyItemData.MyTop, StringFormat=MyTop  {0:0.0}}"/>
+                  <TextBlock Text="{Binding MyItemData.MyZIndex, StringFormat=MyZIndex  {0:0}}"/>
+                  <TextBlock Text="{Binding MyItemData.MyGuid, StringFormat=Guid  {0:0}}"/>
+                  <TextBlock Text="{Binding MyItemData.MyThumbsItemData.Count, StringFormat=MyThumbsItemData.Count  {0:0}}"/>
+
+                </StackPanel>
+              </GroupBox>
+            </TabItem>
+            <TabItem Header="TestTree" DataContext="{Binding}">
+              <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <TreeView ItemsSource="{Binding MyThumbs}"  Background="WhiteSmoke">
+                  <!--<TreeView.Resources>
+                <Style TargetType="{x:Type TreeViewItem}">
+                  <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                  <Setter Property="VerticalContentAlignment" Value="Center"/>
+                </Style>
+              </TreeView.Resources>-->
+                  <TreeView.ItemContainerStyle>
+                    <Style TargetType="TreeViewItem">
+                      <!--<Setter Property="Margin" Value="0,20,0,-30"/>-->
+                      <!--<Setter Property="Padding" Value="20"/>-->
+                    </Style>
+                  </TreeView.ItemContainerStyle>
+                  <TreeView.ItemTemplate>
+                    <HierarchicalDataTemplate  ItemsSource="{Binding MyThumbs}">
+                      <Border BorderBrush="Silver" BorderThickness="0" Margin="0">
+                        <StackPanel Orientation="Horizontal">
+                          <StackPanel.RenderTransform>
+                            <SkewTransform AngleX="20" AngleY="0"/>
+                          </StackPanel.RenderTransform>
+                          <Rectangle Width="60" Height="60" Margin="0,0,0,-20">
+                            <Rectangle.RenderTransform>
+                              <SkewTransform AngleX="0" AngleY="0"/>
+                            </Rectangle.RenderTransform>
+                            <Rectangle.Fill>
+                              <VisualBrush Visual="{Binding}" Stretch="Uniform"/>
+                            </Rectangle.Fill>
+                          </Rectangle>
+                          <TextBlock Text="{Binding MyThumbType}" VerticalAlignment="Bottom"/>
+                        </StackPanel>
+                      </Border>
+                    </HierarchicalDataTemplate>
+                  </TreeView.ItemTemplate>
+                  <!--<TreeView.ItemContainerStyle>
+                <Style TargetType="{x:Type TreeViewItem}">
+                  <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                  <Setter Property="VerticalAlignment" Value="Center"/>
+                </Style>
+              </TreeView.ItemContainerStyle>-->
+                </TreeView>
+              </ScrollViewer>
+            </TabItem>
+          </TabControl>
+        </Grid>
         <!--右側1-->
         <Grid x:Name="MyPanelSelectedItemsProperty" DockPanel.Dock="Right" Width="200"
-              DataContext="{Binding MyRoot.MySelectedThumbs}" Visibility="Visible">
+              DataContext="{Binding MyRoot.MySelectedThumbs}" Visibility="Collapsed">
           <GroupBox Header="SelectedItems">
             <ListBox ItemsSource="{Binding}" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
               <ListBox.Resources>
@@ -422,7 +574,11 @@
         </Grid>
 
         <!--右側2-->
-        <Grid x:Name="MyPanelActiveGroupItemProperty" DockPanel.Dock="Right" Width="200" DataContext="{Binding MyRoot.MyActiveGroupThumb}" Visibility="Collapsed">
+        <Grid
+          x:Name="MyPanelActiveGroupItemProperty"
+          DockPanel.Dock="Right"
+          Width="200"
+          DataContext="{Binding MyRoot.MyActiveGroupThumb}" Visibility="Collapsed">
           <GroupBox Header="ActiveGroupItem">
             <StackPanel>
               <Canvas Width="100" Height="100">
@@ -447,7 +603,6 @@
           </GroupBox>
         </Grid>
 
-
         <!--右側3-->
         <Grid x:Name="MyPanelFocusItemProperty" DockPanel.Dock="Right" Width="200" DataContext="{Binding MyRoot.MyFocusThumb}" Visibility="Collapsed">
           <GroupBox Header="FocusItem">
@@ -467,19 +622,27 @@
               <TextBlock Text="{Binding MyItemData.MyZIndex, StringFormat=MyZIndex  {0:0}}"/>
               <TextBlock Text="{Binding MyItemData.MyGuid, StringFormat=Guid  {0:0}}"/>
               <TextBlock Text="{Binding MyItemData.MyThumbsItemData.Count, StringFormat=MyThumbsItemData.Count  {0:0}}"/>
-              
+
             </StackPanel>
           </GroupBox>
         </Grid>
 
         <!--右側4、メインパネル-->
-        <ScrollViewer x:Name="MyScrollViewer" UseLayoutRounding="True" DockPanel.Dock="Right" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" VerticalAlignment="Top">
+        <ScrollViewer
+          x:Name="MyScrollViewer"
+          UseLayoutRounding="True"
+          DockPanel.Dock="Right"
+          HorizontalScrollBarVisibility="Visible"
+          VerticalScrollBarVisibility="Visible"
+          HorizontalAlignment="Left"
+          VerticalAlignment="Top">
           <!--<Canvas Width="2000" Height="1000" Background="AliceBlue">
             <TextBlock>
                ScrollViewerの中の、ここがメインのパネルになる<LineBreak/>
             </TextBlock>
           </Canvas>-->
         </ScrollViewer>
+
       </DockPanel>
       <!--中間ここまで-->
 

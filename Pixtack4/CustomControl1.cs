@@ -2884,6 +2884,7 @@ namespace Pixtack4
 
 
 
+
     /// <summary>
     /// GeoShape用のアンカーハンドルThumb
     /// </summary>

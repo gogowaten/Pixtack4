@@ -57,6 +57,8 @@ namespace Pixtack4
         private const string DATE_TIME_STRING_FORMAT = "HHmmss";
         //private const string DATE_TIME_STRING_FORMAT = "yyyMMdd'_'HHmmss'.'fff";
 
+        private ContextTabMenu MyContextTabMenu { get; set; } = new();
+
         public MainWindow()
         {
             InitializeComponent();
@@ -65,6 +67,14 @@ namespace Pixtack4
             MyInitialize2();
             Closing += MainWindow_Closing;
             DataContext = this;
+
+
+            this.ContextMenu = MyContextTabMenu;
+            TabItem item = new();
+            item.Header = "tab1";
+            MyContextTabMenu.AddTabItem(item);
+
+
         }
 
         private void MainWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
@@ -250,7 +260,8 @@ namespace Pixtack4
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            var uma = MyPanelSelectedItemsProperty.DataContext;
+            var uma = MyContextTabMenu;
+            _ = MyContextTabMenu.AddTabItem(new TabItem() { Header = "tabtab" });
             var neko = MyAppWindowData;
             var inu = MyAppData;
         }

@@ -4,6 +4,8 @@
     xmlns:local="clr-namespace:Pixtack4">
 
 
+ 
+
   <Style TargetType="{x:Type local:AreaThumb}">
     <Setter Property="Canvas.Left" Value="0"/>
     <Setter Property="Canvas.Top" Value="0"/>
