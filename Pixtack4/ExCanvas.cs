@@ -16,12 +16,16 @@ namespace Pixtack4
     {
         public ManageData MyManageData { get; private set; } = null!;
         public RootThumb MyRootThumb { get; private set; }
+        private MainWindow MyMainWindow;
+
+        //範囲選択Thumb
         public AreaThumb MyAreaThumb { get; private set; }
         private ContextMenu MyContextMenuForAreaThumb { get; set; } = new();
 
         //public ManageExCanvas() { }
-        public ManageExCanvas(RootThumb rootThumb, ManageData manageData)
+        public ManageExCanvas(RootThumb rootThumb, ManageData manageData, MainWindow mainWindow)
         {
+            MyMainWindow = mainWindow;
             MyRootThumb = rootThumb;
             MyAreaThumb = new();
             Panel.SetZIndex(MyAreaThumb, 1);
@@ -67,19 +71,32 @@ namespace Pixtack4
             item.Click += ItemAreaToImageFile_Click;
             item = new() { Header = "範囲を画像として複製" };
             MyContextMenuForAreaThumb.Items.Add(item);
-            item.Click += Item_Click;
+            item.Click += Item_Click_DupulicateAsImage;
         }
 
-        private void Item_Click(object sender, RoutedEventArgs e)
+        private void Item_Click_DupulicateAsImage(object sender, RoutedEventArgs e)
         {
-            var bmp = GetAreaBitmap3(false);
-            MyRootThumb.AddImageThumb(bmp);
+            MyRootThumb.AddImageThumb(bitmap: GetAreaBitmap3(false));//画像として複製
+            
         }
+
 
         private void ItemAreaToImageFile_Click(object sender, RoutedEventArgs e)
         {
-            MainWindow.SaveBitmap(GetAreaBitmap3(false));
-            //RootThumb.SaveBitmap(GetAreaBitmap3(false));
+            AreaToImageSaveFile();// 選択範囲を画像として保存
+        }
+
+        /// <summary>
+        /// 選択範囲を画像として保存
+        /// </summary>
+        private void AreaToImageSaveFile()
+        {
+            var (result, filePath) = MainWindow.SaveBitmap(GetAreaBitmap3(false));
+            if (result)
+            {
+                //既定ファイル名の更新
+                MyMainWindow.MyAppData.DefaultSaveImageFileName = Path.GetFileNameWithoutExtension(filePath);
+            }
         }
 
 

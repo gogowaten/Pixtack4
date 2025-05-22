@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Xml;
+using static System.Net.WebRequestMethods;
 
 namespace Pixtack4
 {
@@ -57,7 +58,8 @@ namespace Pixtack4
         private const string DATE_TIME_STRING_FORMAT = "HHmmss";
         //private const string DATE_TIME_STRING_FORMAT = "yyyMMdd'_'HHmmss'.'fff";
 
-        private ContextTabMenu MyContextTabMenu { get; set; } = new();
+        ////タブ型右クリックメニュー
+        //private ContextTabMenu MyContextTabMenu { get; set; } = new();
 
         public MainWindow()
         {
@@ -69,10 +71,10 @@ namespace Pixtack4
             DataContext = this;
 
 
-            this.ContextMenu = MyContextTabMenu;
-            TabItem item = new();
-            item.Header = "tab1";
-            MyContextTabMenu.AddTabItem(item);
+            //this.ContextMenu = MyContextTabMenu;
+            //TabItem item = new();
+            //item.Header = "tab1";
+            //MyContextTabMenu.AddTabItem(item);
 
 
         }
@@ -260,8 +262,6 @@ namespace Pixtack4
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            var uma = MyContextTabMenu;
-            _ = MyContextTabMenu.AddTabItem(new TabItem() { Header = "tabtab" });
             var neko = MyAppWindowData;
             var inu = MyAppData;
         }
@@ -270,6 +270,12 @@ namespace Pixtack4
         {
 
         }
+
+        private void Button_Click_AreaItemVisibleSwitch(object sender, RoutedEventArgs e)
+        {
+            MyManageExCanvas.AreaThumbVisibleSwitch();
+        }
+
         #region 完了
 
 
@@ -544,7 +550,7 @@ namespace Pixtack4
         {
             MyRoot = new RootThumb(new ItemData(ThumbType.Root));
             _ = MyRoot.SetBinding(KisoThumb.IsWakuVisibleProperty, new Binding(nameof(AppData.IsWakuVisible)) { Source = MyAppData, Mode = BindingMode.TwoWay });
-            MyManageExCanvas = new ManageExCanvas(MyRoot, new ManageData());
+            MyManageExCanvas = new ManageExCanvas(MyRoot, new ManageData(),this);
             MyScrollViewer.Content = MyManageExCanvas;
             //MyGridMyItemsTree.DataContext = MyRoot.MyThumbs;
             //DataContext = this;
@@ -676,10 +682,10 @@ namespace Pixtack4
         /// <returns></returns>
         private bool SaveItemToImageFile(KisoThumb item)
         {
-            if (MakeBitmapFromThumb(item) is RenderTargetBitmap bb)// ThumbをBitmapに変換
+            if (MakeBitmapFromThumb(item) is RenderTargetBitmap bmp)// ThumbをBitmapに変換
             {
                 // Bitmapをファイル保存
-                var (result, filePath) = SaveBitmap(bb, MyAppData.DefaultSaveImageFileName, MyAppData.MyJpegQuality);
+                var (result, filePath) = SaveBitmap(bmp, MyAppData.DefaultSaveImageFileName, MyAppData.MyJpegQuality);
                 if (result)
                 {
                     //既定ファイル名の更新
@@ -733,44 +739,9 @@ namespace Pixtack4
         /// <param name="fileName">ダイアログに表示する規定のファイル名</param>
         /// <param name="jpegQuality">jpeg画像の品質値、jpeg以外で保存するときは無視される</param>
         /// <returns></returns>
-        //public static bool SaveBitmap(BitmapSource bitmap, string fileName = "", int jpegQuality = 90)
-        //{
-        //    SaveFileDialog dialog = new()
-        //    {
-        //        Filter = "*.png|*.png|*.jpg|*.jpg;*.jpeg|*.bmp|*.bmp|*.gif|*.gif|*.tiff|*.tiff",
-        //        AddExtension = true,
-        //        FileName = fileName,
-        //    };
-
-        //    if (dialog.ShowDialog() == true)
-        //    {
-        //        //エンコーダー取得
-        //        (BitmapEncoder? encoder, BitmapMetadata? meta) = GetEncoderWithMetaData(dialog.FilterIndex, jpegQuality);
-        //        if (encoder is null) { return false; }
-        //        //保存
-        //        encoder.Frames.Add(BitmapFrame.Create(bitmap, null, meta, null));
-        //        try
-        //        {
-        //            using FileStream stream = new(dialog.FileName, FileMode.Create, FileAccess.Write);
-        //            encoder.Save(stream);                    
-        //            return true;
-        //        }
-        //        catch (Exception)
-        //        {
-        //            return false;
-        //        }
-        //    }
-        //    return false;
-        //}
-
         public static (bool result, string filePath) SaveBitmap(BitmapSource bitmap, string fileName = "", int jpegQuality = 90)
         {
-            SaveFileDialog dialog = new()
-            {
-                Filter = "*.png|*.png|*.jpg|*.jpg;*.jpeg|*.bmp|*.bmp|*.gif|*.gif|*.tiff|*.tiff",
-                FileName = fileName,
-                AddExtension = true,
-            };
+            SaveFileDialog dialog = MakeSaveFileDialogForImage(fileName);
 
             if (dialog.ShowDialog() == true)
             {
@@ -793,6 +764,18 @@ namespace Pixtack4
             return (false, string.Empty);
         }
 
+
+        private static SaveFileDialog MakeSaveFileDialogForImage(string fileName)
+        {
+            SaveFileDialog dialog = new()
+            {
+                Filter = "*.png|*.png|*.jpg|*.jpg;*.jpeg|*.bmp|*.bmp|*.gif|*.gif|*.tiff|*.tiff",
+                FileName = fileName,
+                AddExtension = true,
+            };
+
+            return dialog;
+        }
 
 
         /// <summary>
@@ -946,7 +929,6 @@ namespace Pixtack4
         {
             return MakeSaveFileDialog(thumb.MyItemData);
         }
-
 
         #endregion SaveData
 

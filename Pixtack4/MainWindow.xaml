@@ -98,7 +98,7 @@
           <MenuItem Header="編集(_E)">
             <MenuItem Header="文字追加" IsEnabled="False"/>
             <MenuItem Header="図形追加" IsEnabled="False"/>
-            <MenuItem Header="範囲選択" IsEnabled="False"/>
+            <MenuItem Header="範囲選択" Click="Button_Click_AreaItemVisibleSwitch"/>
             <MenuItem Header="右クリックメニュー" IsEnabled="False"/>
             <MenuItem Header="ホットキー" IsEnabled="False"/>
             <MenuItem Header="クリップボード監視" IsEnabled="False"/>

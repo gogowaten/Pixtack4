@@ -11,6 +11,7 @@ using System.Linq;
 using System.Reflection.Emit;
 using System.Runtime.Serialization;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -2009,7 +2010,7 @@ namespace Pixtack4
         public void AddImageThumb(BitmapSource bitmap)
         {
             var data = new ItemData(ThumbType.Image) { MyBitmapSource = bitmap };
-            AddNewThumbFromItemData(data);
+            AddNewThumbFromItemData(data, MyActiveGroupThumb);
         }
 
 
@@ -2051,42 +2052,116 @@ namespace Pixtack4
                 }
             }
         }
+
         public void AddNewThumbFromItemData(ItemData data)
         {
             AddNewThumbFromItemData(data, MyActiveGroupThumb);
         }
 
+        ///// <summary>
+        ///// Thumbを指定Groupに追加、追加座標はFocusThumbに準じる
+        ///// </summary>
+        ///// <param name="thumb"></param>
+        ///// <param name="group"></param>
+        //public void AddThumb(KisoThumb thumb, GroupThumb group)
+        //{
+        //    thumb.MyItemData.MyLeft = 0;
+        //    thumb.MyItemData.MyTop = 0;
+        //    if (MyFocusThumb is null)
+        //    {
+        //        group.MyThumbs.Add(thumb);
+        //    }
+        //    else
+        //    {
+        //        //グリッドスナップ、FocusThumbの位置を基準に追加位置を決める
+        //        //常に0から遠い方へ丸める割り算
+        //        ItemData groupData = group.MyItemData;
+        //        ItemData focus = MyFocusThumb.MyItemData;
+        //        var atoLeft = GetIntLocate(groupData.GridSize, groupData.MyAddOffsetLeft + focus.MyLeft);
+        //        var atoTop = GetIntLocate(groupData.GridSize, groupData.MyAddOffsetTop + focus.MyTop);
+
+        //        thumb.MyItemData.MyLeft = atoLeft;
+        //        thumb.MyItemData.MyTop = atoTop;
+        //        group.MyThumbs.Add(thumb);
+        //    }
+
+        //    thumb.IsSelectable = true;
+        //    MySelectedThumbs.Clear();
+        //    SelectedThumbsToAdd(thumb);
+        //}
+
+        /// <summary>
+        /// 指定された <see cref="GroupThumb"/> に、グループのグリッド設定とオフセットによって決まる位置に <see cref="KisoThumb"/> を追加します。
+        /// </summary>
+        /// <remarks>フォーカスされているサムが存在する場合、新しいサムの位置は、フォーカスされているサムの位置を基準として計算され、グループのグリッドサイズとオフセット設定によって調整されます。フォーカスされているサムが存在しない場合は、グループのデフォルトの位置にサムが追加されます。</remarks>
+        /// <param name="thumb">グループに追加する <see cref="KisoThumb"/>。このサムは追加後に選択可能になります。</param>
+        /// <param name="group"><paramref name="thumb"/> が追加される <see cref="GroupThumb"/>。グループのグリッドとオフセット設定によってサムの配置が決まります。</param>
         public void AddThumb(KisoThumb thumb, GroupThumb group)
         {
-            thumb.MyItemData.MyLeft = 0;
-            thumb.MyItemData.MyTop = 0;
-            if (MyFocusThumb is null)
+            double left = 0;
+            double top = 0;
+            if (MyFocusThumb?.MyItemData is ItemData focusData)
             {
+                left = GetIntLocate(group.MyItemData.GridSize, group.MyItemData.MyAddOffsetLeft + focusData.MyLeft);
+                top = GetIntLocate(group.MyItemData.GridSize, group.MyItemData.MyAddOffsetTop + focusData.MyTop);
+            }
+            AddThumb(thumb, group, left, top);
+        }
+
+        /// <summary>
+        /// Thumbを指定Groupに追加、追加座標は指定できるけど、グリッドに合わせておく必要がある
+        /// </summary>
+        /// <param name="thumb"></param>
+        /// <param name="group"></param>
+        /// <param name="left"></param>
+        /// <param name="top"></param>
+        public void AddThumb(KisoThumb thumb, GroupThumb group, double left, double top)
+        {
+            if (MyFocusThumb != null)
+            {
+                thumb.MyItemData.MyLeft = left;
+                thumb.MyItemData.MyTop = top;
                 group.MyThumbs.Add(thumb);
             }
             else
             {
-                //グリッドスナップ、FocusThumbの位置を基準に追加位置を決める
-                //常に0から遠い方へ丸める割り算
-                ItemData groupData = group.MyItemData;
-                ItemData focesData = MyFocusThumb.MyItemData;
-                var atoLeft = GetIntLocate(groupData.GridSize, groupData.MyAddOffsetLeft, focesData.MyLeft);
-                var atoTop = GetIntLocate(groupData.GridSize, groupData.MyAddOffsetTop, focesData.MyTop);
-
-                thumb.MyItemData.MyLeft = atoLeft;
-                thumb.MyItemData.MyTop = atoTop;
+                thumb.MyItemData.MyLeft = 0;
+                thumb.MyItemData.MyTop = 0;
                 group.MyThumbs.Add(thumb);
             }
 
+            thumb.IsSelectable = true;
             MySelectedThumbs.Clear();
             SelectedThumbsToAdd(thumb);
         }
 
-        private int GetIntLocate(int grid, int offset, double kiso)
+
+
+        ///// <summary>
+        ///// 丸め処理、常に0から通り方へ丸める
+        ///// </summary>
+        ///// <param name="grid">グリッドサイズ</param>
+        ///// <param name="offset">指定オフセット</param>
+        ///// <param name="kiso">丸める数値</param>
+        ///// <returns></returns>
+        //private int GetIntLocate(int grid, int offset, double kiso)
+        //{
+        //    if (offset < 0) { return (int)Math.Floor((kiso + offset) / grid) * grid; }
+        //    else { return (int)Math.Ceiling((kiso + offset) / grid) * grid; }
+        //}
+
+        /// <summary>
+        /// 丸め処理、常に0から通り方へ丸める
+        /// </summary>
+        /// <param name="grid">グリッドサイズ</param>
+        /// <param name="locate">丸める数値</param>
+        /// <returns></returns>
+        private int GetIntLocate(int grid, double locate)
         {
-            if (offset < 0) { return (int)Math.Floor((kiso + offset) / grid) * grid; }
-            else { return (int)Math.Ceiling((kiso + offset) / grid) * grid; }
+            if (locate < 0) { return (int)Math.Floor(locate / grid) * grid; }
+            else { return (int)Math.Ceiling(locate / grid) * grid; }
         }
+
 
         public void AddThumbToActiveGroup(KisoThumb thumb, GroupThumb parent)
         {
