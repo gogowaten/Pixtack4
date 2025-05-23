@@ -16,7 +16,7 @@ namespace Pixtack4
     {
         public ManageData MyManageData { get; private set; } = null!;
         public RootThumb MyRootThumb { get; private set; }
-        private MainWindow MyMainWindow;
+        private readonly MainWindow MyMainWindow;
 
         //範囲選択Thumb
         public AreaThumb MyAreaThumb { get; private set; }
@@ -27,7 +27,7 @@ namespace Pixtack4
         {
             MyMainWindow = mainWindow;
             MyRootThumb = rootThumb;
-            MyAreaThumb = new();
+            MyAreaThumb = new(MyRootThumb);
 
 
             Children.Add(MyRootThumb);
@@ -95,9 +95,10 @@ namespace Pixtack4
             {
                 MyAreaThumb.SetBinding(dp, new Binding(prop) { Source = MyManageData, Mode = BindingMode.TwoWay });
             }
-            MyAreaThumb.SetBinding(AreaThumb.GridSizeProperty, new Binding(nameof(ItemData.GridSize)) { Source = MyRootThumb.MyActiveGroupThumb.MyItemData, Mode = BindingMode.OneWay });
+
         }
 
+        //右クリックメニューの初期設定
         private void InitializeContextMenu()
         {
             MenuItem item;

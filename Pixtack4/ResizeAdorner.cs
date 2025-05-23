@@ -16,25 +16,17 @@ namespace Pixtack4
 
 
     /// <summary>
-    /// グリッドスナップ対応版
+    /// AreaThumb専用、グリッドスナップ対応版
     /// </summary>
     public class ResizeHandleAdornerGridSnap : ResizeHandleAdorner
     {
-        //グリッドスナップに使うサイズ
-        public int GridSize
-        {
-            get { return (int)GetValue(GridSizeProperty); }
-            set { SetValue(GridSizeProperty, value); }
-        }
-        public static readonly DependencyProperty GridSizeProperty =
-            DependencyProperty.Register(nameof(GridSize), typeof(int), typeof(ResizeHandleAdornerGridSnap), new PropertyMetadata(8));
 
-        public ResizeHandleAdornerGridSnap(FrameworkElement adornedElement) : base(adornedElement)
+        public AreaThumb MyAreaThumb { get; set; }
+
+        public ResizeHandleAdornerGridSnap(AreaThumb adornedElement) : base(adornedElement)
         {
-            if (adornedElement is AreaThumb area)
-            {
-                _ = SetBinding(GridSizeProperty, new Binding() { Source = area, Path = new PropertyPath(AreaThumb.GridSizeProperty), Mode = BindingMode.OneWay });
-            }
+            MyAreaThumb = adornedElement;
+
         }
 
         public override event Action<double>? OnTargetLeftChanged;
@@ -50,6 +42,7 @@ namespace Pixtack4
         protected override void HorizontalChange(FrameworkElement target, double horizontalChange)
         {
             if (horizontalChange == 0) { return; }
+            int GridSize = MyAreaThumb.MyRootThumb.MyActiveGroupThumb.MyItemData.GridSize;
             //移動させる距離はグリッドサイズの倍数になる
             int move = (int)(horizontalChange / GridSize) * GridSize;
 
@@ -72,6 +65,7 @@ namespace Pixtack4
         protected override void VerticalChange(FrameworkElement target, double verticalChange)
         {
             if (verticalChange == 0) { return; }
+            int GridSize = MyAreaThumb.MyRootThumb.MyActiveGroupThumb.MyItemData.GridSize;
             int move = (int)(verticalChange / GridSize) * GridSize;
             if (target.Height - move < GridSize)
             {
@@ -95,6 +89,7 @@ namespace Pixtack4
         ///
         protected override bool SetTargetWidth(double horizontalChange)
         {
+            int GridSize = MyAreaThumb.MyRootThumb.MyActiveGroupThumb.MyItemData.GridSize;
             int move = (int)(horizontalChange / GridSize) * GridSize;
             //ターゲットサイズがグリッドサイズ未満にならないようにサイズ変更
             //サイズ以下になる場合はグリッドサイズに固定する
@@ -114,6 +109,7 @@ namespace Pixtack4
 
         protected override bool SetTargetHeight(double verticalChange)
         {
+            int GridSize = MyAreaThumb.MyRootThumb.MyActiveGroupThumb.MyItemData.GridSize;
             int move = (int)(verticalChange / GridSize) * GridSize;
             //ターゲットサイズがグリッドサイズ未満にならないようにサイズ変更
             //サイズ以下になる場合はグリッドサイズに固定する

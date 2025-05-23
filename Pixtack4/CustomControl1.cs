@@ -93,11 +93,17 @@ namespace Pixtack4
         {
             DefaultStyleKeyProperty.OverrideMetadata(typeof(AreaThumb), new FrameworkPropertyMetadata(typeof(AreaThumb)));
         }
-        public AreaThumb()
+
+        //public AreaThumb()
+        //{
+        //    Loaded += AreaThumb_Loaded;
+        //}
+
+        public AreaThumb(RootThumb root)
         {
-            Loaded += AreaThumb_Loaded;            
+            MyRootThumb = root;
+            Loaded += AreaThumb_Loaded;
         }
-        public AreaThumb(RootThumb root) { MyRootThumb = root; }
 
         private void AreaThumb_Loaded(object sender, RoutedEventArgs e)
         {
@@ -134,17 +140,6 @@ namespace Pixtack4
             }
         }
 
-
-        //グリッドサイズ、スナップ移動用
-        //KisoThumbやリサイズ用Adornerのグリッドサイズとバインドする
-        public int GridSize
-        {
-            get { return (int)GetValue(GridSizeProperty); }
-            set { SetValue(GridSizeProperty, value); }
-        }
-        public static readonly DependencyProperty GridSizeProperty =
-            DependencyProperty.Register(nameof(GridSize), typeof(int), typeof(AreaThumb), new PropertyMetadata(8));
-
     }
 
 
@@ -159,9 +154,6 @@ namespace Pixtack4
     {
         //クリックダウンとドラッグ移動完了時に使う、直前に選択されたものかの判断用
         internal bool IsPreviewSelected { get; set; }
-
-
-        //public ThumbType MyThumbType { get; protected set; }
 
         //親要素の識別用。自身がグループ化されたときに親要素のGroupThumbを入れておく
         public GroupThumb? MyParentThumb { get; set; }
@@ -490,27 +482,25 @@ namespace Pixtack4
                 var ori = e.OriginalSource;
                 var hori = e.HorizontalChange;
                 var vert = e.VerticalChange;
-                int gridSize = 1;
 
-                //回転対応
-                //Parentが回転していると、その分の移動方向も回転されてしまい、
-                //マウスカーソルの移動方向と差が出るので、それを直す処理、
-                Point poi = new(e.HorizontalChange, e.VerticalChange);
-                if (e.OriginalSource is KisoThumb kiso && kiso.MyParentThumb is GroupThumb parent)
-                {
-                    poi = GetRenderTransformsPoint(parent, poi);
-                    //Parentのグリッドサイズ
-                    gridSize = parent.MyItemData.GridSize;
-                }
+                ////回転対応
+                ////Parentが回転していると、その分の移動方向も回転されてしまい、
+                ////マウスカーソルの移動方向と差が出るので、それを直す処理、
+                //Point poi = new(e.HorizontalChange, e.VerticalChange);
+                //if (e.OriginalSource is KisoThumb kiso && kiso.MyParentThumb is GroupThumb parent)
+                //{
+                //    poi = GetRenderTransformsPoint(parent, poi);
+                //    //Parentのグリッドサイズ
+                //    gridSize = parent.MyItemData.GridSize;
+                //}
 
-                //グリッドスナップ移動のため、移動距離をグリッドサイズで切り捨ての割り算
-                int yoko = (int)(poi.X / gridSize) * gridSize;
-                int tate = (int)(poi.Y / gridSize) * gridSize;
-                //int yoko = (int)(poi.X / gridSize + 0.5) * gridSize;
-                //int tate = (int)(poi.Y / gridSize + 0.5) * gridSize;
 
                 if (GetRootThumb() is RootThumb root)
                 {
+                    int gridSize = root.MyActiveGroupThumb.MyItemData.GridSize;
+                    //グリッドスナップ移動のため、移動距離をグリッドサイズで切り捨ての割り算
+                    int yoko = (int)(e.HorizontalChange / gridSize) * gridSize;
+                    int tate = (int)(e.VerticalChange / gridSize) * gridSize;
                     foreach (var item in root.MySelectedThumbs)
                     {
                         item.MyItemData.MyLeft += yoko;
@@ -1428,7 +1418,7 @@ namespace Pixtack4
     {
         //シリアライズ時の内部ファイル名
         private const string XML_FILE_NAME = "Data.xml";
-        private readonly AreaThumb MyRangeThumb = null!;
+        //private readonly AreaThumb MyRangeThumb = null!;
 
 
         static RootThumb()
@@ -1453,7 +1443,7 @@ namespace Pixtack4
             Initialized += RootThumb_Initialized;
             Loaded += RootThumb_Loaded;
 
-            MyRangeThumb = new();
+            //MyRangeThumb = new();
         }
 
         private void RootThumb_Initialized(object? sender, EventArgs e)

@@ -264,6 +264,9 @@ namespace Pixtack4
         {
             var neko = MyAppWindowData;
             var inu = MyAppData;
+            //var grid = MyManageExCanvas.MyAreaThumb.GridSize;
+            var area = MyManageExCanvas.MyRootThumb.MyActiveGroupThumb.MyThumbs.Count;
+            var gri =MyManageExCanvas.MyRootThumb.MyActiveGroupThumb.MyItemData.GridSize;
         }
 
         private void Button_Click_(object sender, RoutedEventArgs e)

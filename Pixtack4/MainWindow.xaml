@@ -96,26 +96,16 @@
           </MenuItem>
 
           <MenuItem Header="編集(_E)">
-            <MenuItem Header="文字追加" IsEnabled="False"/>
-            <MenuItem Header="図形追加" IsEnabled="False"/>
-            <MenuItem Header="範囲選択" Click="Button_Click_AreaItemVisibleSwitch"/>
-            <MenuItem Header="右クリックメニュー" IsEnabled="False"/>
-            <MenuItem Header="ホットキー" IsEnabled="False"/>
-            <MenuItem Header="クリップボード監視" IsEnabled="False"/>
-            <MenuItem Header="フリーハンド図形" IsEnabled="False"/>
-            <MenuItem Header="ツリーでの選択リンク" IsEnabled="False"/>
-            <MenuItem Header="Focusの上下Item表示" IsEnabled="False"/>
-            <MenuItem Header="NumericUpDown" IsEnabled="False"/>
-            <Separator/>
-            <TextBlock Text="完了👇️｜👆️まだ"/>
-            <Separator/>
+            <MenuItem Header="範囲選択Item表示" Click="Button_Click_AreaItemVisibleSwitch"/>
             <MenuItem Header="画像として複製" Click="Button_Click_DupulicateAsImageForFocusItem"/>
             <MenuItem Header="複製" Click="Button_Click_DuplicateFocusItem"/>
-            <MenuItem Header="RootItemをクリップボードに画像としてコピー" Click="Button_Click_CopyAsImageForRoot"/>
-            <MenuItem Header="FocusItemをクリップボードに画像としてコピー" Click="Button_Click_CopyAsImageForFocusItem"/>
-            <MenuItem Header="ClickedItemをクリップボードに画像としてコピー" Click="Button_Click_CopyAsImageForClickedItem"/>
-            <MenuItem Header="クリップボードの画像を追加(png)" Click="Button_Click_AddImageFromClipboardPng" ToolTip="通常はこれ"/>
-            <MenuItem Header="クリップボードの画像を追加(bmp)" Click="Button_Click_AddImageFromClipboardBmp" ToolTip="エクセルのグラフや図形などはこれ"/>
+            <MenuItem Header="クリップボード">
+              <MenuItem Header="RootItemをクリップボードに画像としてコピー" Click="Button_Click_CopyAsImageForRoot"/>
+              <MenuItem Header="FocusItemをクリップボードに画像としてコピー" Click="Button_Click_CopyAsImageForFocusItem"/>
+              <MenuItem Header="ClickedItemをクリップボードに画像としてコピー" Click="Button_Click_CopyAsImageForClickedItem"/>
+              <MenuItem Header="クリップボードの画像を追加(png)" Click="Button_Click_AddImageFromClipboardPng" ToolTip="通常はこれ"/>
+              <MenuItem Header="クリップボードの画像を追加(bmp)" Click="Button_Click_AddImageFromClipboardBmp" ToolTip="エクセルのグラフや図形などはこれ"/>
+            </MenuItem>
             <Separator/>
             <MenuItem Header="グループ化" Click="Button_Click_Grouping"/>
             <MenuItem Header="グループ解除" Click="Button_Click_UnGroup"/>
@@ -126,16 +116,8 @@
               <MenuItem Header="Clicked" Click="Button_Click_ChangeActiveGroupClickedParent"/>
               <MenuItem Header="ToRoot" Click="Button_Click_ChangeActiveGroupRootActivate"/>
             </MenuItem>
-            <MenuItem Header="FocusItemのZ移動">
-              <MenuItem Header="最前面" Click="Button_Click_ZtoTop"/>
-              <MenuItem Header="前面" Click="Button_Click_ZUp"/>
-              <MenuItem Header="背面" Click="Button_Click_ZDown"/>
-              <MenuItem Header="最背面" Click="Button_Click_ZtoBottom"/>
-            </MenuItem>
             <MenuItem Header="グリッドサイズ変更">
-              <MenuItem
-                
-                IsEnabled="False">
+              <MenuItem IsEnabled="False">
                 <MenuItem.Header>
                   <TextBlock Text="{Binding MyRoot.MyActiveGroupThumb.MyItemData.GridSize, StringFormat=今のサイズ {0:0}}"/>
                 </MenuItem.Header>
@@ -143,6 +125,12 @@
               <Button Content="サイズUp" Click="Button_Click_ChangeGridSizeUp"/>
               <Button Content="サイズDown" Click="Button_Click_ChangeGridSizeDown"/>
               <MenuItem Header="サイズ指定" Click="Button_Click_ChangeGridSize"/>
+            </MenuItem>
+            <MenuItem Header="FocusItemのZ移動">
+              <MenuItem Header="最前面" Click="Button_Click_ZtoTop"/>
+              <MenuItem Header="前面" Click="Button_Click_ZUp"/>
+              <MenuItem Header="背面" Click="Button_Click_ZDown"/>
+              <MenuItem Header="最背面" Click="Button_Click_ZtoBottom"/>
             </MenuItem>
             <MenuItem Style="{StaticResource itemMargin}" Click="Button_Click_RemoveSelectedItems">
               <MenuItem.Header>
@@ -166,7 +154,17 @@
           </MenuItem>
 
           <MenuItem Header="まだ">
-            <MenuItem Header="文字入力"/>
+            <MenuItem Header="文字追加" IsEnabled="False"/>
+            <MenuItem Header="図形追加" IsEnabled="False"/>
+            <MenuItem Header="フリーハンド図形" IsEnabled="False"/>
+            <MenuItem Header="右クリックメニュー" IsEnabled="False"/>
+            <MenuItem Header="ホットキー" IsEnabled="False"/>
+            <MenuItem Header="クリップボード監視" IsEnabled="False"/>
+            <MenuItem Header="ツリーでの選択リンク" IsEnabled="False"/>
+            <MenuItem Header="グループごとの表示非表示切り替え" IsEnabled="False"/>
+            <MenuItem Header="Focusの上下Item表示" IsEnabled="False"/>
+            <MenuItem Header="NumericUpDown" IsEnabled="False"/>
+
           </MenuItem>
         </Menu>
 
