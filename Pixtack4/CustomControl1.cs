@@ -82,10 +82,12 @@ namespace Pixtack4
 
     /// <summary>
     /// 範囲選択用Thumb
+    /// リサイズ用ハンドルを持つ
     /// </summary>
     public class AreaThumb : Thumb
     {
-        private ExCanvas MyParentExCanvas = null!;
+        public ExCanvas MyParentExCanvas { get; private set; } = null!;
+        public RootThumb MyRootThumb { get; private set; } = null!;
         //private ContextMenu MyContextMenu = null!;
         static AreaThumb()
         {
@@ -93,39 +95,11 @@ namespace Pixtack4
         }
         public AreaThumb()
         {
-            Loaded += RangeThumb_Loaded;
-            DragDelta += RangeThumb_DragDelta;
-            DragStarted += RangeThumb_DragStarted;
-            DragCompleted += RangeThumb_DragCompleted;
-            //ContextMenuOpening += RangeThumb_ContextMenuOpening;
+            Loaded += AreaThumb_Loaded;            
         }
+        public AreaThumb(RootThumb root) { MyRootThumb = root; }
 
-        //private void RangeThumb_ContextMenuOpening(object sender, ContextMenuEventArgs e)
-        //{
-        //    ContextMenu = MyContextMenu;
-        //}
-
-        private void RangeThumb_DragCompleted(object sender, DragCompletedEventArgs e)
-        {
-            MyParentExCanvas.IsAutoResize = true;
-        }
-
-        private void RangeThumb_DragStarted(object sender, DragStartedEventArgs e)
-        {
-            MyParentExCanvas.IsAutoResize = false;
-        }
-
-        private void RangeThumb_DragDelta(object sender, DragDeltaEventArgs e)
-        {
-            if (sender is Thumb t)
-            {
-                Canvas.SetLeft(t, Canvas.GetLeft(t) + e.HorizontalChange);
-                Canvas.SetTop(t, Canvas.GetTop(t) + e.VerticalChange);
-                e.Handled = true;
-            }
-        }
-
-        private void RangeThumb_Loaded(object sender, RoutedEventArgs e)
+        private void AreaThumb_Loaded(object sender, RoutedEventArgs e)
         {
             InitializeAdorner();
 
@@ -133,31 +107,15 @@ namespace Pixtack4
             {
                 MyParentExCanvas = ex;
             }
-            //InitializeContextMenu();
-
         }
-
-        //private void InitializeContextMenu()
-        //{
-        //    MyContextMenu = new();
-        //    this.ContextMenu = MyContextMenu;
-        //    MenuItem item;
-        //    item = new() { Header = "範囲を画像として保存" }; MyContextMenu.Items.Add(item);
-        //    item.Click += Item_Click;
-        //}
-
-        private void Item_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
 
         //サイズ変更ハンドルの初期設定
         private void InitializeAdorner()
         {
             if (AdornerLayer.GetAdornerLayer(this) is AdornerLayer layer)
             {
-                var adorner = new ResizeHandleAdorner(this)
+                var adorner = new ResizeHandleAdornerGridSnap(this)
+                //var adorner = new ResizeHandleAdorner(this)
                 {
                     MyHandleLayout = HandleLayoutType.Inside
                 };
@@ -177,6 +135,15 @@ namespace Pixtack4
         }
 
 
+        //グリッドサイズ、スナップ移動用
+        //KisoThumbやリサイズ用Adornerのグリッドサイズとバインドする
+        public int GridSize
+        {
+            get { return (int)GetValue(GridSizeProperty); }
+            set { SetValue(GridSizeProperty, value); }
+        }
+        public static readonly DependencyProperty GridSizeProperty =
+            DependencyProperty.Register(nameof(GridSize), typeof(int), typeof(AreaThumb), new PropertyMetadata(8));
 
     }
 
@@ -1475,6 +1442,7 @@ namespace Pixtack4
             Focusable = true;
             //MyThumbType = ThumbType.Root;
             //MyItemData.MyThumbType = ThumbType.Root;
+
             MySelectedThumbs = [];
             DragDelta -= Thumb_DragDelta3;
             DragStarted -= KisoThumb_DragStarted3;
@@ -1482,9 +1450,17 @@ namespace Pixtack4
             DragCompleted -= KisoThumb_DragCompleted3;
             PreviewMouseDown -= KisoThumb_PreviewMouseDown2;
             KeyUp -= KisoThumb_KeyUp;
+            Initialized += RootThumb_Initialized;
             Loaded += RootThumb_Loaded;
 
             MyRangeThumb = new();
+        }
+
+        private void RootThumb_Initialized(object? sender, EventArgs e)
+        {
+
+            //ActiveGroupThumbの指定
+            MyActiveGroupThumb = this;
         }
         #region イベントでの処理
 
@@ -1492,8 +1468,6 @@ namespace Pixtack4
         private void RootThumb_Loaded(object sender, RoutedEventArgs e)
         {
 
-            //ActiveGroupThumbの指定
-            MyActiveGroupThumb = this;
             foreach (var item in MyThumbs)
             {
                 item.IsSelectable = true;

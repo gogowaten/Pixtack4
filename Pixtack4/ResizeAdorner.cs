@@ -7,11 +7,131 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Globalization;
 using System.ComponentModel;
+using System.Diagnostics.Eventing.Reader;
 
 namespace Pixtack4
 {
     //ハンドルの表示位置、ターゲットの境界線の上、内側、外側
     public enum HandleLayoutType { Online = 0, Inside, Outside }
+
+
+    /// <summary>
+    /// グリッドスナップ対応版
+    /// </summary>
+    public class ResizeHandleAdornerGridSnap : ResizeHandleAdorner
+    {
+        //グリッドスナップに使うサイズ
+        public int GridSize
+        {
+            get { return (int)GetValue(GridSizeProperty); }
+            set { SetValue(GridSizeProperty, value); }
+        }
+        public static readonly DependencyProperty GridSizeProperty =
+            DependencyProperty.Register(nameof(GridSize), typeof(int), typeof(ResizeHandleAdornerGridSnap), new PropertyMetadata(8));
+
+        public ResizeHandleAdornerGridSnap(FrameworkElement adornedElement) : base(adornedElement)
+        {
+            if (adornedElement is AreaThumb area)
+            {
+                _ = SetBinding(GridSizeProperty, new Binding() { Source = area, Path = new PropertyPath(AreaThumb.GridSizeProperty), Mode = BindingMode.OneWay });
+            }
+        }
+
+        public override event Action<double>? OnTargetLeftChanged;
+        public override event Action<double>? OnTargetTopChanged;
+
+        /// <summary>
+        /// 移動量で水平移動とWidthを変更、移動量はグリッドサイズの倍数に丸める
+        /// もしwidthがグリッドサイズ未満になるような移動量のときは、Widthはグリッドサイズにする
+        /// </summary>
+        /// <param name="target">ターゲット</param>
+        /// <param name="horizontalChange">水平移動量</param>
+        /// <returns></returns>
+        protected override void HorizontalChange(FrameworkElement target, double horizontalChange)
+        {
+            if (horizontalChange == 0) { return; }
+            //移動させる距離はグリッドサイズの倍数になる
+            int move = (int)(horizontalChange / GridSize) * GridSize;
+
+            //ターゲット要素の最小サイズはグリッドサイズ
+            //それ以下になるような移動距離なら移動させない、サイズはグリッドサイズにする
+            if (target.Width - move < GridSize)
+            {
+                move = 0;
+                target.Width = GridSize;
+            }
+            else
+            {
+                target.Width -= move;
+                Canvas.SetLeft(target, Canvas.GetLeft(target) + move);
+                //リサイズハンドルによりターゲットの位置が変更されたことを知らせる
+                OnTargetLeftChanged?.Invoke(move);
+            }
+        }
+
+        protected override void VerticalChange(FrameworkElement target, double verticalChange)
+        {
+            if (verticalChange == 0) { return; }
+            int move = (int)(verticalChange / GridSize) * GridSize;
+            if (target.Height - move < GridSize)
+            {
+                move = 0;
+                target.Height = GridSize;
+            }
+            else
+            {
+                target.Height -= move;
+                Canvas.SetTop(target, Canvas.GetTop(target) + move);
+                OnTargetTopChanged?.Invoke(move);
+            }
+        }
+
+        /// <summary>
+        /// 指定された水平方向の変化に基づいてターゲット要素の幅をグリッドサイズの倍数に調整する
+        /// </summary>
+        /// <remarks>このメソッドは、ターゲットの幅がグリッドサイズを下回らないようにします。計算された幅がグリッドサイズより小さい場合、幅はグリッドサイズに設定されます。</remarks>
+        /// <param name="horizo​​ntalChange">ターゲット要素の幅に適用する水平方向のサイズ変化（デバイス非依存単位（DIP）単位）。</param>
+        /// <returns><see langword="true"/> ターゲットの幅が正常に調整された場合、<see langword="false"/> を返します。</returns>
+        ///
+        protected override bool SetTargetWidth(double horizontalChange)
+        {
+            int move = (int)(horizontalChange / GridSize) * GridSize;
+            //ターゲットサイズがグリッドサイズ未満にならないようにサイズ変更
+            //サイズ以下になる場合はグリッドサイズに固定する
+            double size = MyTarget.Width + move;
+            if (size >= GridSize)
+            {
+                MyTarget.Width = size;
+                return true;
+            }
+            else if (MyTarget.Width > GridSize)
+            {
+                MyTarget.Width = GridSize;
+                return true;
+            }
+            else { return false; }
+        }
+
+        protected override bool SetTargetHeight(double verticalChange)
+        {
+            int move = (int)(verticalChange / GridSize) * GridSize;
+            //ターゲットサイズがグリッドサイズ未満にならないようにサイズ変更
+            //サイズ以下になる場合はグリッドサイズに固定する
+            double size = MyTarget.Height + move;
+            if (size >= GridSize)
+            {
+                MyTarget.Height = size;
+                return true;
+            }
+            else if (MyTarget.Height > GridSize)
+            {
+                MyTarget.Height = GridSize;
+                return true;
+            }
+            else { return false; }
+        }
+    }
+
 
 
     /// <summary>
@@ -25,12 +145,12 @@ namespace Pixtack4
         protected override int VisualChildrenCount => MyVisualChildren.Count;
 
         protected override Visual GetVisualChild(int index) => MyVisualChildren[index];
-        readonly VisualCollection MyVisualChildren;//表示したい要素を管理する用？
+        protected readonly VisualCollection MyVisualChildren;//表示したい要素を管理する用？
         #endregion VisualCollectionで必要
 
-        private readonly List<HandleThumb> MyHandles = [];//ハンドルリスト、必要なかったかも
+        protected readonly List<HandleThumb> MyHandles = [];//ハンドルリスト、必要なかったかも
         private readonly Canvas MyCanvas = new();// ハンドルを表示する用
-        private readonly FrameworkElement MyTarget;// 装飾ターゲット
+        protected readonly FrameworkElement MyTarget;// 装飾ターゲット
         private readonly HandleThumb Top = new();// 各ハンドル
         private readonly HandleThumb Left = new();
         private readonly HandleThumb Right = new();
@@ -161,13 +281,13 @@ namespace Pixtack4
 
         #region イベント
         //ハンドルのドラッグ移動により、ターゲットの位置が変更されたときに、その変更量を通知
-        public event Action<double>? OnTargetLeftChanged;
-        public event Action<double>? OnTargetTopChanged;
+        public virtual event Action<double>? OnTargetLeftChanged;
+        public virtual event Action<double>? OnTargetTopChanged;
         //public event EventHandler<double>? OnTargetLeftChanged;//こっちでもいい
         //public event PropertyChangedEventHandler PropertyChanged;//これは違う感じ
         #endregion イベント
 
-        private bool SetTargetWidth(double horizontalChange)
+        protected virtual bool SetTargetWidth(double horizontalChange)
         {
             if (MyTarget.Width + horizontalChange >= 1.0)
             {
@@ -180,9 +300,9 @@ namespace Pixtack4
                 return true;
             }
             else { return false; }
-
         }
-        private bool SetTargetHeight(double verticalChange)
+
+        protected virtual bool SetTargetHeight(double verticalChange)
         {
             if (MyTarget.Height + verticalChange >= 1.0)
             {
@@ -212,12 +332,12 @@ namespace Pixtack4
             }
             else if (sender == Right)
             {
-                SetTargetWidth(e.HorizontalChange);
+                _ = SetTargetWidth(e.HorizontalChange);
                 e.Handled = true;
             }
             else if (sender == Bottom)
             {
-                SetTargetHeight(e.VerticalChange);
+                _ = SetTargetHeight(e.VerticalChange);
                 e.Handled = true;
             }
             else if (TopLeft == sender)
@@ -244,8 +364,8 @@ namespace Pixtack4
             }
             else if (BottomRight == sender)
             {
-                SetTargetWidth(e.HorizontalChange);
-                SetTargetHeight(e.VerticalChange);
+                _ = SetTargetWidth(e.HorizontalChange);
+                _ = SetTargetHeight(e.VerticalChange);
                 e.Handled = true;
             }
 
@@ -291,7 +411,7 @@ namespace Pixtack4
         /// <param name="target">ターゲット</param>
         /// <param name="horizontalChange">水平移動量</param>
         /// <returns></returns>
-        private void HorizontalChange(FrameworkElement target, double horizontalChange)
+        protected virtual void HorizontalChange(FrameworkElement target, double horizontalChange)
         {
             if (horizontalChange == 0) { return; }
             if (target.Width - horizontalChange > 0)
@@ -308,7 +428,7 @@ namespace Pixtack4
             OnTargetLeftChanged?.Invoke(horizontalChange);
         }
 
-        private void VerticalChange(FrameworkElement target, double verticalChange)
+        protected virtual void VerticalChange(FrameworkElement target, double verticalChange)
         {
             if (verticalChange == 0) { return; }
             if (target.Height - verticalChange > 0)
@@ -339,13 +459,9 @@ namespace Pixtack4
             Canvas.SetLeft(elem, Canvas.GetLeft(elem) + offset);
         }
 
-        public void GetHandlesRenderBounds()
-        {
-            var r = this.RenderSize;
-        }
-
-
     }
+
+
 
 
 

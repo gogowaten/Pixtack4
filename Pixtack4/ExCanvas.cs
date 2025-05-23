@@ -28,17 +28,51 @@ namespace Pixtack4
             MyMainWindow = mainWindow;
             MyRootThumb = rootThumb;
             MyAreaThumb = new();
-            Panel.SetZIndex(MyAreaThumb, 1);
+
+
             Children.Add(MyRootThumb);
             Children.Add(MyAreaThumb);
 
 
             InitializeContextMenu();
-            MyAreaThumb.ContextMenu = MyContextMenuForAreaThumb;
+            InitializeMyAreaThumb();// 範囲選択Thumbの初期設定
+
             MyManageData = manageData;
-            MyAreaThumb.DataContext = MyManageData;
+
 
             Loaded += ManageExCanvas_Loaded;
+        }
+
+        /// <summary>
+        /// 範囲選択Thumbの初期設定
+        /// </summary>
+        private void InitializeMyAreaThumb()
+        {
+            Panel.SetZIndex(MyAreaThumb, 1);
+            MyAreaThumb.ContextMenu = MyContextMenuForAreaThumb;
+            MyAreaThumb.DataContext = MyManageData;
+            MyAreaThumb.DragStarted += (a, b) => { MyAreaThumb.MyParentExCanvas.IsAutoResize = false; };
+            MyAreaThumb.DragCompleted += (a, b) => { MyAreaThumb.MyParentExCanvas.IsAutoResize = true; };
+            MyAreaThumb.DragDelta += MyAreaThumb_DragDelta;
+            
+        }
+
+        /// <summary>
+        /// 範囲選択Thumbのドラッグ移動、グリッドスナップ
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void MyAreaThumb_DragDelta(object sender, System.Windows.Controls.Primitives.DragDeltaEventArgs e)
+        {
+            if (sender is AreaThumb area)
+            {
+                int gSize = MyRootThumb.MyActiveGroupThumb.MyItemData.GridSize;
+                int yoko = (int)(e.HorizontalChange / gSize) * gSize;
+                int tate = (int)(e.VerticalChange / gSize) * gSize;
+                SetLeft(area, GetLeft(area) + yoko);
+                SetTop(area,GetTop(area) + tate);
+                e.Handled = true;
+            }
         }
 
         private void ManageExCanvas_Loaded(object sender, RoutedEventArgs e)
@@ -61,6 +95,7 @@ namespace Pixtack4
             {
                 MyAreaThumb.SetBinding(dp, new Binding(prop) { Source = MyManageData, Mode = BindingMode.TwoWay });
             }
+            MyAreaThumb.SetBinding(AreaThumb.GridSizeProperty, new Binding(nameof(ItemData.GridSize)) { Source = MyRootThumb.MyActiveGroupThumb.MyItemData, Mode = BindingMode.OneWay });
         }
 
         private void InitializeContextMenu()
@@ -77,7 +112,7 @@ namespace Pixtack4
         private void Item_Click_DupulicateAsImage(object sender, RoutedEventArgs e)
         {
             MyRootThumb.AddImageThumb(bitmap: GetAreaBitmap3(false));//画像として複製
-            
+
         }
 
 
