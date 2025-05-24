@@ -135,9 +135,9 @@
             <MenuItem Style="{StaticResource itemMargin}" Click="Button_Click_RemoveSelectedItems">
               <MenuItem.Header>
                 <StackPanel Orientation="Horizontal">
-                  <TextBlock Text="選択Item"/>
+                  <TextBlock Text="選択Item[ "/>
                   <TextBlock Text="{Binding MyRoot.MySelectedThumbs.Count}" HorizontalAlignment="Center"/>
-                  <TextBlock Text="個を削除"/>
+                  <TextBlock Text=" ]個を削除"/>
                 </StackPanel>
               </MenuItem.Header>
             </MenuItem>
@@ -450,10 +450,32 @@
                   <TextBlock Text="{Binding MyItemData.MyZIndex, StringFormat=MyZIndex  {0:0}}"/>
                   <TextBlock Text="{Binding MyItemData.MyGuid, StringFormat=Guid  {0:0}}"/>
                   <TextBlock Text="{Binding MyItemData.MyThumbsItemData.Count, StringFormat=MyThumbsItemData.Count  {0:0}}"/>
-
                 </StackPanel>
               </GroupBox>
             </TabItem>
+            
+            <TabItem Header="Clicked" DataContext="{Binding MyClickedThumb}">
+              <GroupBox Header="FocusItem">
+                <StackPanel>
+                  <Canvas Width="100" Height="100">
+                    <Canvas.Background>
+                      <VisualBrush Visual="{Binding}" Stretch="Uniform"/>
+                    </Canvas.Background>
+                  </Canvas>
+                  <TextBlock Text="{Binding MyThumbType, StringFormat=MyThumbType  {0}}"/>
+                  <TextBlock Text="{Binding ActualWidth, StringFormat=ActualWidth  {0:0}}"/>
+                  <TextBlock Text="{Binding ActualHeight, StringFormat=ActualHeight  {0:0}}"/>
+                  <TextBlock Text="{Binding MyActualTop, StringFormat=ActualTop  {0:0.0}}"/>
+                  <TextBlock Text="{Binding MyActualLeft, StringFormat=ActualLeft  {0:0.0}}"/>
+                  <TextBlock Text="{Binding MyItemData.MyLeft, StringFormat=MyLeft  {0:0.0}}"/>
+                  <TextBlock Text="{Binding MyItemData.MyTop, StringFormat=MyTop  {0:0.0}}"/>
+                  <TextBlock Text="{Binding MyItemData.MyZIndex, StringFormat=MyZIndex  {0:0}}"/>
+                  <TextBlock Text="{Binding MyItemData.MyGuid, StringFormat=Guid  {0:0}}"/>
+                  <TextBlock Text="{Binding MyItemData.MyThumbsItemData.Count, StringFormat=MyThumbsItemData.Count  {0:0}}"/>
+                </StackPanel>
+              </GroupBox>
+            </TabItem>
+            
             <TabItem Header="TestTree" DataContext="{Binding}">
               <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <TreeView ItemsSource="{Binding MyThumbs}"  Background="WhiteSmoke">
@@ -639,6 +661,9 @@
                ScrollViewerの中の、ここがメインのパネルになる<LineBreak/>
             </TextBlock>
           </Canvas>-->
+          
+          
+          
         </ScrollViewer>
 
       </DockPanel>

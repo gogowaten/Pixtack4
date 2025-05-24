@@ -14,7 +14,7 @@ namespace Pixtack4
     /// </summary>
     public class ContextTabMenu : ContextMenu
     {
-        private TabControl MyTabControl { get; set; }
+        public TabControl MyTabControl { get; private set; }
 
         public ContextTabMenu()
         {
@@ -22,12 +22,24 @@ namespace Pixtack4
             //マウスホイールでタブ切り替え
             MyTabControl.MouseWheel += (s, e) =>
             {
-                int index = MyTabControl.SelectedIndex;
-                if (e.Delta > 0 && index < MyTabControl.Items.Count - 1)
+                int ima = MyTabControl.SelectedIndex;
+                int delta = e.Delta;
+                //下に回転
+                if (delta < 0)
                 {
-                    MyTabControl.SelectedIndex++;
+                    if (ima + 1 < MyTabControl.Items.Count)
+                    {
+                        MyTabControl.SelectedIndex = ima + 1;
+                    }
                 }
-                else if (index > 0) MyTabControl.SelectedIndex--;
+                //上に回転
+                else
+                {
+                    if (ima - 1 >= 0)
+                    {
+                        MyTabControl.SelectedIndex = ima - 1;
+                    }
+                }
             };
         }
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -1418,8 +1419,9 @@ namespace Pixtack4
     {
         //シリアライズ時の内部ファイル名
         private const string XML_FILE_NAME = "Data.xml";
-        //private readonly AreaThumb MyRangeThumb = null!;
 
+        ////右クリックメニュー
+        //public ContextTabMenu MyContextTabMenu { get; set; }
 
         static RootThumb()
         {
@@ -1430,20 +1432,50 @@ namespace Pixtack4
         {
             MyThumbType = ThumbType.Root;
             Focusable = true;
-            //MyThumbType = ThumbType.Root;
-            //MyItemData.MyThumbType = ThumbType.Root;
 
             MySelectedThumbs = [];
             DragDelta -= Thumb_DragDelta3;
             DragStarted -= KisoThumb_DragStarted3;
-            //DragCompleted -= KisoThumb_DragCompleted2;
             DragCompleted -= KisoThumb_DragCompleted3;
             PreviewMouseDown -= KisoThumb_PreviewMouseDown2;
             KeyUp -= KisoThumb_KeyUp;
             Initialized += RootThumb_Initialized;
             Loaded += RootThumb_Loaded;
 
-            //MyRangeThumb = new();
+
+        }
+
+
+
+
+        /// <summary>
+        /// 指定されたItemを画像として複製し、ルートコンテナに追加します。
+        /// </summary>
+        /// <param name="thumb">複製するItem</param>
+        /// <returns><see langword="true"/> の場合、Itemが正常に複製され、ルートコンテナに追加されました。
+        /// それ以外の場合は <see langword="false"/> です。</returns>
+        public bool DupulicateAsImage(KisoThumb? thumb)
+        {
+            if (MakeBitmapFromThumb(thumb) is RenderTargetBitmap bmp)
+            {
+                return AddImageThumb(bmp);
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// 指定Thumbを複製してRootに追加する
+        /// </summary>
+        /// <param name="thumb"></param>
+        /// <returns>正常に複製追加できたときはtrue、それ以外はfalse</returns>
+        public bool Dupulicate(KisoThumb? thumb)
+        {
+            if (thumb != null && thumb.MyItemData.DeepCopy() is ItemData data)
+            {
+                AddNewThumbFromItemData(data);
+                return true;
+            }
+            return false;
         }
 
         private void RootThumb_Initialized(object? sender, EventArgs e)
@@ -1769,6 +1801,40 @@ namespace Pixtack4
         #region 画像系
 
         /// <summary>
+        /// ThumbをBitmapに変換
+        /// </summary>
+        /// <param name="thumb">Bitmapにする要素</param>
+        /// <param name="clearType">フォントのClearTypeを有効にして保存</param>
+        /// <returns></returns>
+        public RenderTargetBitmap? MakeBitmapFromThumb(KisoThumb? thumb, bool clearType = false)
+        {
+            if (thumb == null) { return null; }
+            if (thumb.ActualHeight == 0 || thumb.ActualWidth == 0) { return null; }
+
+            Rect bounds = VisualTreeHelper.GetDescendantBounds(thumb);
+            bounds = thumb.RenderTransform.TransformBounds(bounds);
+            DrawingVisual dVisual = new();
+            //サイズを四捨五入
+            bounds.Width = Math.Round(bounds.Width, MidpointRounding.AwayFromZero);
+            bounds.Height = Math.Round(bounds.Height, MidpointRounding.AwayFromZero);
+            using (DrawingContext context = dVisual.RenderOpen())
+            {
+                var bru = new BitmapCacheBrush(thumb);
+                if (clearType)
+                {
+                    BitmapCache bc = new() { EnableClearType = true };
+                    bru.BitmapCache = bc;
+                }
+                context.DrawRectangle(bru, null, new Rect(bounds.Size));
+            }
+            RenderTargetBitmap bitmap
+                = new((int)Math.Ceiling(bounds.Width), (int)Math.Ceiling(bounds.Height), 96.0, 96.0, PixelFormats.Pbgra32);
+            bitmap.Render(dVisual);
+
+            return bitmap;
+        }
+
+        /// <summary>
         /// ファイルパスを画像ファイルとして開いて返す、エラーの場合はnullを返す
         /// dpiは96に変換する、このときのピクセルフォーマットはbgra32
         /// </summary>
@@ -1971,10 +2037,11 @@ namespace Pixtack4
         /// BitmapSourceをImageThumbとして追加
         /// </summary>
         /// <param name="bitmap"></param>
-        public void AddImageThumb(BitmapSource bitmap)
+        public bool AddImageThumb(BitmapSource? bitmap)
         {
+            if (bitmap == null) { return false; }
             var data = new ItemData(ThumbType.Image) { MyBitmapSource = bitmap };
-            AddNewThumbFromItemData(data, MyActiveGroupThumb);
+            return AddNewThumbFromItemData(data, MyActiveGroupThumb);
         }
 
 
@@ -2002,19 +2069,20 @@ namespace Pixtack4
         /// </summary>
         /// <param name="data"></param>
         /// <param name="addTo"></param>
-        public void AddNewThumbFromItemData(ItemData data, GroupThumb addTo)
+        public bool AddNewThumbFromItemData(ItemData data, GroupThumb addTo)
         {
             if (MyBuilder.MakeThumb(data) is KisoThumb thumb)
             {
                 if (addTo == MyActiveGroupThumb)
                 {
-                    AddThumbToActiveGroup(thumb, addTo);
+                    return AddThumbToActiveGroup(thumb, addTo);
                 }
                 else
                 {
-                    AddThumb(thumb, addTo);
+                    return AddThumb(thumb, addTo);
                 }
             }
+            return false;
         }
 
         public void AddNewThumbFromItemData(ItemData data)
@@ -2060,8 +2128,10 @@ namespace Pixtack4
         /// <remarks>フォーカスされているサムが存在する場合、新しいサムの位置は、フォーカスされているサムの位置を基準として計算され、グループのグリッドサイズとオフセット設定によって調整されます。フォーカスされているサムが存在しない場合は、グループのデフォルトの位置にサムが追加されます。</remarks>
         /// <param name="thumb">グループに追加する <see cref="KisoThumb"/>。このサムは追加後に選択可能になります。</param>
         /// <param name="group"><paramref name="thumb"/> が追加される <see cref="GroupThumb"/>。グループのグリッドとオフセット設定によってサムの配置が決まります。</param>
-        public void AddThumb(KisoThumb thumb, GroupThumb group)
+        public bool AddThumb(KisoThumb? thumb, GroupThumb? group)
         {
+            if (thumb == null || group == null) { return false; }
+
             double left = 0;
             double top = 0;
             if (MyFocusThumb?.MyItemData is ItemData focusData)
@@ -2069,7 +2139,7 @@ namespace Pixtack4
                 left = GetIntLocate(group.MyItemData.GridSize, group.MyItemData.MyAddOffsetLeft + focusData.MyLeft);
                 top = GetIntLocate(group.MyItemData.GridSize, group.MyItemData.MyAddOffsetTop + focusData.MyTop);
             }
-            AddThumb(thumb, group, left, top);
+            return AddThumb(thumb, group, left, top);
         }
 
         /// <summary>
@@ -2079,8 +2149,10 @@ namespace Pixtack4
         /// <param name="group"></param>
         /// <param name="left"></param>
         /// <param name="top"></param>
-        public void AddThumb(KisoThumb thumb, GroupThumb group, double left, double top)
+        public bool AddThumb(KisoThumb thumb, GroupThumb group, double left, double top)
         {
+            if (thumb == null || group == null) { return false; }
+
             if (MyFocusThumb != null)
             {
                 thumb.MyItemData.MyLeft = left;
@@ -2097,6 +2169,7 @@ namespace Pixtack4
             thumb.IsSelectable = true;
             MySelectedThumbs.Clear();
             SelectedThumbsToAdd(thumb);
+            return true;
         }
 
 
@@ -2127,10 +2200,14 @@ namespace Pixtack4
         }
 
 
-        public void AddThumbToActiveGroup(KisoThumb thumb, GroupThumb parent)
+        public bool AddThumbToActiveGroup(KisoThumb thumb, GroupThumb parent)
         {
-            AddThumb(thumb, parent);
-            thumb.IsSelectable = true;
+            if (AddThumb(thumb, parent))
+            {
+                thumb.IsSelectable = true;
+                return true;
+            }
+            return false;
         }
 
 
@@ -2242,8 +2319,8 @@ namespace Pixtack4
                 }
 
                 //削除後の処理
-                //削除結果残った要素数が1ならグループにしておく必要がないのでグループ解除する。
-                //最後の要素は1個上のグループに移動させるので位置調整、
+                //削除結果残った要素数が1ならグループ解除する。
+                //最後の要素は1個上のグループに移動させるのでxyz位置調整、
                 //ActiveGroupを削除、
                 //ActiveGroupのMyThumbsをクリア、
                 //ActiveGroupを変更、
@@ -2267,7 +2344,7 @@ namespace Pixtack4
                     }
                 }
                 //グループ維持の場合は、
-                //FocusThumbとSelectedThumbsを調整、
+                //FocusThumbとSelectedThumbsの選定、
                 //FocusThumbはSelectedThumbsの下層のThumbにする、無ければ上層
                 else
                 {
@@ -2361,90 +2438,12 @@ namespace Pixtack4
         }
 
 
-
-        //public void RemoveSelectedThumbs2()
-        //{
-        //    if (MySelectedThumbs.Count == 0) { return; }
-
-        //    //ActiveGroupから選択Thumbを削除
-        //    foreach (var item in MySelectedThumbs)
-        //    {
-        //        MyActiveGroupThumb.MyThumbs.Remove(item);
-        //    }
-
-        //    //残った要素が1個だけならGroupを解除
-        //    if (MyActiveGroupThumb.MyThumbs.Count == 1)
-        //    {
-        //        if (MyActiveGroupThumb.MyParentThumb is GroupThumb newGroup)
-        //        {
-        //            ChangeActiveGroupThumb(newGroup);
-        //        }
-
-        //        MyFocusThumb = MyActiveGroupThumb;
-        //        UngroupFocusThumb();
-        //        return;
-        //    }
-
-        //    //新たなFocusThumbの選定
-        //    //基本は削除群の最小Index-1が対象、これが無ければ最小Index
-        //    int index = MySelectedThumbs.Min(x => x.MyItemData.MyZIndex);
-        //    MySelectedThumbs.Clear();
-        //    KisoThumb? nextForcusThumb;
-        //    if (index > 0)
-        //    {
-        //        nextForcusThumb = MyActiveGroupThumb.MyThumbs[index - 1];
-        //    }
-        //    else if (MyActiveGroupThumb.MyThumbs.Count > 0)
-        //    {
-        //        nextForcusThumb = MyActiveGroupThumb.MyThumbs[index];
-        //    }
-        //    else { nextForcusThumb = null; }
-        //    SelectedThumbsClearAndAddThumb(nextForcusThumb);
-
-        //    MyClickedThumb = null;
-        //}
-
-        ///// <summary>
-        ///// SelectedThumbsの全要素をActiveGroupThumbから削除
-        ///// </summary>
-        ///// <param name="withReLayout">削除後に再配置処理をするならtrue</param>
-        //public void RemoveSelectedThumbsFromActiveGroup(bool withReLayout = true)
-        //{
-        //    int selectedCount = MySelectedThumbs.Count;
-        //    if (selectedCount == 0) { return; }
-        //    int targetCount = MyActiveGroupThumb.MyThumbs.Count;
-
-        //    if (IsSelectedWithParent(MyClickedThumb)) { MyClickedThumb = null; }
-        //    MyFocusThumb = null;
-
-        //    //全削除
-        //    if (selectedCount == targetCount)
-        //    {
-        //        RemoveAll();
-        //    }
-
-        //    foreach (var item in MySelectedThumbs)
-        //    {
-        //        item.IsSelectable = false;
-        //        MyActiveGroupThumb.MyThumbs.Remove(item);
-        //    }
-        //    if (withReLayout) { ReLayout3(); }
-        //}
-
         public void RemoveSelectedThumbsFromActiveGroup2(bool withReLayout = true)
         {
-
             if (MySelectedThumbs.Count == 0) { return; }
-            //int targetCount = MyActiveGroupThumb.MyThumbs.Count;
 
             if (IsSelectedWithParent(MyClickedThumb)) { MyClickedThumb = null; }
             MyFocusThumb = null;
-
-            ////全削除
-            //if (selectedCount == targetCount)
-            //{
-            //    RemoveAll();
-            //}
 
             foreach (var item in MySelectedThumbs)
             {

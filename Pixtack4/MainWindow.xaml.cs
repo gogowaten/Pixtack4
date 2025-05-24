@@ -1,4 +1,5 @@
 ﻿using Microsoft.Win32;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.Serialization;
@@ -58,8 +59,8 @@ namespace Pixtack4
         private const string DATE_TIME_STRING_FORMAT = "HHmmss";
         //private const string DATE_TIME_STRING_FORMAT = "yyyMMdd'_'HHmmss'.'fff";
 
-        ////タブ型右クリックメニュー
-        //private ContextTabMenu MyContextTabMenu { get; set; } = new();
+        //タブ型右クリックメニュー
+        private ContextTabMenu MyRootContextMenu { get; set; } = new();
 
         public MainWindow()
         {
@@ -70,14 +71,9 @@ namespace Pixtack4
             Closing += MainWindow_Closing;
             DataContext = this;
 
-
-            //this.ContextMenu = MyContextTabMenu;
-            //TabItem item = new();
-            //item.Header = "tab1";
-            //MyContextTabMenu.AddTabItem(item);
-
-
         }
+
+
 
         private void MainWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
         {
@@ -162,10 +158,195 @@ namespace Pixtack4
 
             MyBind();
 
-            //初回起動時はRootThumbを新規作成
+            //RootThumbの右クリックメニュー作成
+            MyInitializeMyRootContextMenu();
 
         }
 
+        private void MyInitializeMyRootContextMenu()
+        {
+
+            MyRootContextMenu = new();
+            MyRoot.ContextMenu = MyRootContextMenu;
+            MyRootContextMenu.MyTabControl.TabStripPlacement = Dock.Left;
+
+
+
+            MyRootContextMenu.AddTabItem(MakeContextMenuTabItem1());
+
+            MyRootContextMenu.AddTabItem(MakeContextMenuTabItem2());
+
+
+
+
+
+            //TabItem tabItem2 = new();
+            //Rectangle rectangle2 = new() { Width = 100, Height = 100 };
+            //VisualBrush brush2 = new() { Stretch = Stretch.Uniform };
+            //BindingOperations.SetBinding(brush2, VisualBrush.VisualProperty, new Binding() { Source = MyRoot, Path = new PropertyPath(RootThumb.MyClickedThumbProperty) });
+            //rectangle2.Fill = brush2;
+            //tabItem2.Header = rectangle2;
+
+            //StackPanel stackPanel2 = new();
+            //TextBlock textBlock22 = new() { Text = "textb111" };
+            //TextBlock textBlock222 = new() { Text = "textb222" };
+            //stackPanel2.Children.Add(textBlock22);
+            //stackPanel2.Children.Add(textBlock222);
+            //tabItem2.Content = stackPanel2;
+            //MyRootContextMenu.AddTabItem(tabItem2);
+
+        }
+
+        private TabItem MakeContextMenuTabItem1()
+        {
+            Rectangle rectangle = new() { Width = 100, Height = 100 };
+            VisualBrush brush = new() { Stretch = Stretch.Uniform };
+            BindingOperations.SetBinding(brush, VisualBrush.VisualProperty, new Binding() { Source = MyRoot, Path = new PropertyPath(RootThumb.MyFocusThumbProperty) });
+            rectangle.Fill = brush;
+
+            StackPanel menuPanel = new();
+            TabItem tabItem = new()
+            {
+                Header = rectangle,
+                Content = menuPanel
+            };
+
+            MenuItem mItem = new() { Header = "複製" };
+            mItem.Click += (a, b) => { MyRoot.Dupulicate(MyRoot.MyFocusThumb); };
+            menuPanel.Children.Add(mItem);
+
+            mItem = new() { Header = "画像として複製" };
+            mItem.Click += (a, b) => { MyRoot.DupulicateAsImage(MyRoot.MyFocusThumb); };
+            menuPanel.Children.Add(mItem);
+
+            mItem = new() { Header = "名前を付けて保存" };
+            mItem.Click += (a, b) =>
+            {
+                if (MyRoot.MyFocusThumb is KisoThumb item)
+                {
+                    SaveFileDialog dialog = MakeSaveFileDialog(item);
+                    if (dialog.ShowDialog() == true)
+                    {
+                        _ = MyRoot.SaveItemData(item.MyItemData, dialog.FileName);
+                    }
+                }
+            };
+            menuPanel.Children.Add(mItem);
+
+            mItem = new() { Header = "名前を付けて画像として保存" };
+            mItem.Click += (a, b) => { _ = SaveItemToImageFile(MyRoot.MyFocusThumb); };
+            menuPanel.Children.Add(mItem);
+
+            //mItem = new() { Header = "削除" };
+            //menuPanel.Children.Add(mItem);
+            //mItem.Click += (a, b) => { MyRoot.RemoveThumb(MyRoot.MyFocusThumb); };
+
+            mItem = new();
+            StackPanel sp = new() { Orientation = Orientation.Horizontal };
+            sp.Children.Add(new TextBlock() { Text = "選択Item " });
+            TextBlock tb = new();
+            tb.SetBinding(TextBlock.TextProperty, new Binding(nameof(ObservableCollection<KisoThumb>.Count)) { Source = MyRoot.MySelectedThumbs });
+            sp.Children.Add(tb);
+            sp.Children.Add(new TextBlock() { Text = " 個すべてを削除" });
+            mItem.Header = sp;
+            mItem.Click += (a, b) => { MyRoot.RemoveSelectedThumbs(); };
+            menuPanel.Children.Add(mItem);
+
+            mItem = new() { Header = "最前面" };
+            menuPanel.Children.Add(mItem);
+            mItem.Click += (a, b) => { MyRoot.MyFocusThumb?.ZIndexTop(); };
+            mItem = new() { Header = "前面" };
+            menuPanel.Children.Add(mItem);
+            mItem.Click += (a, b) => { MyRoot.MyFocusThumb?.ZIndexUp(); };
+            mItem = new() { Header = "背面" };
+            menuPanel.Children.Add(mItem);
+            mItem.Click += (a, b) => { MyRoot.MyFocusThumb?.ZIndexDown(); };
+            mItem = new() { Header = "最背面" };
+            mItem.Click += (a, b) => { MyRoot.MyFocusThumb?.ZIndexBottom(); };
+            menuPanel.Children.Add(mItem);
+
+            mItem = new() { Header = "Focusを画像としてコピー" };
+            mItem.Click += (a, b) => { CopyAsImageForItem(MyRoot.MyFocusThumb); };
+            menuPanel.Children.Add(mItem);
+            mItem = new() { Header = "Groupを画像としてコピー" };
+            mItem.Click += (a, b) => { CopyAsImageForItem(MyRoot.MyActiveGroupThumb); };
+            menuPanel.Children.Add(mItem);
+            mItem = new() { Header = "Rootを画像としてコピー" };
+            mItem.Click += (a, b) => { CopyAsImageForItem(MyRoot); };
+            menuPanel.Children.Add(mItem);
+            mItem = new() { Header = "Clickedを画像としてコピー" };
+            mItem.Click += (a, b) => { CopyAsImageForItem(MyRoot.MyClickedThumb); };
+            menuPanel.Children.Add(mItem);
+
+            mItem = new() { Header = "画像を貼り付け(png)" };
+            mItem.Click += (a, b) => { AddImageFromClipboardPng(); };
+            menuPanel.Children.Add(mItem);
+            mItem = new() { Header = "画像を貼り付け(bmp)" };
+            mItem.Click += (a, b) => { AddImageFromClipboardBmp(); };
+            menuPanel.Children.Add(mItem);
+
+            mItem = new() { Header = "グループ化" };
+            mItem.Click += (a, b) => { MyRoot.AddGroupingFromSelected(); };
+            menuPanel.Children.Add(mItem);
+            mItem = new() { Header = "グループ解除" };
+            mItem.Click += (a, b) => { MyRoot.UngroupFocusThumb(); };
+            menuPanel.Children.Add(mItem);
+
+            return tabItem;
+        }
+
+        private TabItem MakeContextMenuTabItem2()
+        {
+            Rectangle rectangle = new() { Width = 100, Height = 100 };
+            VisualBrush brush = new() { Stretch = Stretch.Uniform };
+            BindingOperations.SetBinding(brush, VisualBrush.VisualProperty, new Binding() { Source = MyRoot, Path = new PropertyPath(RootThumb.MyActiveGroupThumbProperty) });
+            rectangle.Fill = brush;
+            TextBlock headerText = new() { Text = "ActiveGroup" };
+            StackPanel headerPanel = new() { Orientation = Orientation.Vertical };
+            headerPanel.Children.Add(headerText);
+            headerPanel.Children.Add(rectangle);
+
+            StackPanel menuPanel = new();
+            TabItem tabItem = new()
+            {
+                Header = headerPanel,
+                Content = menuPanel
+            };
+
+            StackPanel menuStackPanel = new();
+            tabItem.Content = menuStackPanel;
+
+            MenuItem item = new() { Header = "IN(内側)" };
+            item.Click += (a, b) => { MyRoot.ActiveGroupToInside(); };
+            menuStackPanel.Children.Add(item);
+            item = new() { Header = "OUT" };
+            item.Click += (a, b) => { MyRoot.ActiveGroupToOutside(); };
+            menuStackPanel.Children.Add(item);
+            item = new() { Header = "Clicked" };
+            item.Click += (a, b) => { MyRoot.ActiveGroupFromClickedThumbsParent(); };
+            menuStackPanel.Children.Add(item);
+            item = new() { Header = "Root" };
+            item.Click += (a, b) => { MyRoot.ChangeActiveGroupToRootActivate(); };
+            menuStackPanel.Children.Add(item);
+
+            TextBlock gridsize = new();
+            gridsize.SetBinding(TextBlock.TextProperty, new Binding(nameof(ItemData.GridSize)) { Source = MyRoot.MyActiveGroupThumb.MyItemData, StringFormat = $"今のGridSize {0}" });
+            menuStackPanel.Children.Add(gridsize);
+
+            Button btn = new() { Content = "GridSizeUp"};
+            btn.Click += (a, b) => { ChangeGridSizeUp(); };
+            menuStackPanel.Children.Add(btn);
+            btn = new() { Content = "GridSizeDown"};
+            btn.Click += (a, b) => { ChangeGridSizeDown(); };
+            menuStackPanel.Children.Add(btn);
+            item = new() { Header = "GridSize指定" };
+            item.Click += (a, b) => { ChangeGridSize(); };
+            menuStackPanel.Children.Add(item);
+
+
+
+            return tabItem;
+        }
 
         private void MyBind()
         {
@@ -266,7 +447,7 @@ namespace Pixtack4
             var inu = MyAppData;
             //var grid = MyManageExCanvas.MyAreaThumb.GridSize;
             var area = MyManageExCanvas.MyRootThumb.MyActiveGroupThumb.MyThumbs.Count;
-            var gri =MyManageExCanvas.MyRootThumb.MyActiveGroupThumb.MyItemData.GridSize;
+            var gri = MyManageExCanvas.MyRootThumb.MyActiveGroupThumb.MyItemData.GridSize;
         }
 
         private void Button_Click_(object sender, RoutedEventArgs e)
@@ -288,12 +469,12 @@ namespace Pixtack4
 
         private void Button_Click_DupulicateAsImageForFocusItem(object sender, RoutedEventArgs e)
         {
-            _ = DupulicateAsImage(MyRoot.MyFocusThumb);// 指定されたItemを画像として複製
+            _ = MyRoot.DupulicateAsImage(MyRoot.MyFocusThumb);// 指定されたItemを画像として複製
         }
 
         private void Button_Click_DuplicateFocusItem(object sender, RoutedEventArgs e)
         {
-            DupulicateFocusItem();// Data複製
+            MyRoot.Dupulicate(MyRoot.MyFocusThumb);// Data複製
         }
 
         private void Button_Click_CopyAsImageForRoot(object sender, RoutedEventArgs e)
@@ -553,7 +734,7 @@ namespace Pixtack4
         {
             MyRoot = new RootThumb(new ItemData(ThumbType.Root));
             _ = MyRoot.SetBinding(KisoThumb.IsWakuVisibleProperty, new Binding(nameof(AppData.IsWakuVisible)) { Source = MyAppData, Mode = BindingMode.TwoWay });
-            MyManageExCanvas = new ManageExCanvas(MyRoot, new ManageData(),this);
+            MyManageExCanvas = new ManageExCanvas(MyRoot, new ManageData(), this);
             MyScrollViewer.Content = MyManageExCanvas;
             //MyGridMyItemsTree.DataContext = MyRoot.MyThumbs;
             //DataContext = this;
@@ -580,7 +761,7 @@ namespace Pixtack4
         private void CopyAsImageForItem(KisoThumb? item)
         {
             if (item == null) { return; }
-            if (MakeBitmapFromThumb(item) is RenderTargetBitmap bmp)
+            if (MyRoot.MakeBitmapFromThumb(item) is RenderTargetBitmap bmp)
             {
                 SetImageToClipboard(bmp);
             }
@@ -683,9 +864,10 @@ namespace Pixtack4
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        private bool SaveItemToImageFile(KisoThumb item)
+        private bool SaveItemToImageFile(KisoThumb? item)
         {
-            if (MakeBitmapFromThumb(item) is RenderTargetBitmap bmp)// ThumbをBitmapに変換
+            if (item == null) { return false; }
+            if (MyRoot.MakeBitmapFromThumb(item) is RenderTargetBitmap bmp)// ThumbをBitmapに変換
             {
                 // Bitmapをファイル保存
                 var (result, filePath) = SaveBitmap(bmp, MyAppData.DefaultSaveImageFileName, MyAppData.MyJpegQuality);
@@ -700,39 +882,39 @@ namespace Pixtack4
         }
 
 
-        /// <summary>
-        /// ThumbをBitmapに変換
-        /// </summary>
-        /// <param name="thumb">Bitmapにする要素</param>
-        /// <param name="clearType">フォントのClearTypeを有効にして保存</param>
-        /// <returns></returns>
-        public RenderTargetBitmap? MakeBitmapFromThumb(KisoThumb? thumb, bool clearType = false)
-        {
-            if (thumb == null) { return null; }
-            if (thumb.ActualHeight == 0 || thumb.ActualWidth == 0) { return null; }
+        ///// <summary>
+        ///// ThumbをBitmapに変換
+        ///// </summary>
+        ///// <param name="thumb">Bitmapにする要素</param>
+        ///// <param name="clearType">フォントのClearTypeを有効にして保存</param>
+        ///// <returns></returns>
+        //public RenderTargetBitmap? MakeBitmapFromThumb(KisoThumb? thumb, bool clearType = false)
+        //{
+        //    if (thumb == null) { return null; }
+        //    if (thumb.ActualHeight == 0 || thumb.ActualWidth == 0) { return null; }
 
-            Rect bounds = VisualTreeHelper.GetDescendantBounds(thumb);
-            bounds = thumb.RenderTransform.TransformBounds(bounds);
-            DrawingVisual dVisual = new();
-            //サイズを四捨五入
-            bounds.Width = Math.Round(bounds.Width, MidpointRounding.AwayFromZero);
-            bounds.Height = Math.Round(bounds.Height, MidpointRounding.AwayFromZero);
-            using (DrawingContext context = dVisual.RenderOpen())
-            {
-                var bru = new BitmapCacheBrush(thumb);
-                if (clearType)
-                {
-                    BitmapCache bc = new() { EnableClearType = true };
-                    bru.BitmapCache = bc;
-                }
-                context.DrawRectangle(bru, null, new Rect(bounds.Size));
-            }
-            RenderTargetBitmap bitmap
-                = new((int)Math.Ceiling(bounds.Width), (int)Math.Ceiling(bounds.Height), 96.0, 96.0, PixelFormats.Pbgra32);
-            bitmap.Render(dVisual);
+        //    Rect bounds = VisualTreeHelper.GetDescendantBounds(thumb);
+        //    bounds = thumb.RenderTransform.TransformBounds(bounds);
+        //    DrawingVisual dVisual = new();
+        //    //サイズを四捨五入
+        //    bounds.Width = Math.Round(bounds.Width, MidpointRounding.AwayFromZero);
+        //    bounds.Height = Math.Round(bounds.Height, MidpointRounding.AwayFromZero);
+        //    using (DrawingContext context = dVisual.RenderOpen())
+        //    {
+        //        var bru = new BitmapCacheBrush(thumb);
+        //        if (clearType)
+        //        {
+        //            BitmapCache bc = new() { EnableClearType = true };
+        //            bru.BitmapCache = bc;
+        //        }
+        //        context.DrawRectangle(bru, null, new Rect(bounds.Size));
+        //    }
+        //    RenderTargetBitmap bitmap
+        //        = new((int)Math.Ceiling(bounds.Width), (int)Math.Ceiling(bounds.Height), 96.0, 96.0, PixelFormats.Pbgra32);
+        //    bitmap.Render(dVisual);
 
-            return bitmap;
-        }
+        //    return bitmap;
+        //}
 
 
         /// <summary>
@@ -938,32 +1120,21 @@ namespace Pixtack4
 
         #region その他
 
-        /// <summary>
-        /// 指定されたItemを画像として複製し、ルートコンテナに追加します。
-        /// </summary>
-        /// <param name="thumb">複製するItem</param>
-        /// <returns><see langword="true"/> の場合、Itemが正常に複製され、ルートコンテナに追加されました。
-        /// それ以外の場合は <see langword="false"/> です。</returns>
-        private bool DupulicateAsImage(KisoThumb? thumb)
-        {
-            if (MakeBitmapFromThumb(thumb) is RenderTargetBitmap bmp)
-            {
-                MyRoot.AddImageThumb(bmp);
-                return true;
-            }
-            return false;
-        }
-
-        /// <summary>
-        /// Data複製
-        /// </summary>
-        private void DupulicateFocusItem()
-        {
-            if (MyRoot.MyFocusThumb?.MyItemData.DeepCopy() is ItemData data)
-            {
-                MyRoot.AddNewThumbFromItemData(data);
-            }
-        }
+        ///// <summary>
+        ///// 指定されたItemを画像として複製し、ルートコンテナに追加します。
+        ///// </summary>
+        ///// <param name="thumb">複製するItem</param>
+        ///// <returns><see langword="true"/> の場合、Itemが正常に複製され、ルートコンテナに追加されました。
+        ///// それ以外の場合は <see langword="false"/> です。</returns>
+        //private bool DupulicateAsImage(KisoThumb? thumb)
+        //{
+        //    if (MakeBitmapFromThumb(thumb) is RenderTargetBitmap bmp)
+        //    {
+        //        MyRoot.AddImageThumb(bmp);
+        //        return true;
+        //    }
+        //    return false;
+        //}
 
 
         /// <summary>

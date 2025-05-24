@@ -3,9 +3,43 @@ using System.Windows.Data;
 using System.Globalization;
 using System.Windows;
 using System.Collections.ObjectModel;
+using System.Windows.Controls;
 
 namespace Pixtack4
 {
+    public class MyConvSelectedThumbCountString : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            var coll = (ObservableCollection<KisoThumb>)value;
+            string str = coll.Count.ToString();
+            str += "個を削除";
+            
+            return str;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    //public class MyConvElementVisualBrush : IValueConverter
+    //{
+    //    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    //    {
+    //        var elem = (FrameworkElement)value;
+    //        VisualBrush visualBrush = new(elem);
+    //        visualBrush.Stretch = Stretch.Uniform;
+    //        return visualBrush;
+    //    }
+
+    //    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    //    {
+    //        throw new NotImplementedException();
+    //    }
+    //}
+
 
     /// <summary>
     /// Visibilityとboolの相互変換、Collapsedをfalse、Visibleをtrue
