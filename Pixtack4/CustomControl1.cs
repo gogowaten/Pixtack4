@@ -1464,7 +1464,7 @@ namespace Pixtack4
         }
 
         /// <summary>
-        /// 指定Thumbを複製してRootに追加する
+        /// 指定Thumbを複製してActiveGroupに追加する
         /// </summary>
         /// <param name="thumb"></param>
         /// <returns>正常に複製追加できたときはtrue、それ以外はfalse</returns>

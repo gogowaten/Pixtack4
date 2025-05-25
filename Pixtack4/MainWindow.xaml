@@ -90,7 +90,7 @@
 
               <MenuItem Header="Clicked" IsEnabled="False"/>
             </MenuItem>
-            <MenuItem Header="上書き保存" Click="Button_Click_OverwriteSave"/>
+            <MenuItem Header="上書き保存" Click="Button_Click_OverwriteSave" InputGestureText="Ctrl+S"/>
             <MenuItem Header="開く" Click="Button_Click_OpenPx4File"/>
             <MenuItem Header="追加" Click="Button_Click_OpenFile" ToolTip="Itemとして追加する"/>
           </MenuItem>
@@ -98,7 +98,7 @@
           <MenuItem Header="編集(_E)">
             <MenuItem Header="範囲選択Item表示" Click="Button_Click_AreaItemVisibleSwitch"/>
             <MenuItem Header="画像として複製" Click="Button_Click_DupulicateAsImageForFocusItem"/>
-            <MenuItem Header="複製" Click="Button_Click_DuplicateFocusItem"/>
+            <MenuItem Header="複製" Click="Button_Click_DuplicateFocusItem" InputGestureText="Ctrl+D"/>
             <MenuItem Header="クリップボード">
               <MenuItem Header="RootItemをクリップボードに画像としてコピー" Click="Button_Click_CopyAsImageForRoot"/>
               <MenuItem Header="FocusItemをクリップボードに画像としてコピー" Click="Button_Click_CopyAsImageForFocusItem"/>
@@ -107,8 +107,8 @@
               <MenuItem Header="クリップボードの画像を追加(bmp)" Click="Button_Click_AddImageFromClipboardBmp" ToolTip="エクセルのグラフや図形などはこれ"/>
             </MenuItem>
             <Separator/>
-            <MenuItem Header="グループ化" Click="Button_Click_Grouping"/>
-            <MenuItem Header="グループ解除" Click="Button_Click_UnGroup"/>
+            <MenuItem Header="グループ化" Click="Button_Click_Grouping" InputGestureText="Ctrl+G"/>
+            <MenuItem Header="グループ解除" Click="Button_Click_UnGroup" InputGestureText="Ctrl+Shift+G"/>
             <Separator/>
             <MenuItem Header="ActiveGroupの変更">
               <MenuItem Header="IN" Click="Button_Click_ChangeActiveGroupToInside"/>
@@ -128,11 +128,11 @@
             </MenuItem>
             <MenuItem Header="FocusItemのZ移動">
               <MenuItem Header="最前面" Click="Button_Click_ZtoTop"/>
-              <MenuItem Header="前面" Click="Button_Click_ZUp"/>
-              <MenuItem Header="背面" Click="Button_Click_ZDown"/>
+              <MenuItem Header="前面" Click="Button_Click_ZUp" InputGestureText="PageUp"/>
+              <MenuItem Header="背面" Click="Button_Click_ZDown" InputGestureText="PageDown"/>
               <MenuItem Header="最背面" Click="Button_Click_ZtoBottom"/>
             </MenuItem>
-            <MenuItem Style="{StaticResource itemMargin}" Click="Button_Click_RemoveSelectedItems">
+            <MenuItem Style="{StaticResource itemMargin}" Click="Button_Click_RemoveSelectedItems" InputGestureText="F4">
               <MenuItem.Header>
                 <StackPanel Orientation="Horizontal">
                   <TextBlock Text="選択Item[ "/>
@@ -143,7 +143,7 @@
             </MenuItem>
 
             <Separator/>
-            <MenuItem Header="全Item削除" Click="Button_Click_RemoveAllItems"/>
+            <MenuItem Header="全Item削除" Click="Button_Click_RemoveAllItems" InputGestureText="Ctrl+Shift+F4"/>
 
           </MenuItem>
           <MenuItem Header="表示(_V)">
@@ -157,7 +157,6 @@
             <MenuItem Header="文字追加" IsEnabled="False"/>
             <MenuItem Header="図形追加" IsEnabled="False"/>
             <MenuItem Header="フリーハンド図形" IsEnabled="False"/>
-            <MenuItem Header="右クリックメニュー" IsEnabled="False"/>
             <MenuItem Header="ホットキー" IsEnabled="False"/>
             <MenuItem Header="クリップボード監視" IsEnabled="False"/>
             <MenuItem Header="ツリーでの選択リンク" IsEnabled="False"/>
@@ -283,16 +282,10 @@
 
         <!--左側1、TreeVew-->
         <!--動作は問題なけどTreeViewにバインドエラーが出る-->
-        <Grid x:Name="MyGridMyItemsTree" DockPanel.Dock="Left" Width="200"
+        <!--<Grid x:Name="MyGridMyItemsTree" DockPanel.Dock="Left" Width="200"
               DataContext="{Binding MyRoot, UpdateSourceTrigger=PropertyChanged}">
           <ScrollViewer VerticalScrollBarVisibility="Auto">
             <TreeView ItemsSource="{Binding MyThumbs}"  Background="WhiteSmoke">
-              <!--<TreeView.Resources>
-                <Style TargetType="{x:Type TreeViewItem}">
-                  <Setter Property="HorizontalContentAlignment" Value="Center"/>
-                  <Setter Property="VerticalContentAlignment" Value="Center"/>
-                </Style>
-              </TreeView.Resources>-->
               <TreeView.ItemTemplate>
                 <HierarchicalDataTemplate  ItemsSource="{Binding MyThumbs}">
                   <Border BorderBrush="Silver" BorderThickness="1" Margin="1">
@@ -307,15 +300,15 @@
                   </Border>
                 </HierarchicalDataTemplate>
               </TreeView.ItemTemplate>
-              <!--<TreeView.ItemContainerStyle>
+              --><!--<TreeView.ItemContainerStyle>
                 <Style TargetType="{x:Type TreeViewItem}">
                   <Setter Property="HorizontalContentAlignment" Value="Center"/>
                   <Setter Property="VerticalAlignment" Value="Center"/>
                 </Style>
-              </TreeView.ItemContainerStyle>-->
+              </TreeView.ItemContainerStyle>--><!--
             </TreeView>
           </ScrollViewer>
-        </Grid>
+        </Grid>-->
 
         <!--左側2-->
         <Grid x:Name="MyRootStatusView" DockPanel.Dock="Left"

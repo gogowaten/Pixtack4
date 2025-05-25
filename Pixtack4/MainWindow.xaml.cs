@@ -69,11 +69,37 @@ namespace Pixtack4
             MyInitialize();
             MyInitialize2();
             Closing += MainWindow_Closing;
+            PreviewKeyDown += MainWindow_PreviewKeyDown;
             DataContext = this;
 
         }
 
+        //ホットキーの設定、ショートカットキー
+        private void MainWindow_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
 
+            if (Keyboard.Modifiers == ModifierKeys.None)
+            {
+                if (e.Key == Key.PageDown) { MyRoot.MyFocusThumb?.ZIndexDown(); }// PageDown：背面
+                else if (e.Key == Key.PageUp) { MyRoot.MyFocusThumb?.ZIndexUp(); }// PageUp：前面                
+                else if (e.Key == Key.F4) { MyRoot.RemoveSelectedThumbs(); }// F4：削除
+            }
+            else if (Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift))
+            {
+                if (e.Key == Key.G) { MyRoot.UngroupFocusThumb(); }// G：グループ解除
+                else if (e.Key == Key.F4) { MyRoot.RemoveAll(); }// F4：全削除
+            }
+            else if (Keyboard.Modifiers == ModifierKeys.Shift)
+            {
+
+            }
+            else if (Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                if (e.Key == Key.S) { SaveRootItemOverwrite(); }// S：Root上書き保存、名前を付けて保存
+                else if (e.Key == Key.G) { MyRoot.AddGroupingFromSelected(); }// G：グループ化
+                else if (e.Key == Key.D) { MyRoot.Dupulicate(MyRoot.MyFocusThumb); }// D：複製
+            }
+        }
 
         private void MainWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
         {
@@ -105,7 +131,7 @@ namespace Pixtack4
                 }
                 else if (result == MessageBoxResult.Yes)
                 {
-                    SaveItemOverwriteCurrentFilePath();// 上書き保存
+                    SaveRootItemOverwrite();// 上書き保存
                 }
             }
 
@@ -163,6 +189,11 @@ namespace Pixtack4
 
         }
 
+        #region 右クリックメニュー作成
+
+        /// <summary>
+        /// 右クリックメニューの作成
+        /// </summary>
         private void MyInitializeMyRootContextMenu()
         {
 
@@ -171,32 +202,15 @@ namespace Pixtack4
             MyRootContextMenu.MyTabControl.TabStripPlacement = Dock.Left;
 
 
-
-            MyRootContextMenu.AddTabItem(MakeContextMenuTabItem1());
-
-            MyRootContextMenu.AddTabItem(MakeContextMenuTabItem2());
-
-
-
-
-
-            //TabItem tabItem2 = new();
-            //Rectangle rectangle2 = new() { Width = 100, Height = 100 };
-            //VisualBrush brush2 = new() { Stretch = Stretch.Uniform };
-            //BindingOperations.SetBinding(brush2, VisualBrush.VisualProperty, new Binding() { Source = MyRoot, Path = new PropertyPath(RootThumb.MyClickedThumbProperty) });
-            //rectangle2.Fill = brush2;
-            //tabItem2.Header = rectangle2;
-
-            //StackPanel stackPanel2 = new();
-            //TextBlock textBlock22 = new() { Text = "textb111" };
-            //TextBlock textBlock222 = new() { Text = "textb222" };
-            //stackPanel2.Children.Add(textBlock22);
-            //stackPanel2.Children.Add(textBlock222);
-            //tabItem2.Content = stackPanel2;
-            //MyRootContextMenu.AddTabItem(tabItem2);
+            MyRootContextMenu.AddTabItem(MakeContextMenuTabItem1());// 右クリックメニュータブ1
+            MyRootContextMenu.AddTabItem(MakeContextMenuTabItem2());// 右クリックメニュータブ2
 
         }
 
+        /// <summary>
+        /// 右クリックメニュータブ1
+        /// </summary>
+        /// <returns></returns>
         private TabItem MakeContextMenuTabItem1()
         {
             Rectangle rectangle = new() { Width = 100, Height = 100 };
@@ -211,7 +225,7 @@ namespace Pixtack4
                 Content = menuPanel
             };
 
-            MenuItem mItem = new() { Header = "複製" };
+            MenuItem mItem = new() { Header = "複製", InputGestureText = "Ctrl+D" };
             mItem.Click += (a, b) => { MyRoot.Dupulicate(MyRoot.MyFocusThumb); };
             menuPanel.Children.Add(mItem);
 
@@ -241,13 +255,13 @@ namespace Pixtack4
             //menuPanel.Children.Add(mItem);
             //mItem.Click += (a, b) => { MyRoot.RemoveThumb(MyRoot.MyFocusThumb); };
 
-            mItem = new();
+            mItem = new() { InputGestureText = "F4" };
             StackPanel sp = new() { Orientation = Orientation.Horizontal };
-            sp.Children.Add(new TextBlock() { Text = "選択Item " });
+            sp.Children.Add(new TextBlock() { Text = "削除：選択Item " });
             TextBlock tb = new();
             tb.SetBinding(TextBlock.TextProperty, new Binding(nameof(ObservableCollection<KisoThumb>.Count)) { Source = MyRoot.MySelectedThumbs });
             sp.Children.Add(tb);
-            sp.Children.Add(new TextBlock() { Text = " 個すべてを削除" });
+            sp.Children.Add(new TextBlock() { Text = " 個を削除" });
             mItem.Header = sp;
             mItem.Click += (a, b) => { MyRoot.RemoveSelectedThumbs(); };
             menuPanel.Children.Add(mItem);
@@ -255,10 +269,10 @@ namespace Pixtack4
             mItem = new() { Header = "最前面" };
             menuPanel.Children.Add(mItem);
             mItem.Click += (a, b) => { MyRoot.MyFocusThumb?.ZIndexTop(); };
-            mItem = new() { Header = "前面" };
+            mItem = new() { Header = "前面", InputGestureText = "PageUp" };
             menuPanel.Children.Add(mItem);
             mItem.Click += (a, b) => { MyRoot.MyFocusThumb?.ZIndexUp(); };
-            mItem = new() { Header = "背面" };
+            mItem = new() { Header = "背面", InputGestureText = "PageDown" };
             menuPanel.Children.Add(mItem);
             mItem.Click += (a, b) => { MyRoot.MyFocusThumb?.ZIndexDown(); };
             mItem = new() { Header = "最背面" };
@@ -285,16 +299,20 @@ namespace Pixtack4
             mItem.Click += (a, b) => { AddImageFromClipboardBmp(); };
             menuPanel.Children.Add(mItem);
 
-            mItem = new() { Header = "グループ化" };
+            mItem = new() { Header = "グループ化", InputGestureText = "Ctrl+G" };
             mItem.Click += (a, b) => { MyRoot.AddGroupingFromSelected(); };
             menuPanel.Children.Add(mItem);
-            mItem = new() { Header = "グループ解除" };
+            mItem = new() { Header = "グループ解除", InputGestureText = "Ctrl+Shift+G" };
             mItem.Click += (a, b) => { MyRoot.UngroupFocusThumb(); };
             menuPanel.Children.Add(mItem);
 
             return tabItem;
         }
 
+        /// <summary>
+        /// 右クリックメニュータブ2
+        /// </summary>
+        /// <returns></returns>
         private TabItem MakeContextMenuTabItem2()
         {
             Rectangle rectangle = new() { Width = 100, Height = 100 };
@@ -333,10 +351,10 @@ namespace Pixtack4
             gridsize.SetBinding(TextBlock.TextProperty, new Binding(nameof(ItemData.GridSize)) { Source = MyRoot.MyActiveGroupThumb.MyItemData, StringFormat = $"今のGridSize {0}" });
             menuStackPanel.Children.Add(gridsize);
 
-            Button btn = new() { Content = "GridSizeUp"};
+            Button btn = new() { Content = "GridSizeUp" };
             btn.Click += (a, b) => { ChangeGridSizeUp(); };
             menuStackPanel.Children.Add(btn);
-            btn = new() { Content = "GridSizeDown"};
+            btn = new() { Content = "GridSizeDown" };
             btn.Click += (a, b) => { ChangeGridSizeDown(); };
             menuStackPanel.Children.Add(btn);
             item = new() { Header = "GridSize指定" };
@@ -347,6 +365,8 @@ namespace Pixtack4
 
             return tabItem;
         }
+
+        #endregion 右クリックメニュー作成
 
         private void MyBind()
         {
@@ -565,10 +585,10 @@ namespace Pixtack4
             MyRoot.AddGroupingFromSelected();// SelectedThumbsからGroupThumbを生成、ActiveThumbに追加
         }
 
-        private void Button_Click_ItemsTreePanelVisible(object sender, RoutedEventArgs e)
-        {
-            ChangeVisible(MyGridMyItemsTree);// パネルの表示非表示を切り替える、Visible or Collapsed
-        }
+        //private void Button_Click_ItemsTreePanelVisible(object sender, RoutedEventArgs e)
+        //{
+        //    ChangeVisible(MyGridMyItemsTree);// パネルの表示非表示を切り替える、Visible or Collapsed
+        //}
 
         private void Button_Click_SelectedItemsPropertyPanelVisible(object sender, RoutedEventArgs e)
         {
@@ -669,7 +689,7 @@ namespace Pixtack4
 
         private void Button_Click_OverwriteSave(object sender, RoutedEventArgs e)
         {
-            SaveItemOverwriteCurrentFilePath();// 上書き保存
+            SaveRootItemOverwrite();// 上書き保存
         }
 
         private void Button_Click_ResetWindow(object sender, RoutedEventArgs e)
@@ -722,6 +742,8 @@ namespace Pixtack4
                 //SaveData(MyAppData.CurrentOpenFilePath, MyRoot.MyItemData);
                 SaveItem(MyRoot);
             }
+
+            //リセット処理
             MyInitializeRootThumb();
             MyAppData.CurrentOpenFilePath = string.Empty;//今開いているファイルパスもリセット
             return MakeStatusMessage("リセット完了");
@@ -1040,18 +1062,15 @@ namespace Pixtack4
                         MyAppData.CurrentOpenFilePath = dialog.FileName;
                     }
                     return (true, MakeStatusMessage("保存完了"));
-                    //MyStatusMessage.Text = MakeStatusMessage("保存完了");
                 }
                 else
                 {
                     return (false, MakeStatusMessage("保存に失敗"));
-                    //MyStatusMessage.Text = MakeStatusMessage("保存できなかった");
                 }
             }
             else
             {
                 return (false, MakeStatusMessage("保存はキャンセルされた"));
-                //MyStatusMessage.Text = MakeStatusMessage("保存はキャンセルされた");
             }
         }
 
@@ -1060,7 +1079,7 @@ namespace Pixtack4
         /// RootDataをCurrentFileに上書き保存
         /// </summary>
         /// <returns></returns>
-        private bool SaveItemOverwriteCurrentFilePath()
+        private bool SaveRootItemOverwrite()
         {
             string filePath = MyAppData.CurrentOpenFilePath;
             //CurrentFilePathがないときは、ダイアログ表示して取得
@@ -1071,16 +1090,19 @@ namespace Pixtack4
                 {
                     filePath = dialog.FileName;
                 }
-                MyStatusMessage.Text = MakeStatusMessage("保存はキャンセルされた");
-                return false;
+                else
+                {
+                    MyStatusMessage.Text = MakeStatusMessage("保存はキャンセルされた");
+                    return false;
+                }
             }
 
             //保存
             if (MyRoot.SaveItemData(MyRoot.MyItemData, filePath))
             {
-                MyAppData.CurrentOpenFilePath = filePath;
                 MyStatusMessage.Text = MakeStatusMessage("保存完了");
-                //既定ファイル名の更新
+                //上書き保存のファイルパスと既定ファイル名の更新
+                MyAppData.CurrentOpenFilePath = filePath;
                 MyAppData.DefaultSaveDataFileName = System.IO.Path.GetFileNameWithoutExtension(filePath);
                 return true;
             }
@@ -1410,6 +1432,7 @@ namespace Pixtack4
         /// </summary>
         private string OpenPx4File()
         {
+            //今の状態を保存するかの確認してから開く
             if (MyRoot.MyThumbs.Count > 0)
             {
                 MessageBoxResult result = MessageBox.Show(
@@ -1426,10 +1449,11 @@ namespace Pixtack4
                 }
                 else if (result == MessageBoxResult.Yes)
                 {
-                    SaveItemOverwriteCurrentFilePath();// 上書き保存
+                    SaveRootItemOverwrite();// 上書き保存
                 }
             }
 
+            //実際に開く
             return OpenPx4File2();
         }
 
@@ -1449,6 +1473,8 @@ namespace Pixtack4
             {
                 if (OpenPx4FileRootThumb(dialog.FileName))
                 {
+                    //開いたら、上書き保存用のパスを更新
+                    MyAppData.CurrentOpenFilePath = dialog.FileName;
                     return MakeStatusMessage("px4ファイルを開いた");
                 }
                 return MakeStatusMessage("ファイルを開けなかった");
