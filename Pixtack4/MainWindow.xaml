@@ -343,7 +343,7 @@
           </StackPanel>
         </Grid>
 
-        <Grid x:Name="MyPanelForGroupItems" Width="200" DataContext="{Binding MyRoot.MyThumbs}">
+        <Grid x:Name="MyPanelForGroupItems" Width="100" DataContext="{Binding MyRoot.MyThumbs}">
           <TreeView ItemsSource="{Binding}">
             <TreeView.ItemTemplate>
               <HierarchicalDataTemplate ItemsSource="{Binding MyThumbs}">
