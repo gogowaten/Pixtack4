@@ -7,6 +7,22 @@ using System.Windows.Controls;
 
 namespace Pixtack4
 {
+    public class MyConvOnlyGroupItemVisible : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            var type = (ThumbType)value;
+            if(type == ThumbType.Group) { return Visibility.Visible; }
+            return Visibility.Collapsed;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+
     public class MyConvSelectedThumbCountString : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
@@ -24,22 +40,25 @@ namespace Pixtack4
         }
     }
 
-    //public class MyConvElementVisualBrush : IValueConverter
-    //{
-    //    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-    //    {
-    //        var elem = (FrameworkElement)value;
-    //        VisualBrush visualBrush = new(elem);
-    //        visualBrush.Stretch = Stretch.Uniform;
-    //        return visualBrush;
-    //    }
+    /// <summary>
+    /// Visibilityとboolの相互変換、Collapsedをfalse、Visibleをtrue
+    /// </summary>
+    public class MyConvBoolToVisible : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            var b = (bool)value;
+            if (b) { return Visibility.Visible; }
+            return Visibility.Collapsed;
+        }
 
-    //    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-    //    {
-    //        throw new NotImplementedException();
-    //    }
-    //}
-
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            var v = (Visibility)value;
+            if (v== Visibility.Visible) { return true; }
+            return false;
+        }
+    }
 
     /// <summary>
     /// Visibilityとboolの相互変換、Collapsedをfalse、Visibleをtrue

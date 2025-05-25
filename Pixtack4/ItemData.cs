@@ -642,6 +642,11 @@ namespace Pixtack4
 
         #region Group, Root用
 
+
+        //private bool _isVisible = true;
+        //[DataMember] public bool IsVisible { get => _isVisible; set => SetProperty(ref _isVisible, value); }
+
+
         //スナップ移動で使うグリッドサイズ
         private int _gridSize = 8;
         [DataMember] public int GridSize { get => _gridSize; set => SetProperty(ref _gridSize, value); }

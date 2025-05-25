@@ -12,6 +12,8 @@
         Drop="Window_Drop">
   <Window.Resources>
     <local:MyConvVisibleCollapsedIsBoolFalse x:Key="visibleTrue"/>
+    <local:MyConvOnlyGroupItemVisible x:Key="visibleGroup"/>
+    <local:MyConvBoolToVisible x:Key="boolVisible"/>
   </Window.Resources>
   <Grid x:Name="MyRootGrid">
     <DockPanel>
@@ -277,7 +279,7 @@
           <Button Content="Menu"/>
           <Button Content="テスト用確認" Click="Button_Click"/>
           <Button Content="Root" Click="Button_Click_MyRootStatusPanelVisible"/>
-          <Button Content="ItemsTree" Click="Button_Click_ItemsTreePanelVisible"/>
+          <!--<Button Content="ItemsTree" Click="Button_Click_ItemsTreePanelVisible"/>-->
         </Menu>
 
         <!--左側1、TreeVew-->
@@ -300,12 +302,14 @@
                   </Border>
                 </HierarchicalDataTemplate>
               </TreeView.ItemTemplate>
-              --><!--<TreeView.ItemContainerStyle>
+              -->
+        <!--<TreeView.ItemContainerStyle>
                 <Style TargetType="{x:Type TreeViewItem}">
                   <Setter Property="HorizontalContentAlignment" Value="Center"/>
                   <Setter Property="VerticalAlignment" Value="Center"/>
                 </Style>
-              </TreeView.ItemContainerStyle>--><!--
+              </TreeView.ItemContainerStyle>-->
+        <!--
             </TreeView>
           </ScrollViewer>
         </Grid>-->
@@ -339,6 +343,42 @@
           </StackPanel>
         </Grid>
 
+        <Grid x:Name="MyPanelForGroupItems" Width="200" DataContext="{Binding MyRoot.MyThumbs}">
+          <TreeView ItemsSource="{Binding}">
+            <TreeView.ItemTemplate>
+              <HierarchicalDataTemplate ItemsSource="{Binding MyThumbs}">
+                <StackPanel Margin="0,0,0,10" Visibility="{Binding MyThumbType, Converter={StaticResource visibleGroup}}">
+                  <Rectangle Width="60" Height="60">
+                    <Rectangle.Fill>
+                      <VisualBrush Stretch="Uniform" Visual="{Binding}"/>
+                    </Rectangle.Fill>
+                  </Rectangle>
+                  <CheckBox Content="aaa" IsChecked="{Binding Visibility, Converter={StaticResource visibleTrue}}"/>
+                  <!--<CheckBox Content="aaa" IsChecked="{Binding Visibility, Converter={StaticResource visibleTrue}}"/>-->
+                </StackPanel>
+              </HierarchicalDataTemplate>
+            </TreeView.ItemTemplate>
+          </TreeView>
+        </Grid>
+        
+        <!--<Grid x:Name="MyPanelForGroupItems" Width="200" DataContext="{Binding MyCollectionViewOnlyGroupItems}">
+          <TreeView ItemsSource="{Binding}">
+            <TreeView.ItemTemplate>
+              <HierarchicalDataTemplate ItemsSource="{Binding}">
+                <StackPanel Margin="0,0,0,10">
+                  <Rectangle Width="160" Height="160">
+                    <Rectangle.Fill>
+                      <VisualBrush Stretch="Uniform" Visual="{Binding}"/>
+                    </Rectangle.Fill>
+                  </Rectangle>
+                  <CheckBox Content="aaa" IsChecked="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=Visibility, Converter={StaticResource visibleTrue}}"/>
+                </StackPanel>
+              </HierarchicalDataTemplate>
+            </TreeView.ItemTemplate>
+          </TreeView>
+        </Grid>-->
+
+
         <!--右端ライン-->
         <StatusBar DockPanel.Dock="Right" TextOptions.TextFormattingMode="Display">
           <StatusBar.LayoutTransform>
@@ -352,6 +392,7 @@
           <Button Content="SelectedItemsPanel" Click="Button_Click_SelectedItemsPropertyPanelVisible"/>
         </StatusBar>
 
+        <!--右側タブ-->
         <Grid x:Name="MyPanelRightBase"
               DockPanel.Dock="Right"
               Width="220"
@@ -446,7 +487,7 @@
                 </StackPanel>
               </GroupBox>
             </TabItem>
-            
+
             <TabItem Header="Clicked" DataContext="{Binding MyClickedThumb}">
               <GroupBox Header="FocusItem">
                 <StackPanel>
@@ -468,7 +509,7 @@
                 </StackPanel>
               </GroupBox>
             </TabItem>
-            
+
             <TabItem Header="TestTree" DataContext="{Binding}">
               <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <TreeView ItemsSource="{Binding MyThumbs}"  Background="WhiteSmoke">
@@ -654,9 +695,9 @@
                ScrollViewerの中の、ここがメインのパネルになる<LineBreak/>
             </TextBlock>
           </Canvas>-->
-          
-          
-          
+
+
+
         </ScrollViewer>
 
       </DockPanel>

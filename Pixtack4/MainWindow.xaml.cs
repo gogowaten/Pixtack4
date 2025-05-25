@@ -33,6 +33,9 @@ namespace Pixtack4
         public static readonly DependencyProperty MyRootProperty =
             DependencyProperty.Register(nameof(MyRoot), typeof(RootThumb), typeof(MainWindow), new PropertyMetadata(null));
 
+        public System.ComponentModel.ICollectionView MyGroupItemView { get; set; } = null!;
+        public CollectionViewSource MyCollectionViewOnlyGroupItems { get; set; } = null!;
+
         //private string ROOT_DATA_FILE_NAME = "RootData.px4";
         //RootのDataの拡張子はpx4
         //それ以外のDataの拡張子はpx4item
@@ -69,10 +72,15 @@ namespace Pixtack4
             MyInitialize();
             MyInitialize2();
             Closing += MainWindow_Closing;
-            PreviewKeyDown += MainWindow_PreviewKeyDown;
+            PreviewKeyDown += MainWindow_PreviewKeyDown;// 主にホットキーの設定
             DataContext = this;
 
+
         }
+
+
+        #region ホットキー
+
 
         //ホットキーの設定、ショートカットキー
         private void MainWindow_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -100,6 +108,9 @@ namespace Pixtack4
                 else if (e.Key == Key.D) { MyRoot.Dupulicate(MyRoot.MyFocusThumb); }// D：複製
             }
         }
+
+        #endregion ホットキー
+
 
         private void MainWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
         {
@@ -186,7 +197,24 @@ namespace Pixtack4
 
             //RootThumbの右クリックメニュー作成
             MyInitializeMyRootContextMenu();
+            
+            MyGroupItemView = new CollectionViewSource() { Source = MyRoot.MyThumbs }.View;
+            MyGroupItemView.Filter = x =>
+            {
+                var v = (KisoThumb)x;
+                return v.MyThumbType == ThumbType.Group;
+            };
+            MyCollectionViewOnlyGroupItems = new() { Source = MyRoot.MyThumbs };
+            MyCollectionViewOnlyGroupItems.IsLiveFilteringRequested = true;
+            MyCollectionViewOnlyGroupItems.Filter += MyCollectionViewSource_Filter;
+        }
 
+        private void MyCollectionViewSource_Filter(object sender, FilterEventArgs e)
+        {
+            var neko = e.Item;
+            var tt = (KisoThumb)e.Item;
+            if(tt.MyThumbType== ThumbType.Group) { e.Accepted = true; }
+            else { e.Accepted = false; }
         }
 
         #region 右クリックメニュー作成
@@ -463,12 +491,20 @@ namespace Pixtack4
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            var neko = MyAppWindowData;
-            var inu = MyAppData;
-            //var grid = MyManageExCanvas.MyAreaThumb.GridSize;
-            var area = MyManageExCanvas.MyRootThumb.MyActiveGroupThumb.MyThumbs.Count;
-            var gri = MyManageExCanvas.MyRootThumb.MyActiveGroupThumb.MyItemData.GridSize;
+            var neko = MyGroupItemView;
+            var inu = MyCollectionViewOnlyGroupItems;
+            //System.ComponentModel.ICollectionView filterView = new CollectionViewSource() { Source = MyRoot.MyThumbs }.View;
+            ////System.ComponentModel.ICollectionView uma = CollectionViewSource.GetDefaultView(MyRoot.MyThumbs);
+
+            //filterView.Filter = x =>
+            //{
+            //    var pp = (KisoThumb)x;
+            //    return pp.MyThumbType == ThumbType.Group;
+            //};
+            
         }
+
+
 
         private void Button_Click_(object sender, RoutedEventArgs e)
         {
@@ -1540,5 +1576,13 @@ namespace Pixtack4
             else { MyRootStatusView.Visibility = Visibility.Visible; }
         }
         #endregion テスト用
+
+        private void CheckBox_Click(object sender, RoutedEventArgs e)
+        {
+            var sou = e.Source;
+            var ori = e.OriginalSource;
+            var sen = sender;
+            
+        }
     }
 }
