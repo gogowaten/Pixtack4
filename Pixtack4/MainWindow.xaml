@@ -354,7 +354,7 @@
                       <SkewTransform AngleX="0" AngleY="0"/>
                     </StackPanel.RenderTransform>
                     <!--<StackPanel Margin="0,0,0,0" Visibility="{Binding MyThumbType, Converter={StaticResource visibleGroup}}">-->
-                    <Viewbox Stretch="Uniform" Width="60" Height="60">
+                    <Viewbox Stretch="Uniform" Width="60" Height="60" PreviewMouseLeftButtonDown="Viewbox_PreviewMouseLeftButtonDown">
                       <Viewbox.RenderTransform>
                         <SkewTransform AngleX="20"/>
                       </Viewbox.RenderTransform>

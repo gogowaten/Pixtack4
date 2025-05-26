@@ -1603,5 +1603,10 @@ namespace Pixtack4
         }
         #endregion TreeView
 
+        private void Viewbox_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            var ori = e.OriginalSource;
+            var sou = e.Source;
+        }
     }
 }
