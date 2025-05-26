@@ -197,7 +197,7 @@ namespace Pixtack4
 
             //RootThumbの右クリックメニュー作成
             MyInitializeMyRootContextMenu();
-            
+
             MyGroupItemView = new CollectionViewSource() { Source = MyRoot.MyThumbs }.View;
             MyGroupItemView.Filter = x =>
             {
@@ -213,7 +213,7 @@ namespace Pixtack4
         {
             var neko = e.Item;
             var tt = (KisoThumb)e.Item;
-            if(tt.MyThumbType== ThumbType.Group) { e.Accepted = true; }
+            if (tt.MyThumbType == ThumbType.Group) { e.Accepted = true; }
             else { e.Accepted = false; }
         }
 
@@ -501,7 +501,7 @@ namespace Pixtack4
             //    var pp = (KisoThumb)x;
             //    return pp.MyThumbType == ThumbType.Group;
             //};
-            
+            var uma = MyThumbsTreeView.SelectedItem;
         }
 
 
@@ -1577,12 +1577,31 @@ namespace Pixtack4
         }
         #endregion テスト用
 
-        private void CheckBox_Click(object sender, RoutedEventArgs e)
+        #region TreeView
+        
+
+        private void MyThumbsTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            var sou = e.Source;
-            var ori = e.OriginalSource;
-            var sen = sender;
-            
+            if (e.NewValue is KisoThumb clicked)
+            {
+                // MyRootのClickedThumbとFocusThumbを変更を試みる
+                ChangeFocusThumb(clicked);
+            }
         }
+
+        /// <summary>
+        /// TreeViewのSelectedItemChanged用。MyRootのClickedThumbとFocusThumbを変更を試みる
+        /// </summary>
+        /// <param name="clickedItem"></param>
+        private void ChangeFocusThumb(KisoThumb clickedItem)
+        {
+            if (MyRoot.GetSelectableThumb(clickedItem) is KisoThumb thumb)
+            {
+                MyRoot.TestPreviewMouseDown(thumb, clickedItem);
+                clickedItem.BringIntoView();
+            }
+        }
+        #endregion TreeView
+
     }
 }

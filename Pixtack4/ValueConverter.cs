@@ -7,6 +7,24 @@ using System.Windows.Controls;
 
 namespace Pixtack4
 {
+
+    public class MyConvBitmapCasheBrushAspect : IMultiValueConverter
+    {
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            var a =(double)values[0];
+            var b =(double)values[1];
+            double ritu = 60 / b;
+            if (a > b) { ritu = 60 / a; }
+            return a * ritu;
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
     public class MyConvOnlyGroupItemVisible : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
@@ -57,6 +75,26 @@ namespace Pixtack4
             var v = (Visibility)value;
             if (v== Visibility.Visible) { return true; }
             return false;
+        }
+    }
+
+    /// <summary>
+    /// Visibilityとboolの相互変換、Hiddenをfalse、Visibleをtrue
+    /// </summary>
+    public class MyConvVisibleHiddenIsBoolFalse : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            var visi = (Visibility)value;
+            if (visi == Visibility.Visible) { return true; }
+            return false;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            var b = (bool)value;
+            if (b) { return Visibility.Visible; }
+            return Visibility.Hidden;
         }
     }
 

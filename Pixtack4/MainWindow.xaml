@@ -12,6 +12,7 @@
         Drop="Window_Drop">
   <Window.Resources>
     <local:MyConvVisibleCollapsedIsBoolFalse x:Key="visibleTrue"/>
+    <local:MyConvVisibleHiddenIsBoolFalse x:Key="VisibleOrHidden"/>
     <local:MyConvOnlyGroupItemVisible x:Key="visibleGroup"/>
     <local:MyConvBoolToVisible x:Key="boolVisible"/>
   </Window.Resources>
@@ -343,35 +344,54 @@
           </StackPanel>
         </Grid>
 
-        <Grid x:Name="MyPanelForGroupItems" Width="100" DataContext="{Binding MyRoot.MyThumbs}">
-          <TreeView ItemsSource="{Binding}">
+        <Grid x:Name="MyPanelForGroupItems" Width="160" DataContext="{Binding MyRoot.MyThumbs}">
+          <TreeView x:Name="MyThumbsTreeView" ItemsSource="{Binding}" SelectedItemChanged="MyThumbsTreeView_SelectedItemChanged">
             <TreeView.ItemTemplate>
               <HierarchicalDataTemplate ItemsSource="{Binding MyThumbs}">
-                <StackPanel Margin="0,0,0,10" Visibility="{Binding MyThumbType, Converter={StaticResource visibleGroup}}">
-                  <Rectangle Width="60" Height="60">
-                    <Rectangle.Fill>
-                      <VisualBrush Stretch="Uniform" Visual="{Binding}"/>
-                    </Rectangle.Fill>
-                  </Rectangle>
-                  <CheckBox Content="aaa" IsChecked="{Binding Visibility, Converter={StaticResource visibleTrue}}"/>
-                  <!--<CheckBox Content="aaa" IsChecked="{Binding Visibility, Converter={StaticResource visibleTrue}}"/>-->
-                </StackPanel>
+                <Border BorderBrush="Silver" BorderThickness="0,0,0,1" Background="WhiteSmoke">
+                  <StackPanel Margin="0,-10,0,-10" Orientation="Horizontal">
+                    <StackPanel.RenderTransform>
+                      <SkewTransform AngleX="0" AngleY="0"/>
+                    </StackPanel.RenderTransform>
+                    <!--<StackPanel Margin="0,0,0,0" Visibility="{Binding MyThumbType, Converter={StaticResource visibleGroup}}">-->
+                    <Viewbox Stretch="Uniform" Width="60" Height="60">
+                      <Viewbox.RenderTransform>
+                        <SkewTransform AngleX="20"/>
+                      </Viewbox.RenderTransform>
+                      <Rectangle Width="{Binding ActualWidth}" Height="{Binding ActualHeight}">
+                        <Rectangle.Fill>
+                          <BitmapCacheBrush Target="{Binding}"/>
+                        </Rectangle.Fill>
+                      </Rectangle>
+                    </Viewbox>
+                    <CheckBox Content="表示" Margin="10,0,10,0" VerticalAlignment="Center" IsChecked="{Binding Visibility, Converter={StaticResource VisibleOrHidden}}"/>
+                  </StackPanel>
+                </Border>
               </HierarchicalDataTemplate>
             </TreeView.ItemTemplate>
+            <TreeView.ItemContainerStyle>
+              <Style TargetType="TreeViewItem">
+                <Setter Property="Margin" Value="0"/>
+                <Setter Property="Padding" Value="0"/>
+                <!--<Setter Property="IsSelected" Value="{Binding IsSelected}"/>-->
+              </Style>
+            </TreeView.ItemContainerStyle>
           </TreeView>
         </Grid>
-        
+
         <!--<Grid x:Name="MyPanelForGroupItems" Width="200" DataContext="{Binding MyCollectionViewOnlyGroupItems}">
           <TreeView ItemsSource="{Binding}">
             <TreeView.ItemTemplate>
-              <HierarchicalDataTemplate ItemsSource="{Binding}">
+              <HierarchicalDataTemplate ItemsSource="{Binding}" DataType="{x:Type local:KisoThumb}">
                 <StackPanel Margin="0,0,0,10">
-                  <Rectangle Width="160" Height="160">
-                    <Rectangle.Fill>
-                      <VisualBrush Stretch="Uniform" Visual="{Binding}"/>
-                    </Rectangle.Fill>
-                  </Rectangle>
-                  <CheckBox Content="aaa" IsChecked="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=Visibility, Converter={StaticResource visibleTrue}}"/>
+                  <Viewbox Stretch="Uniform" Width="60" Height="60">
+                    <Rectangle Width="{Binding ActualWidth}" Height="{Binding ActualHeight}">
+                      <Rectangle.Fill>
+                        <BitmapCacheBrush Target="{Binding}"/>
+                      </Rectangle.Fill>
+                    </Rectangle>
+                  </Viewbox>
+                  <CheckBox Content="表示" IsChecked="{Binding Path=Visibility, Converter={StaticResource VisibleOrHidden}}"/>
                 </StackPanel>
               </HierarchicalDataTemplate>
             </TreeView.ItemTemplate>
@@ -483,6 +503,8 @@
                   <TextBlock Text="{Binding MyItemData.MyTop, StringFormat=MyTop  {0:0.0}}"/>
                   <TextBlock Text="{Binding MyItemData.MyZIndex, StringFormat=MyZIndex  {0:0}}"/>
                   <TextBlock Text="{Binding MyItemData.MyGuid, StringFormat=Guid  {0:0}}"/>
+                  <TextBlock Text="{Binding IsSelectable, StringFormat=IsSelectable  {0:0}}"/>
+                  <TextBlock Text="{Binding IsSelected, StringFormat=IsSelected  {0:0}}"/>
                   <TextBlock Text="{Binding MyItemData.MyThumbsItemData.Count, StringFormat=MyThumbsItemData.Count  {0:0}}"/>
                 </StackPanel>
               </GroupBox>
@@ -505,6 +527,8 @@
                   <TextBlock Text="{Binding MyItemData.MyTop, StringFormat=MyTop  {0:0.0}}"/>
                   <TextBlock Text="{Binding MyItemData.MyZIndex, StringFormat=MyZIndex  {0:0}}"/>
                   <TextBlock Text="{Binding MyItemData.MyGuid, StringFormat=Guid  {0:0}}"/>
+                  <TextBlock Text="{Binding IsSelectable, StringFormat=IsSelectable  {0:0}}"/>
+                  <TextBlock Text="{Binding IsSelected, StringFormat=IsSelected  {0:0}}"/>
                   <TextBlock Text="{Binding MyItemData.MyThumbsItemData.Count, StringFormat=MyThumbsItemData.Count  {0:0}}"/>
                 </StackPanel>
               </GroupBox>

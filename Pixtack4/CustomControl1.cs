@@ -335,17 +335,17 @@ namespace Pixtack4
             var sou = e.Source;
             var ori = e.OriginalSource;
             //イベントのOriginalSourceからクリックされたThumbとFocusThumb候補を取得
-            if (GetClickedCandidateThumb(e) is KisoThumb clicked
-                && GetSelectableThumb(clicked) is KisoThumb focus)
+            if (GetClickedCandidateThumb(e) is KisoThumb clickedCandidate
+                && GetSelectableThumb(clickedCandidate) is KisoThumb focusCandidate)
             {
                 //フォーカス候補とthisが一致したときだけ処理する、
                 //こうしないとグループ内の他のThumbまで処理してしまう
-                if (focus.MyItemData.MyGuid == this.MyItemData.MyGuid
+                if (focusCandidate.MyItemData.MyGuid == this.MyItemData.MyGuid
                 && GetRootThumb() is RootThumb root)
                 {
-                    clicked.Focusable = false;
-                    focus.Focusable = false;
-                    root.TestPreviewMouseDown(focus, clicked);
+                    clickedCandidate.Focusable = false;
+                    focusCandidate.Focusable = false;
+                    root.TestPreviewMouseDown(focusCandidate, clickedCandidate);
                 }
                 //e.Handled = true;
                 //ここでtrueにするとドラッグ移動が動かなくなってしまう
@@ -765,7 +765,7 @@ namespace Pixtack4
         /// </summary>
         /// <param name="thumb"></param>
         /// <returns></returns>
-        protected KisoThumb? GetSelectableThumb(KisoThumb? thumb)
+        public KisoThumb? GetSelectableThumb(KisoThumb? thumb)
         {
             if (thumb is null) { return null; }
             if (thumb.IsSelectable) { return thumb; }
