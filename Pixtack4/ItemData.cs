@@ -631,6 +631,9 @@ namespace Pixtack4
         #region テキスト系
 
 
+        private string _fontName = string.Empty;
+        [DataMember] public string FontName { get => _fontName; set => SetProperty(ref _fontName, value); }
+
         private string _myText = string.Empty;
         [DataMember] public string MyText { get => _myText; set => SetProperty(ref _myText, value); }
 

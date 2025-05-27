@@ -2085,9 +2085,9 @@ namespace Pixtack4
             return false;
         }
 
-        public void AddNewThumbFromItemData(ItemData data)
+        public bool AddNewThumbFromItemData(ItemData data)
         {
-            AddNewThumbFromItemData(data, MyActiveGroupThumb);
+            return AddNewThumbFromItemData(data, MyActiveGroupThumb);
         }
 
         ///// <summary>
@@ -2169,6 +2169,8 @@ namespace Pixtack4
             thumb.IsSelectable = true;
             MySelectedThumbs.Clear();
             SelectedThumbsToAdd(thumb);
+            MyFocusThumb = thumb;
+            MyFocusThumb.BringIntoView();
             return true;
         }
 

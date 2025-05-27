@@ -1,6 +1,7 @@
 ﻿using Microsoft.Win32;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Text;
@@ -177,7 +178,8 @@ namespace Pixtack4
             if (LoadAppData() is AppData appData) { MyAppData = appData; }
             else { MyAppData = new AppData(); }
 
-
+            //フォント一覧のコンボボックスの初期化
+            InitializeMyComboBoxFont();
         }
 
 
@@ -460,22 +462,6 @@ namespace Pixtack4
 
         #endregion アプリのウィンドウ設定
 
-        /// <summary>
-        /// アプリのバージョン取得
-        /// </summary>
-        /// <returns></returns>
-        private static string GetAppVersion()
-        {
-            //実行ファイルのバージョン取得
-            string[] cl = Environment.GetCommandLineArgs();
-
-            //System.Diagnostics.FileVersionInfo
-            if (FileVersionInfo.GetVersionInfo(cl[0]).FileVersion is string ver)
-            {
-                return ver;
-            }
-            else { return string.Empty; }
-        }
 
         #endregion 初期処理
 
@@ -511,17 +497,37 @@ namespace Pixtack4
 
         }
 
-        private void Button_Click_AreaItemVisibleSwitch(object sender, RoutedEventArgs e)
+        private void Button_Click_AddTextBlockItem(object sender, RoutedEventArgs e)
         {
-            MyManageExCanvas.AreaThumbVisibleSwitch();
+            if (MyTextBoxAddText.Text == string.Empty) { return; }
+            ItemData data = new(ThumbType.Text)
+            {
+                MyText = MyTextBoxAddText.Text,
+                MyFontSize = MySliderFontSize.Value,
+            };
+            //comboboxからフォント名取得
+            if (MyComboBoxFont.SelectedValue is string ff) { data.FontName = ff; }
+            else { data.FontName = FontFamily.Source; }
+            MyRoot.AddNewThumbFromItemData(data);
         }
 
+        private void InitializeMyComboBoxFont()
+        {
+            SortedDictionary<string, FontFamily> fonts = GetFontFamilies();
+
+            MyComboBoxFont.ItemsSource = fonts;
+        }
         #region 完了
 
 
 
 
 
+
+        private void Button_Click_AreaItemVisibleSwitch(object sender, RoutedEventArgs e)
+        {
+            MyManageExCanvas.AreaThumbVisibleSwitch();// 範囲選択Itemの表示非表示、
+        }
 
         private void Button_Click_DupulicateAsImageForFocusItem(object sender, RoutedEventArgs e)
         {
@@ -1178,21 +1184,67 @@ namespace Pixtack4
 
         #region その他
 
-        ///// <summary>
-        ///// 指定されたItemを画像として複製し、ルートコンテナに追加します。
-        ///// </summary>
-        ///// <param name="thumb">複製するItem</param>
-        ///// <returns><see langword="true"/> の場合、Itemが正常に複製され、ルートコンテナに追加されました。
-        ///// それ以外の場合は <see langword="false"/> です。</returns>
-        //private bool DupulicateAsImage(KisoThumb? thumb)
-        //{
-        //    if (MakeBitmapFromThumb(thumb) is RenderTargetBitmap bmp)
-        //    {
-        //        MyRoot.AddImageThumb(bmp);
-        //        return true;
-        //    }
-        //    return false;
-        //}
+
+        /// <summary>
+        /// アプリのバージョン取得
+        /// </summary>
+        /// <returns></returns>
+        private static string GetAppVersion()
+        {
+            //実行ファイルのバージョン取得
+            string[] cl = Environment.GetCommandLineArgs();
+
+            //System.Diagnostics.FileVersionInfo
+            if (FileVersionInfo.GetVersionInfo(cl[0]).FileVersion is string ver)
+            {
+                return ver;
+            }
+            else { return string.Empty; }
+        }
+
+        /// <summary>
+        /// SystemFontFamiliesから日本語フォント名で並べ替えたフォント一覧を返す、1ファイルに別名のフォントがある場合も取得
+        /// </summary>
+        /// <returns></returns>
+        private SortedDictionary<string, FontFamily> GetFontFamilies()
+        {
+            //今のPCで使っている言語(日本語)のCulture取得
+            //var language =
+            //    System.Windows.Markup.XmlLanguage.GetLanguage(
+            //    CultureInfo.CurrentCulture.IetfLanguageTag);
+            CultureInfo culture = CultureInfo.CurrentCulture;//日本
+            CultureInfo cultureUS = new("en-US");//英語？米国？
+
+            List<string> uName = new();//フォント名の重複判定に使う
+            Dictionary<string, FontFamily> tempDictionary = new();
+            foreach (var item in Fonts.SystemFontFamilies)
+            {
+                var typefaces = item.GetTypefaces();
+                foreach (var typeface in typefaces)
+                {
+                    _ = typeface.TryGetGlyphTypeface(out GlyphTypeface gType);
+                    if (gType != null)
+                    {
+                        //フォント名取得はFamilyNamesではなく、Win32FamilyNamesを使う
+                        //FamilyNamesだと違うフォントなのに同じフォント名で取得されるものがあるので
+                        //Win32FamilyNamesを使う
+                        //日本語名がなければ英語名
+                        string fontName = gType.Win32FamilyNames[culture] ?? gType.Win32FamilyNames[cultureUS];
+                        //string fontName = gType.FamilyNames[culture] ?? gType.FamilyNames[cultureUS];
+
+                        //フォント名で重複判定
+                        var uri = gType.FontUri;
+                        if (uName.Contains(fontName) == false)
+                        {
+                            uName.Add(fontName);
+                            tempDictionary.Add(fontName, new(uri, fontName));
+                        }
+                    }
+                }
+            }
+            SortedDictionary<string, FontFamily> fontDictionary = new(tempDictionary);
+            return fontDictionary;
+        }
 
 
         /// <summary>
@@ -1578,7 +1630,7 @@ namespace Pixtack4
         #endregion テスト用
 
         #region TreeView
-        
+
 
         private void MyThumbsTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {

@@ -214,6 +214,9 @@ namespace Pixtack4
             Children.Add(MyRootThumb);
         }
 
+        /// <summary>
+        /// 範囲選択Itemの表示非表示、
+        /// </summary>
         public void AreaThumbVisibleSwitch()
         {
             if (MyManageData.AreaThumbVisibility == Visibility.Visible)

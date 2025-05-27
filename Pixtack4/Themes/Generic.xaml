@@ -147,13 +147,14 @@
           <Grid>
             <Canvas>
               <TextBlock x:Name="element"
+                         Padding="1"
                          Text="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=MyItemData.MyText}"
                          Foreground="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=MyItemData.MyForeground}"
                          Background="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=MyItemData.MyBackground}"
                          FontSize="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=MyItemData.MyFontSize}"
+                         FontFamily="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=MyItemData.FontName}"
                          Canvas.Left="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=MyInsideElementOffsetLeft}"
                          Canvas.Top="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=MyInsideElementOffsetTop}"
-                         Padding="1"
                          >
                 <TextBlock.RenderTransform>
                   <RotateTransform x:Name="angle" Angle="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=MyItemData.MyAngle}"/>
