@@ -342,7 +342,7 @@
         </Grid>
 
         <Expander DockPanel.Dock="Left" ExpandDirection="Right" IsExpanded="True">
-          <TabControl TabStripPlacement="Left" BorderBrush="Red" BorderThickness="1" Width="200">
+          <TabControl TabStripPlacement="Left" BorderBrush="SlateBlue" BorderThickness="1" Width="200">
             <TabControl.Resources>
               <Style TargetType="{x:Type TabItem}" x:Key="verticalTab">
                 <Setter Property="LayoutTransform">
