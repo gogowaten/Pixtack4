@@ -76,7 +76,7 @@ namespace Pixtack4
             PreviewKeyDown += MainWindow_PreviewKeyDown;// 主にホットキーの設定
             DataContext = this;
 
-
+            //TextBlock tb = new() { FontWeight = FontWeights.b };
         }
 
 
@@ -503,8 +503,9 @@ namespace Pixtack4
             ItemData data = new(ThumbType.Text)
             {
                 MyText = MyTextBoxAddText.Text,
-                MyFontSize = MySliderFontSize.Value,
+                //MyFontSize = MySliderFontSize.Value,
             };
+            data.TextItemData.MyFontSize = MySliderFontSize.Value;
             //comboboxからフォント名取得
             if (MyComboBoxFont.SelectedValue is string ff) { data.FontName = ff; }
             else { data.FontName = FontFamily.Source; }
