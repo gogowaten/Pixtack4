@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:Pixtack4"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance local:MainWindow}"
-        Title="MainWindow" Height="300" Width="600"
+        Title="MainWindow" Height="600" Width="600"
         ResizeMode="CanResizeWithGrip"
         AllowDrop="True"
         Drop="Window_Drop">
@@ -397,12 +397,13 @@
                   <StackPanel>
                     <TextBox x:Name="MyTextBoxAddText" Text="aaa" AcceptsReturn="True" Height="100"/>
                     <Button Content="追加" Click="Button_Click_AddTextBlockItem"/>
+                    <Button Content="フォントリスト更新" IsEnabled="False"/>
                     <DockPanel>
                       <TextBlock DockPanel.Dock="Right" Width="70" TextAlignment="Right" Text="{Binding ElementName=MySliderFontSize, Path=Value, StringFormat=fontsize {0:0.0}}"/>
                       <Slider x:Name="MySliderFontSize" DockPanel.Dock="Right" Minimum="1" Maximum="100" Value="20"/>
                     </DockPanel>
                     <DockPanel>
-                      <TextBlock FontFamily="mei" Text="フォント" VerticalAlignment="Center"/>
+                      <TextBlock Text="フォント" VerticalAlignment="Center"/>
                       <ComboBox x:Name="MyComboBoxFont" SelectedValuePath="Key">
                         <ComboBox.ItemTemplate>
                           <DataTemplate>
@@ -411,7 +412,17 @@
                         </ComboBox.ItemTemplate>
                       </ComboBox>
                     </DockPanel>
-                  <Button Content="フォントリスト更新"/>
+                    <DockPanel>
+                      <TextBlock Text="FontWeight" VerticalAlignment="Center"/>
+                      <ComboBox x:Name="MyComboBoxFontWeight" SelectedValuePath="Value">
+                        <ComboBox.ItemTemplate>
+                          <DataTemplate>
+                            <TextBlock Text="{Binding Key}"/>
+                          </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                      </ComboBox>
+                    </DockPanel>
+
                   </StackPanel>
                 </TabItem>
                 <TabItem Header="item2">
@@ -547,9 +558,10 @@
                   <TextBlock Text="{Binding MyItemData.MyTop, StringFormat=MyTop  {0:0.0}}"/>
                   <TextBlock Text="{Binding MyItemData.MyZIndex, StringFormat=MyZIndex  {0:0}}"/>
                   <TextBlock Text="{Binding MyItemData.MyGuid, StringFormat=Guid  {0:0}}"/>
-                  <TextBlock Text="{Binding MyItemData.FontName, StringFormat=FontName  {0:0}}"/>
-                  <TextBlock Text="{Binding MyItemData.MyFontSize, StringFormat=MyFontSize  {0:0}}"/>
-                  <TextBlock Text="{Binding MyItemData.MyText, StringFormat=MyText  {0:0}}"/>
+                  <TextBlock Text="{Binding MyItemData.TextItemData.FontName, StringFormat=FontName  {0:0}}"/>
+                  <TextBlock Text="{Binding MyItemData.TextItemData.MyFontSize, StringFormat=MyFontSize  {0:0}}"/>
+                  <TextBlock Text="{Binding MyItemData.TextItemData.MyText, StringFormat=MyText  {0:0}}"/>
+                  <TextBlock Text="{Binding MyItemData.TextItemData.FontWeight, StringFormat=FontWeight  {0:0}}"/>
                   <TextBlock Text="{Binding IsSelectable, StringFormat=IsSelectable  {0:0}}"/>
                   <TextBlock Text="{Binding IsSelected, StringFormat=IsSelected  {0:0}}"/>
                   <TextBlock Text="{Binding MyItemData.MyThumbsItemData.Count, StringFormat=MyThumbsItemData.Count  {0:0}}"/>

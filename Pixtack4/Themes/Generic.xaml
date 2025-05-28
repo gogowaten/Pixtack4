@@ -148,11 +148,12 @@
             <Canvas>
               <TextBlock x:Name="element"
                          Padding="1"
-                         Text="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=MyItemData.MyText}"
+                         Text="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=MyItemData.TextItemData.MyText}"
+                         FontWeight="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=MyItemData.TextItemData.FontWeight}"
                          Foreground="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=MyItemData.MyForeground}"
                          Background="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=MyItemData.MyBackground}"
                          FontSize="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=MyItemData.TextItemData.MyFontSize}"
-                         FontFamily="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=MyItemData.FontName}"
+                         FontFamily="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=MyItemData.TextItemData.FontName}"
                          Canvas.Left="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=MyInsideElementOffsetLeft}"
                          Canvas.Top="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=MyInsideElementOffsetTop}"
                          
@@ -194,7 +195,7 @@
                         Path=MyItemData.MyFill}"/>
                 <TextBlock Text="{Binding
                         RelativeSource={RelativeSource Mode=TemplatedParent},
-                        Path=MyItemData.MyText}"
+                        Path=MyItemData.TextItemData.MyText}"
                        Foreground="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=MyItemData.MyForeground}"
                        FontSize="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=MyItemData.TextItemData.MyFontSize}"
                        Background="Transparent"

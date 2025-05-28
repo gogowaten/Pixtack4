@@ -500,24 +500,38 @@ namespace Pixtack4
         private void Button_Click_AddTextBlockItem(object sender, RoutedEventArgs e)
         {
             if (MyTextBoxAddText.Text == string.Empty) { return; }
-            ItemData data = new(ThumbType.Text)
-            {
-                MyText = MyTextBoxAddText.Text,
-                //MyFontSize = MySliderFontSize.Value,
-            };
+            ItemData data = new(ThumbType.Text);
+            //            TextBlock tb = new() { FontWeight = FontWeights.Bold };
+            data.TextItemData.MyText = MyTextBoxAddText.Text;
             data.TextItemData.MyFontSize = MySliderFontSize.Value;
             //comboboxからフォント名取得
-            if (MyComboBoxFont.SelectedValue is string ff) { data.FontName = ff; }
-            else { data.FontName = FontFamily.Source; }
+            if (MyComboBoxFont.SelectedValue is string ff) { data.TextItemData.FontName = ff; }
+            else { data.TextItemData.FontName = FontFamily.Source; }
+            //FontWeight
+            if (MyComboBoxFontWeight.SelectedValue is FontWeight fw)
+            {
+                data.TextItemData.FontWeight = fw;
+            }
+            else { data.TextItemData.FontWeight = this.FontWeight; }
+
             MyRoot.AddNewThumbFromItemData(data);
         }
 
         private void InitializeMyComboBoxFont()
         {
             SortedDictionary<string, FontFamily> fonts = GetFontFamilies();
-
             MyComboBoxFont.ItemsSource = fonts;
+
+            //FontWeight
+
+            Dictionary<string, object> dict = MakePropertyDictionary(typeof(FontWeights));
+            MyComboBoxFontWeight.ItemsSource = dict;
+            //MyComboBoxFontWeight.ItemsSource = dict.ToDictionary(a => a.Key, a => (FontWeight)a.Value);
+            //MyStackPanel2.Children.Add(box);
+            //SetComboBoxSelectedValueBinding(TextBox.FontWeightProperty, box);
+
         }
+
         #region 完了
 
 
@@ -1184,6 +1198,30 @@ namespace Pixtack4
 
 
         #region その他
+
+        /// <summary>
+        /// 指定された型のすべての public static プロパティの名前と値を含むディクショナリを作成します。
+        /// </summary>
+        /// <remarks>このメソッドは、リフレクションを使用して、指定された型のすべての public static プロパティを取得します。<see langword="null"/> 値を持つプロパティは、結果のディクショナリから除外されます。</remarks>
+        /// <param name="t">ディクショナリに含まれる public static プロパティの <see cref="Type"/>。</param>
+        /// <returns><see cref="Dictionary{TKey, TValue}"/>。キーは指定された型の public static プロパティの名前、値は対応する値です。</returns>
+        private static Dictionary<string, object> MakePropertyDictionary(Type t)
+        {
+            System.Reflection.PropertyInfo[]? info = t.GetProperties(
+                System.Reflection.BindingFlags.Public |
+                System.Reflection.BindingFlags.Static);
+
+            Dictionary<string, object>? dict = new();
+            foreach (var item in info)
+            {
+                if (item.GetValue(null) is not object o)
+                {
+                    continue;
+                }
+                dict.Add(item.Name, o);
+            }
+            return dict;
+        }
 
 
         /// <summary>

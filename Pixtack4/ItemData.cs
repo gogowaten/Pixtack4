@@ -96,8 +96,16 @@ namespace Pixtack4
     public class TextItemData : ItemDataKiso
     {
 
-        private bool _bold;
-        public bool Bold { get => _bold; set => SetProperty(ref _bold, value); }
+
+        private FontWeight _fontWeight;
+        public FontWeight FontWeight { get => _fontWeight; set => SetProperty(ref _fontWeight, value); }
+
+        private string _fontName = string.Empty;
+        [DataMember] public string FontName { get => _fontName; set => SetProperty(ref _fontName, value); }
+
+        private string _myText = string.Empty;
+        [DataMember] public string MyText { get => _myText; set => SetProperty(ref _myText, value); }
+
         private double _myFontSize = SystemFonts.MessageFontSize;
         [DataMember] public double MyFontSize { get => _myFontSize; set => SetProperty(ref _myFontSize, value); }
 
@@ -642,11 +650,11 @@ namespace Pixtack4
         private TextItemData _textItemData = new();
         public TextItemData TextItemData { get => _textItemData; set => SetProperty(ref _textItemData, value); }
 
-        private string _fontName = string.Empty;
-        [DataMember] public string FontName { get => _fontName; set => SetProperty(ref _fontName, value); }
+        //private string _fontName = string.Empty;
+        //[DataMember] public string FontName { get => _fontName; set => SetProperty(ref _fontName, value); }
 
-        private string _myText = string.Empty;
-        [DataMember] public string MyText { get => _myText; set => SetProperty(ref _myText, value); }
+        //private string _myText = string.Empty;
+        //[DataMember] public string MyText { get => _myText; set => SetProperty(ref _myText, value); }
 
 
         //private double _myFontSize = SystemFonts.MessageFontSize;
