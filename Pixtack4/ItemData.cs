@@ -93,7 +93,7 @@ namespace Pixtack4
 
     }
 
-
+    
 
     /// <summary>
     /// アプリの設定用

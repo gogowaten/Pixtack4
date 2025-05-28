@@ -411,6 +411,7 @@
                         </ComboBox.ItemTemplate>
                       </ComboBox>
                     </DockPanel>
+                  <Button Content="フォントリスト更新"/>
                   </StackPanel>
                 </TabItem>
                 <TabItem Header="item2">
