@@ -51,12 +51,14 @@ namespace Pixtack4
         //アプリのウィンドウData
         private AppWindowData MyAppWindowData { get; set; } = null!;
         //アプリのウィンドウDataファイル名
-        private const string APP_WINDOW_DATA_FILE_NAME = "AppWindowData.xml";
+        private const string APP_WINDOW_DATA_FILE_NAME = "Px4AppWindowData.xml";
+        //private const string APP_WINDOW_DATA_FILE_NAME = "AppWindowData.xml";
 
         //アプリの設定Data
         public AppData MyAppData { get; private set; } = null!;// 確認用でパブリックにしている
         //アプリのDataファイル名
-        private const string APP_DATA_FILE_NAME = "AppData.xml";
+        private const string APP_DATA_FILE_NAME = "Px4AppData.xml";
+        //private const string APP_DATA_FILE_NAME = "AppData.xml";
 
 
         //datetime.tostringの書式、これを既定値にする
@@ -178,8 +180,6 @@ namespace Pixtack4
             if (LoadAppData() is AppData appData) { MyAppData = appData; }
             else { MyAppData = new AppData(); }
 
-            //フォント一覧のコンボボックスの初期化
-            InitializeMyComboBoxFont();
         }
 
 
@@ -199,6 +199,9 @@ namespace Pixtack4
 
             //RootThumbの右クリックメニュー作成
             MyInitializeMyRootContextMenu();
+
+            //フォント一覧のコンボボックスの初期化
+            InitializeMyComboBoxFont();
 
             MyGroupItemView = new CollectionViewSource() { Source = MyRoot.MyThumbs }.View;
             MyGroupItemView.Filter = x =>
@@ -499,31 +502,22 @@ namespace Pixtack4
 
         private void Button_Click_AddTextBlockItem(object sender, RoutedEventArgs e)
         {
-            if (MyTextBoxAddText.Text == string.Empty) { return; }
-            ItemData data = new(ThumbType.Text);
-            //            TextBlock tb = new() { FontWeight = FontWeights.Bold };
-            data.TextItemData.MyText = MyTextBoxAddText.Text;
-            data.TextItemData.MyFontSize = MySliderFontSize.Value;
-            //comboboxからフォント名取得
-            if (MyComboBoxFont.SelectedValue is string ff) { data.TextItemData.FontName = ff; }
-            else { data.TextItemData.FontName = FontFamily.Source; }
-            //FontWeight
-            if (MyComboBoxFontWeight.SelectedValue is FontWeight fw)
-            {
-                data.TextItemData.FontWeight = fw;
-            }
-            else { data.TextItemData.FontWeight = this.FontWeight; }
-
-            MyRoot.AddNewThumbFromItemData(data);
+            AddTextBlockItem();// MainWindowからTextBlockItemをMyRootに追加する
         }
 
+        /// <summary>
+        /// コンボボックスの初期化
+        /// </summary>
         private void InitializeMyComboBoxFont()
         {
-            SortedDictionary<string, FontFamily> fonts = GetFontFamilies();
-            MyComboBoxFont.ItemsSource = fonts;
+            //Font
+            if (MyAppData.FontNameList == null || MyAppData.FontNameList.Length == 0)
+            {
+                MyAppData.FontNameList = GetFontNames();
+            }
+            MyComboBoxFont.ItemsSource = MyAppData.FontNameList;
 
             //FontWeight
-
             Dictionary<string, object> dict = MakePropertyDictionary(typeof(FontWeights));
             MyComboBoxFontWeight.ItemsSource = dict;
             //MyComboBoxFontWeight.ItemsSource = dict.ToDictionary(a => a.Key, a => (FontWeight)a.Value);
@@ -770,6 +764,34 @@ namespace Pixtack4
         }
 
         #region メソッド
+
+        #region Item追加
+
+        /// <summary>
+        /// MainWindowからTextBlockItemをMyRootに追加する
+        /// </summary>
+        private void AddTextBlockItem()
+        {
+            if (MyTextBoxAddText.Text == string.Empty) { return; }
+            ItemData data = new(ThumbType.Text);
+            data.TextItemData.MyText = MyTextBoxAddText.Text;
+            data.TextItemData.MyFontSize = MySliderFontSize.Value;
+            //comboboxからフォント名取得
+            if (MyComboBoxFont.SelectedValue is string ff) { data.TextItemData.FontName = ff; }
+            else { data.TextItemData.FontName = FontFamily.Source; }
+            //FontWeight
+            if (MyComboBoxFontWeight.SelectedValue is FontWeight fw)
+            {
+                data.TextItemData.FontWeight = fw.ToString();
+                //data.TextItemData.FontWeight = fw;
+            }
+            else { data.TextItemData.FontWeight = this.FontWeight.ToString(); }
+            //else { data.TextItemData.FontWeight = this.FontWeight; }
+
+            MyRoot.AddNewThumbFromItemData(data);
+        }
+
+        #endregion Item追加
 
         #region 初期化、リセット系
 
@@ -1258,7 +1280,7 @@ namespace Pixtack4
             Dictionary<string, FontFamily> tempDictionary = new();
             foreach (var item in Fonts.SystemFontFamilies)
             {
-                var typefaces = item.GetTypefaces();
+                ICollection<Typeface> typefaces = item.GetTypefaces();
                 foreach (var typeface in typefaces)
                 {
                     _ = typeface.TryGetGlyphTypeface(out GlyphTypeface gType);
@@ -1284,6 +1306,31 @@ namespace Pixtack4
             SortedDictionary<string, FontFamily> fontDictionary = new(tempDictionary);
             return fontDictionary;
         }
+
+        private string[] GetFontNames()
+        {
+            CultureInfo culture = CultureInfo.CurrentCulture;//日本
+            CultureInfo cultureUS = new("en-US");//英語？米国？
+            List<string> names = [];
+
+            foreach (var item in Fonts.SystemFontFamilies)
+            {
+                ICollection<Typeface> tf = item.GetTypefaces();
+                foreach (var typeface in tf)
+                {
+                    _ = typeface.TryGetGlyphTypeface(out GlyphTypeface gType);
+                    if (gType != null)
+                    {
+                        names.Add(gType.Win32FamilyNames[culture] ?? gType.Win32FamilyNames[cultureUS]);
+                    }
+                }
+            }
+            names.Sort();
+            return names.Distinct().ToArray();
+
+
+        }
+
 
 
         /// <summary>

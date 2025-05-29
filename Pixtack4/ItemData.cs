@@ -93,12 +93,13 @@ namespace Pixtack4
 
     }
 
+
     public class TextItemData : ItemDataKiso
     {
 
-
-        private FontWeight _fontWeight;
-        public FontWeight FontWeight { get => _fontWeight; set => SetProperty(ref _fontWeight, value); }
+        //FontWdithそのままだとシリアル化できないみたい、エラーにもならないのでToString()のstring型にしてみた
+        private string _fontWeight = "Normal";
+        [DataMember] public string FontWeight { get => _fontWeight; set => SetProperty(ref _fontWeight, value); }
 
         private string _fontName = string.Empty;
         [DataMember] public string FontName { get => _fontName; set => SetProperty(ref _fontName, value); }
@@ -117,6 +118,13 @@ namespace Pixtack4
     public class AppData : ItemDataKiso
     {
         public AppData() { }
+
+
+        //font
+
+        private string[] _fontNameList = [];
+        public string[] FontNameList { get => _fontNameList; set => SetProperty(ref _fontNameList, value); }
+
 
         //GridSizeの下限値
         private int _minGridSize = 1;

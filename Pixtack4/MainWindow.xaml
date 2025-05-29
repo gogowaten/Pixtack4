@@ -395,7 +395,7 @@
               <TabControl>
                 <TabItem Header="mozi">
                   <StackPanel>
-                    <TextBox x:Name="MyTextBoxAddText" Text="aaa" AcceptsReturn="True" Height="100"/>
+                    <TextBox x:Name="MyTextBoxAddText" AcceptsReturn="True" Height="100" Text="ここに文字列入力して&#xa;追加ボタン"/>
                     <Button Content="追加" Click="Button_Click_AddTextBlockItem"/>
                     <Button Content="フォントリスト更新" IsEnabled="False"/>
                     <DockPanel>
@@ -404,10 +404,12 @@
                     </DockPanel>
                     <DockPanel>
                       <TextBlock Text="フォント" VerticalAlignment="Center"/>
-                      <ComboBox x:Name="MyComboBoxFont" SelectedValuePath="Key">
+                      <ComboBox x:Name="MyComboBoxFont">
+                      <!--<ComboBox x:Name="MyComboBoxFont" SelectedValuePath="Key">-->
                         <ComboBox.ItemTemplate>
                           <DataTemplate>
-                            <TextBlock Text="{Binding Key}"/>
+                            <TextBlock Text="{Binding}"/>
+                            <!--<TextBlock Text="{Binding Key}"/>-->
                           </DataTemplate>
                         </ComboBox.ItemTemplate>
                       </ComboBox>
