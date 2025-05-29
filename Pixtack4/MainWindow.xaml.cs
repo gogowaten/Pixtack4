@@ -511,14 +511,15 @@ namespace Pixtack4
         private void InitializeMyComboBoxFont()
         {
             //Font
-            if (MyAppData.FontNameList == null || MyAppData.FontNameList.Length == 0)
+            if (MyAppData.FontNameList == null || MyAppData.FontNameList.Count == 0)
             {
-                MyAppData.FontNameList = GetFontNames();
+                RenewAppDataFontList();// アプリの設定のフォントリストを更新する
             }
-            MyComboBoxFont.ItemsSource = MyAppData.FontNameList;
+            //MyComboBoxFont.ItemsSource = MyAppData.FontNameList;
 
             //FontWeight
             Dictionary<string, object> dict = MakePropertyDictionary(typeof(FontWeights));
+            dict.Add("default", this.FontWeight);
             MyComboBoxFontWeight.ItemsSource = dict;
             //MyComboBoxFontWeight.ItemsSource = dict.ToDictionary(a => a.Key, a => (FontWeight)a.Value);
             //MyStackPanel2.Children.Add(box);
@@ -532,6 +533,10 @@ namespace Pixtack4
 
 
 
+        private void Button_Click_RenewFontList(object sender, RoutedEventArgs e)
+        {
+            RenewAppDataFontList();// アプリの設定のフォントリストを更新する
+        }
 
         private void Button_Click_AreaItemVisibleSwitch(object sender, RoutedEventArgs e)
         {
@@ -776,9 +781,14 @@ namespace Pixtack4
             ItemData data = new(ThumbType.Text);
             data.TextItemData.MyText = MyTextBoxAddText.Text;
             data.TextItemData.MyFontSize = MySliderFontSize.Value;
-            //comboboxからフォント名取得
-            if (MyComboBoxFont.SelectedValue is string ff) { data.TextItemData.FontName = ff; }
-            else { data.TextItemData.FontName = FontFamily.Source; }
+            //フォント名
+            //ComboBoxから取得できないときは規定のフォント
+            data.TextItemData.FontName = FontFamily.Source;
+            if (MyComboBoxFont.SelectedValue is string str && str.Length != 0)
+            {
+                data.TextItemData.FontName = str;
+            }
+
             //FontWeight
             if (MyComboBoxFontWeight.SelectedValue is FontWeight fw)
             {
@@ -794,6 +804,19 @@ namespace Pixtack4
         #endregion Item追加
 
         #region 初期化、リセット系
+
+        /// <summary>
+        /// アプリの設定のフォントリストを更新する
+        /// </summary>
+        private void RenewAppDataFontList()
+        {
+            var ar = GetFontNames();
+            List<string> ll = ar.ToList();
+            ll.Insert(0, string.Empty);// 戦闘に空白をいれる、規定のフォント指定用
+            MyAppData.FontNameList = ll;
+
+            MyAppData.FontComboBoxSelectedIndex = 0;
+        }
 
         /// <summary>
         /// RootThumbを新規作成してリセット

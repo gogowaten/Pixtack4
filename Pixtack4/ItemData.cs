@@ -119,11 +119,17 @@ namespace Pixtack4
     {
         public AppData() { }
 
+        //フォントweight選択ComboBoxの選択Index
+        private int _fontWeightComboBoxSelectedIndex = -1;
+        [DataMember] public int FontWeightComboBoxSelectedIndex { get => _fontWeightComboBoxSelectedIndex; set => SetProperty(ref _fontWeightComboBoxSelectedIndex, value); }
 
-        //font
+        //フォント選択ComboBoxの選択Index
+        private int _fontComboBoxSelectedIndex;
+        [DataMember] public int FontComboBoxSelectedIndex { get => _fontComboBoxSelectedIndex; set => SetProperty(ref _fontComboBoxSelectedIndex, value); }
 
-        private string[] _fontNameList = [];
-        public string[] FontNameList { get => _fontNameList; set => SetProperty(ref _fontNameList, value); }
+        //フォントリスト
+        private List<string> _fontNameList = [];
+        [DataMember] public List<string> FontNameList { get => _fontNameList; set => SetProperty(ref _fontNameList, value); }
 
 
         //GridSizeの下限値

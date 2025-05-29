@@ -397,14 +397,14 @@
                   <StackPanel>
                     <TextBox x:Name="MyTextBoxAddText" AcceptsReturn="True" Height="100" Text="ここに文字列入力して&#xa;追加ボタン"/>
                     <Button Content="追加" Click="Button_Click_AddTextBlockItem"/>
-                    <Button Content="フォントリスト更新" IsEnabled="False"/>
+                    <Button Content="フォントリスト更新" Click="Button_Click_RenewFontList"/>
                     <DockPanel>
                       <TextBlock DockPanel.Dock="Right" Width="70" TextAlignment="Right" Text="{Binding ElementName=MySliderFontSize, Path=Value, StringFormat=fontsize {0:0.0}}"/>
                       <Slider x:Name="MySliderFontSize" DockPanel.Dock="Right" Minimum="1" Maximum="100" Value="20"/>
                     </DockPanel>
                     <DockPanel>
                       <TextBlock Text="フォント" VerticalAlignment="Center"/>
-                      <ComboBox x:Name="MyComboBoxFont">
+                      <ComboBox x:Name="MyComboBoxFont" SelectedIndex="{Binding MyAppData.FontComboBoxSelectedIndex}" ItemsSource="{Binding MyAppData.FontNameList}">
                       <!--<ComboBox x:Name="MyComboBoxFont" SelectedValuePath="Key">-->
                         <ComboBox.ItemTemplate>
                           <DataTemplate>
@@ -416,7 +416,7 @@
                     </DockPanel>
                     <DockPanel>
                       <TextBlock Text="FontWeight" VerticalAlignment="Center"/>
-                      <ComboBox x:Name="MyComboBoxFontWeight" SelectedValuePath="Value">
+                      <ComboBox x:Name="MyComboBoxFontWeight" SelectedIndex="{Binding MyAppData.FontWeightComboBoxSelectedIndex}" SelectedValuePath="Value">
                         <ComboBox.ItemTemplate>
                           <DataTemplate>
                             <TextBlock Text="{Binding Key}"/>
