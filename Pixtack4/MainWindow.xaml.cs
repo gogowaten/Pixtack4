@@ -500,6 +500,11 @@ namespace Pixtack4
 
         }
 
+        private void Button_Click_AddRectItem(object sender, RoutedEventArgs e)
+        {
+            AddRectItem();
+        }
+
         private void Button_Click_AddTextBlockItem(object sender, RoutedEventArgs e)
         {
             AddTextBlockItem();// MainWindowからTextBlockItemをMyRootに追加する
@@ -525,6 +530,11 @@ namespace Pixtack4
             //MyStackPanel2.Children.Add(box);
             //SetComboBoxSelectedValueBinding(TextBox.FontWeightProperty, box);
 
+            //ShapeFill
+            
+            Dictionary<string, Brush> filldict = MakeBrushesDictionary();
+            //ComboBoxShapeFill.DataContext = filldict;
+            ComboBoxShapeFill.ItemsSource = filldict;
         }
 
         #region 完了
@@ -771,6 +781,20 @@ namespace Pixtack4
         #region メソッド
 
         #region Item追加
+
+        private bool AddRectItem()
+        {
+            ItemData data = new(ThumbType.Rect);
+            data.MyWidth = SliderShapeWidht.Value;
+            data.MyHeight = SliderShapeHeight.Value;
+            var fill = ComboBoxShapeFill.SelectedValue;
+            var filli = ComboBoxShapeFill.SelectedItem;
+            
+            data.ShapeItemData.MyFill = Brushes.Tomato;
+            if (ComboBoxShapeFill.SelectedValue is Brush bb) { data.ShapeItemData.MyFill = bb; }
+
+            return MyRoot.AddNewThumbFromItemData(data);
+        }
 
         /// <summary>
         /// MainWindowからTextBlockItemをMyRootに追加する
@@ -1243,6 +1267,30 @@ namespace Pixtack4
 
 
         #region その他
+
+        /// <summary>
+        /// 定義済みブラシの名前を対応する <see cref="Brush"/> オブジェクトにマッピングするディクショナリを作成します。
+        /// </summary>
+        /// <remarks>このメソッドは、定義済みブラシを表す <see cref="Brushes"/> クラスのすべての public static プロパティを取得し、プロパティ名をキー、対応する <see cref="Brush"/> インスタンスを値とするディクショナリを構築します。</remarks>
+        /// <returns> <see cref="Dictionary{TKey, TValue}"/> を返します。キーは定義済みブラシの名前、値は対応する <see cref="Brush"/> オブジェクトです。</returns>
+        ///
+        private static Dictionary<string, Brush> MakeBrushesDictionary()
+        {
+            var brushInfos = typeof(Brushes).GetProperties(
+                System.Reflection.BindingFlags.Public |
+                System.Reflection.BindingFlags.Static);
+
+            Dictionary<string, Brush> dict = new();
+            foreach (var item in brushInfos)
+            {
+                if (item.GetValue(null) is not Brush bu)
+                {
+                    continue;
+                }
+                dict.Add(item.Name, bu);
+            }
+            return dict;
+        }
 
         /// <summary>
         /// 指定された型のすべての public static プロパティの名前と値を含むディクショナリを作成します。

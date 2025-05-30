@@ -94,24 +94,6 @@ namespace Pixtack4
     }
 
 
-    public class TextItemData : ItemDataKiso
-    {
-
-        //FontWdithそのままだとシリアル化できないみたい、エラーにもならないのでToString()のstring型にしてみた
-        private string _fontWeight = "Normal";
-        [DataMember] public string FontWeight { get => _fontWeight; set => SetProperty(ref _fontWeight, value); }
-
-        private string _fontName = string.Empty;
-        [DataMember] public string FontName { get => _fontName; set => SetProperty(ref _fontName, value); }
-
-        private string _myText = string.Empty;
-        [DataMember] public string MyText { get => _myText; set => SetProperty(ref _myText, value); }
-
-        private double _myFontSize = SystemFonts.MessageFontSize;
-        [DataMember] public double MyFontSize { get => _myFontSize; set => SetProperty(ref _myFontSize, value); }
-
-    }
-
     /// <summary>
     /// アプリの設定用
     /// </summary>
@@ -324,6 +306,66 @@ namespace Pixtack4
     }
 
 
+    public class ShapeItemData : ItemDataKiso
+    {
+        public ShapeItemData() { MyInitBind(); }
+        private void MyInitBind()
+        {
+
+            MultiBinding mb = new() { Converter = new MyConverterARGBtoSolidBrush() };
+            mb.Bindings.Add(new Binding(nameof(MyFillA)) { Source = this });
+            mb.Bindings.Add(new Binding(nameof(MyFillR)) { Source = this });
+            mb.Bindings.Add(new Binding(nameof(MyFillG)) { Source = this });
+            mb.Bindings.Add(new Binding(nameof(MyFillB)) { Source = this });
+            _ = BindingOperations.SetBinding(this, MyFillProperty, mb);
+
+        }
+
+        //塗りつぶし色
+        private byte _myFillA;
+        [DataMember] public byte MyFillA { get => _myFillA; set => SetProperty(ref _myFillA, value); }
+        private byte _myFillR;
+        [DataMember] public byte MyFillR { get => _myFillR; set => SetProperty(ref _myFillR, value); }
+        private byte _myFillG;
+        [DataMember] public byte MyFillG { get => _myFillG; set => SetProperty(ref _myFillG, value); }
+        private byte _myFillB;
+        [DataMember] public byte MyFillB { get => _myFillB; set => SetProperty(ref _myFillB, value); }
+        //オプションでBindsTwoWayByDefault必須、Binding時にはTwoWayに設定しても反映されないので、ここで指定
+        [IgnoreDataMember]
+        public Brush MyFill
+        {
+            get { return (Brush)GetValue(MyFillProperty); }
+            set { SetValue(MyFillProperty, value); }
+        }
+        public static readonly DependencyProperty MyFillProperty =
+            DependencyProperty.Register(nameof(MyFill), typeof(Brush), typeof(ShapeItemData),
+                new FrameworkPropertyMetadata(null,
+                    FrameworkPropertyMetadataOptions.AffectsRender |
+                    FrameworkPropertyMetadataOptions.AffectsMeasure |
+                    FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));// TwoWay
+
+
+
+    }
+
+    //文字列用
+    public class TextItemData : ItemDataKiso
+    {
+
+        //FontWdithそのままだとシリアル化できないみたい、エラーにもならないのでToString()のstring型にしてみた
+        private string _fontWeight = "Normal";
+        [DataMember] public string FontWeight { get => _fontWeight; set => SetProperty(ref _fontWeight, value); }
+
+        private string _fontName = string.Empty;
+        [DataMember] public string FontName { get => _fontName; set => SetProperty(ref _fontName, value); }
+
+        private string _myText = string.Empty;
+        [DataMember] public string MyText { get => _myText; set => SetProperty(ref _myText, value); }
+
+        private double _myFontSize = SystemFonts.MessageFontSize;
+        [DataMember] public double MyFontSize { get => _myFontSize; set => SetProperty(ref _myFontSize, value); }
+
+    }
 
 
     /// <summary>
@@ -469,12 +511,6 @@ namespace Pixtack4
             mb.Bindings.Add(new Binding(nameof(MyBackgroundB)) { Source = this });
             _ = BindingOperations.SetBinding(this, MyBackgroundProperty, mb);
 
-            mb = new MultiBinding() { Converter = new MyConverterARGBtoSolidBrush() };
-            mb.Bindings.Add(new Binding(nameof(MyFillA)) { Source = this });
-            mb.Bindings.Add(new Binding(nameof(MyFillR)) { Source = this });
-            mb.Bindings.Add(new Binding(nameof(MyFillG)) { Source = this });
-            mb.Bindings.Add(new Binding(nameof(MyFillB)) { Source = this });
-            _ = BindingOperations.SetBinding(this, MyFillProperty, mb);
 
             mb = new MultiBinding() { Converter = new MyConverterARGBtoSolidBrush() };
             mb.Bindings.Add(new Binding(nameof(MyStrokeA)) { Source = this });
@@ -506,6 +542,8 @@ namespace Pixtack4
 
 
         #endregion 特殊
+
+
 
         #region 図形Geometry系
 
@@ -565,27 +603,6 @@ namespace Pixtack4
 
         #region ブラシ
 
-        private byte _myFillA;
-        [DataMember] public byte MyFillA { get => _myFillA; set => SetProperty(ref _myFillA, value); }
-        private byte _myFillR;
-        [DataMember] public byte MyFillR { get => _myFillR; set => SetProperty(ref _myFillR, value); }
-        private byte _myFillG;
-        [DataMember] public byte MyFillG { get => _myFillG; set => SetProperty(ref _myFillG, value); }
-        private byte _myFillB;
-        [DataMember] public byte MyFillB { get => _myFillB; set => SetProperty(ref _myFillB, value); }
-        //オプションでBindsTwoWayByDefault必須、Binding時にはTwoWayに設定しても反映されないので、ここで指定
-        [IgnoreDataMember]
-        public Brush MyFill
-        {
-            get { return (Brush)GetValue(MyFillProperty); }
-            set { SetValue(MyFillProperty, value); }
-        }
-        public static readonly DependencyProperty MyFillProperty =
-            DependencyProperty.Register(nameof(MyFill), typeof(Brush), typeof(ItemData),
-                new FrameworkPropertyMetadata(null,
-                    FrameworkPropertyMetadataOptions.AffectsRender |
-                    FrameworkPropertyMetadataOptions.AffectsMeasure |
-                    FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));// TwoWay
 
 
         private byte _myForegroundA = 255;
@@ -597,6 +614,7 @@ namespace Pixtack4
         private byte _myForegroundB;
         [DataMember] public byte MyForegroundB { get => _myForegroundB; set => SetProperty(ref _myForegroundB, value); }
 
+        //オプションでBindsTwoWayByDefault必須、Binding時にはTwoWayに設定しても反映されないので、ここで指定
         [IgnoreDataMember]
         public Brush MyForeground
         {
@@ -658,11 +676,16 @@ namespace Pixtack4
 
         #endregion ブラシ
 
+
+        //基本図形
+        private ShapeItemData _shapeItemData = new();
+        [DataMember] public ShapeItemData ShapeItemData { get => _shapeItemData; set => SetProperty(ref _shapeItemData, value); }
+
+
         #region テキスト系
 
-
         private TextItemData _textItemData = new();
-        public TextItemData TextItemData { get => _textItemData; set => SetProperty(ref _textItemData, value); }
+        [DataMember] public TextItemData TextItemData { get => _textItemData; set => SetProperty(ref _textItemData, value); }
 
         //private string _fontName = string.Empty;
         //[DataMember] public string FontName { get => _fontName; set => SetProperty(ref _fontName, value); }

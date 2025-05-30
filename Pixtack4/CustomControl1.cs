@@ -32,6 +32,26 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 namespace Pixtack4
 {
 
+    /// <summary>
+    /// 四角形図形用テュbm
+    /// </summary>
+    public class RectThumb : KisoThumb
+    {
+        static RectThumb()
+        {
+            DefaultStyleKeyProperty.OverrideMetadata(typeof(RectThumb), new FrameworkPropertyMetadata(typeof(RectThumb)));
+        }
+        public RectThumb() { }
+        public RectThumb(ItemData data)
+        {
+            MyItemData = data;
+            MyThumbType = ThumbType.Rect;
+        }
+    }
+
+    /// <summary>
+    /// 画像用Thumb
+    /// </summary>
     public class ImageThumb : KisoThumb
     {
         static ImageThumb()
@@ -3038,7 +3058,10 @@ namespace Pixtack4
             {
                 return new ImageThumb(data);
             }
-
+            else if(data.MyThumbType== ThumbType.Rect)
+            {
+                return new RectThumb(data);
+            }
             else { return null; }
         }
 
