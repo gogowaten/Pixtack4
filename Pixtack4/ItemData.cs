@@ -223,7 +223,7 @@ namespace Pixtack4
         private double _top;
         [DataMember] public double Top { get => _top; set => SetProperty(ref _top, value); }
 
-        private double _width = 800.0;
+        private double _width = 1000.0;
         [DataMember] public double Width { get => _width; set => SetProperty(ref _width, value); }
 
         private double _height = 600.0;
@@ -306,13 +306,26 @@ namespace Pixtack4
     }
 
 
+    /// <summary>
+    /// 図形用
+    /// </summary>
     public class ShapeItemData : ItemDataKiso
     {
         public ShapeItemData() { MyInitBind(); }
+   
         private void MyInitBind()
         {
+            //枠色
+            MultiBinding mb;
+            mb = new() { Converter = new MyConverterARGBtoSolidBrush() };
+            mb.Bindings.Add(new Binding(nameof(WakuColorA)) { Source = this });
+            mb.Bindings.Add(new Binding(nameof(WakuColorR)) { Source = this });
+            mb.Bindings.Add(new Binding(nameof(WakuColorG)) { Source = this });
+            mb.Bindings.Add(new Binding(nameof(WakuColorB)) { Source = this });
+            _ = BindingOperations.SetBinding(this, WakuColorProperty, mb);
 
-            MultiBinding mb = new() { Converter = new MyConverterARGBtoSolidBrush() };
+            //塗りつぶし
+            mb = new() { Converter = new MyConverterARGBtoSolidBrush() };
             mb.Bindings.Add(new Binding(nameof(MyFillA)) { Source = this });
             mb.Bindings.Add(new Binding(nameof(MyFillR)) { Source = this });
             mb.Bindings.Add(new Binding(nameof(MyFillG)) { Source = this });
@@ -320,6 +333,33 @@ namespace Pixtack4
             _ = BindingOperations.SetBinding(this, MyFillProperty, mb);
 
         }
+
+        //枠幅
+        private double _strokeThickness = 0;
+        public double StrokeThickness { get => _strokeThickness; set => SetProperty(ref _strokeThickness, value); }
+
+
+        //枠色
+        private byte _wakuColorA;
+        [DataMember] public byte WakuColorA { get => _wakuColorA; set => SetProperty(ref _wakuColorA, value); }
+        private byte _wakuColorR;
+        [DataMember] public byte WakuColorR { get => _wakuColorR; set => SetProperty(ref _wakuColorR, value); }
+        private byte _wakuColorG;
+        [DataMember] public byte WakuColorG { get => _wakuColorG; set => SetProperty(ref _wakuColorG, value); }
+        private byte _wakuColorB;
+        [DataMember] public byte WakuColorB { get => _wakuColorB; set => SetProperty(ref _wakuColorB, value); }
+
+        public Brush WakuColor
+        {
+            get { return (Brush)GetValue(WakuColorProperty); }
+            set { SetValue(WakuColorProperty, value); }
+        }
+        public static readonly DependencyProperty WakuColorProperty =
+            DependencyProperty.Register(nameof(WakuColor), typeof(Brush), typeof(ShapeItemData),
+                new FrameworkPropertyMetadata(null,
+                    FrameworkPropertyMetadataOptions.AffectsRender |
+                    FrameworkPropertyMetadataOptions.AffectsMeasure |
+                    FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
         //塗りつぶし色
         private byte _myFillA;

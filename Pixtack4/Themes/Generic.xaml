@@ -4,7 +4,7 @@
     xmlns:local="clr-namespace:Pixtack4">
 
 
- 
+
 
   <Style TargetType="{x:Type local:AreaThumb}">
     <Setter Property="Canvas.Left" Value="0"/>
@@ -151,6 +151,8 @@
                 Width="{Binding MyWidth}"
                 Height="{Binding MyHeight}"
                 Fill="{Binding ShapeItemData.MyFill}"
+                Stroke="{Binding ShapeItemData.WakuColor}"
+                StrokeThickness="{Binding ShapeItemData.StrokeThickness}"
                 />
             </Canvas>
             <Border Style="{StaticResource waku4}"/>
@@ -215,7 +217,7 @@
                         Path=MyItemData.MyHeight}"
                      Fill="{Binding
                         RelativeSource={RelativeSource Mode=TemplatedParent},
-                        Path=MyItemData.MyFill}"/>
+                        Path=MyItemData.ShapeItemData.MyFill}"/>
                 <TextBlock Text="{Binding
                         RelativeSource={RelativeSource Mode=TemplatedParent},
                         Path=MyItemData.TextItemData.MyText}"

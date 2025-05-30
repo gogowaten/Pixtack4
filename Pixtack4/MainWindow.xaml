@@ -314,7 +314,7 @@
 
         <!--左側2-->
         <Grid x:Name="MyRootStatusView" DockPanel.Dock="Left"
-              Width="200"
+              Width="240"
               DataContext="{Binding MyRoot, UpdateSourceTrigger=PropertyChanged}"
               Visibility="Collapsed">
           <StackPanel>
@@ -342,7 +342,7 @@
         </Grid>
 
         <Expander DockPanel.Dock="Left" ExpandDirection="Right" IsExpanded="True">
-          <TabControl SelectedIndex="2" TabStripPlacement="Left" BorderBrush="SlateBlue" BorderThickness="1" Width="200">
+          <TabControl SelectedIndex="2" TabStripPlacement="Left" BorderBrush="SlateBlue" BorderThickness="1" Width="240">
             <TabControl.Resources>
               <Style TargetType="{x:Type TabItem}" x:Key="verticalTab">
                 <Setter Property="LayoutTransform">
@@ -436,7 +436,7 @@
               <TabControl BorderThickness="0">
                 <TabItem Header="基本">
                   <StackPanel Margin="4">
-                    <Button Content="追加" Click="Button_Click_AddRectItem"/>
+                    <Button Content="長方形追加" Click="Button_Click_AddRectItem"/>
                     <UniformGrid Columns="2">
                       <Slider x:Name="SliderShapeWidht" Minimum="1" Maximum="200" Value="100" TickFrequency="1" IsSnapToTickEnabled="True"/>
                       <TextBlock Text="{Binding ElementName=SliderShapeWidht, Path=Value, StringFormat=幅 {0:0}}"/>
@@ -445,27 +445,37 @@
                       <Slider x:Name="SliderShapeHeight" Minimum="1" Maximum="200" Value="100" TickFrequency="1" IsSnapToTickEnabled="True"/>
                       <TextBlock Text="{Binding ElementName=SliderShapeHeight, Path=Value, StringFormat=高 {0:0}}"/>
                     </UniformGrid>
+                    <TextBlock Text="塗り"/>
                     <ComboBox x:Name="ComboBoxShapeFill" SelectedValuePath="Value">
                       <ComboBox.ItemTemplate>
                         <DataTemplate>
                           <WrapPanel>
-                            <Border Height="10" Width="20" Background="{Binding Value}" Margin="0,2,4,2"/>
-                            <!--<TextBlock Text="{Binding Key}"/>-->
+                            <Border Height="10" Width="20" Background="{Binding Value}" Margin="0,2,2,2"/>
                           </WrapPanel>
-
-                          <!--<StackPanel Orientation="Horizontal">
-                            <Border Width="20" Background="{Binding Value}" Margin="0,2,4,2"/>
-                            <TextBlock Text="{Binding Key}"/>
-                          </StackPanel>-->
-
                         </DataTemplate>
                       </ComboBox.ItemTemplate>
                       <ComboBox.ItemsPanel>
                         <ItemsPanelTemplate>
-                          <WrapPanel Width="140"/>
+                          <WrapPanel Width="160"/>
                         </ItemsPanelTemplate>
                       </ComboBox.ItemsPanel>
                     </ComboBox>
+                    <TextBlock Text="枠色"/>
+                    <ComboBox x:Name="ComboBoxShapeStrokeColor" SelectedValuePath="Value">
+                      <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                          <StackPanel Orientation="Horizontal">
+                            <Border Width="20" Background="{Binding Value}" Margin="0,2,4,2"/>
+                            <TextBlock Text="{Binding Key}"/>
+                          </StackPanel>
+                        </DataTemplate>
+                      </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <UniformGrid Columns="2">
+                      <Slider x:Name="SliderShapeStrokeThickness" Minimum="1" Maximum="20" Value="1" TickFrequency="1" IsSnapToTickEnabled="True"/>
+                      <TextBlock Text="{Binding ElementName=SliderShapeStrokeThickness, Path=Value, StringFormat=枠幅 {0:0}}"/>
+                    </UniformGrid>
+
                   </StackPanel>
                 </TabItem>
               </TabControl>

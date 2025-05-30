@@ -209,8 +209,11 @@ namespace Pixtack4
                 var v = (KisoThumb)x;
                 return v.MyThumbType == ThumbType.Group;
             };
-            MyCollectionViewOnlyGroupItems = new() { Source = MyRoot.MyThumbs };
-            MyCollectionViewOnlyGroupItems.IsLiveFilteringRequested = true;
+            MyCollectionViewOnlyGroupItems = new()
+            {
+                Source = MyRoot.MyThumbs,
+                IsLiveFilteringRequested = true
+            };
             MyCollectionViewOnlyGroupItems.Filter += MyCollectionViewSource_Filter;
         }
 
@@ -535,6 +538,7 @@ namespace Pixtack4
             Dictionary<string, Brush> filldict = MakeBrushesDictionary();
             //ComboBoxShapeFill.DataContext = filldict;
             ComboBoxShapeFill.ItemsSource = filldict;
+            ComboBoxShapeStrokeColor.ItemsSource = filldict;
         }
 
         #region 完了
@@ -787,12 +791,13 @@ namespace Pixtack4
             ItemData data = new(ThumbType.Rect);
             data.MyWidth = SliderShapeWidht.Value;
             data.MyHeight = SliderShapeHeight.Value;
-            var fill = ComboBoxShapeFill.SelectedValue;
-            var filli = ComboBoxShapeFill.SelectedItem;
-            
             data.ShapeItemData.MyFill = Brushes.Tomato;
             if (ComboBoxShapeFill.SelectedValue is Brush bb) { data.ShapeItemData.MyFill = bb; }
+            data.ShapeItemData.WakuColor = Brushes.Transparent;
+            if(ComboBoxShapeStrokeColor.SelectedValue is Brush wakuBrush) {  data.ShapeItemData.WakuColor = wakuBrush;}
+            data.ShapeItemData.StrokeThickness = SliderShapeStrokeThickness.Value;
 
+            
             return MyRoot.AddNewThumbFromItemData(data);
         }
 
