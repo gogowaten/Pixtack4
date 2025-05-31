@@ -18,7 +18,7 @@ namespace Pixtack4
 {
 
     //Thumbの種類の識別用
-    public enum ThumbType { None = 0, Root, Group, Text, Ellipse, Rect, GeoShape, Image }
+    public enum ThumbType { None = 0, Root, Group, Text, EllipseText, Ellipse, Rect, GeoShape, Image }
 
 
 
@@ -312,7 +312,7 @@ namespace Pixtack4
     public class ShapeItemData : ItemDataKiso
     {
         public ShapeItemData() { MyInitBind(); }
-   
+
         private void MyInitBind()
         {
             //枠色

@@ -437,6 +437,7 @@
                 <TabItem Header="基本">
                   <StackPanel Margin="4">
                     <Button Content="長方形追加" Click="Button_Click_AddRectItem"/>
+                    <Button Content="楕円形追加" Click="Button_Click_AddEllipseItem"/>
                     <UniformGrid Columns="2">
                       <Slider x:Name="SliderShapeWidht" Minimum="1" Maximum="200" Value="100" TickFrequency="1" IsSnapToTickEnabled="True"/>
                       <TextBlock Text="{Binding ElementName=SliderShapeWidht, Path=Value, StringFormat=幅 {0:0}}"/>

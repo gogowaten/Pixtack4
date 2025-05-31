@@ -32,8 +32,23 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 namespace Pixtack4
 {
 
+
+    public class EllipseThumb : KisoThumb
+    {
+        static EllipseThumb()
+        {
+            DefaultStyleKeyProperty.OverrideMetadata(typeof(EllipseThumb), new FrameworkPropertyMetadata(typeof(EllipseThumb)));
+        }
+        public EllipseThumb() { }
+        public EllipseThumb(ItemData data) : base(data)
+        {
+            MyItemData = data;
+            MyThumbType = ThumbType.Ellipse;
+        }
+    }
+
     /// <summary>
-    /// 四角形図形用テュbm
+    /// 四角形図形用Thumb
     /// </summary>
     public class RectThumb : KisoThumb
     {
@@ -42,7 +57,7 @@ namespace Pixtack4
             DefaultStyleKeyProperty.OverrideMetadata(typeof(RectThumb), new FrameworkPropertyMetadata(typeof(RectThumb)));
         }
         public RectThumb() { }
-        public RectThumb(ItemData data)
+        public RectThumb(ItemData data) : base(data)
         {
             MyItemData = data;
             MyThumbType = ThumbType.Rect;
@@ -3038,7 +3053,7 @@ namespace Pixtack4
             {
                 return new TextBlockThumb(data);
             }
-            else if (data.MyThumbType == ThumbType.Ellipse)
+            else if (data.MyThumbType == ThumbType.EllipseText)
             {
                 return new EllipseTextThumb(data);
             }
@@ -3058,10 +3073,11 @@ namespace Pixtack4
             {
                 return new ImageThumb(data);
             }
-            else if(data.MyThumbType== ThumbType.Rect)
+            else if (data.MyThumbType == ThumbType.Rect)
             {
                 return new RectThumb(data);
             }
+            else if (data.MyThumbType == ThumbType.Ellipse) { return new EllipseThumb(data); }
             else { return null; }
         }
 

@@ -503,9 +503,17 @@ namespace Pixtack4
 
         }
 
+        private void Button_Click_AddEllipseItem(object sender, RoutedEventArgs e)
+        {
+            AddEllipseItem();
+        }
+
+
+
+
         private void Button_Click_AddRectItem(object sender, RoutedEventArgs e)
         {
-            AddRectItem();
+            AddRectItem();// RectangleThumbの追加
         }
 
         private void Button_Click_AddTextBlockItem(object sender, RoutedEventArgs e)
@@ -534,7 +542,7 @@ namespace Pixtack4
             //SetComboBoxSelectedValueBinding(TextBox.FontWeightProperty, box);
 
             //ShapeFill
-            
+
             Dictionary<string, Brush> filldict = MakeBrushesDictionary();
             //ComboBoxShapeFill.DataContext = filldict;
             ComboBoxShapeFill.ItemsSource = filldict;
@@ -786,18 +794,45 @@ namespace Pixtack4
 
         #region Item追加
 
-        private bool AddRectItem()
+        private bool AddEllipseItem()
         {
-            ItemData data = new(ThumbType.Rect);
-            data.MyWidth = SliderShapeWidht.Value;
-            data.MyHeight = SliderShapeHeight.Value;
+            ItemData data = new(ThumbType.Ellipse)
+            {
+                MyWidth = SliderShapeWidht.Value,
+                MyHeight = SliderShapeHeight.Value,
+            };
             data.ShapeItemData.MyFill = Brushes.Tomato;
             if (ComboBoxShapeFill.SelectedValue is Brush bb) { data.ShapeItemData.MyFill = bb; }
             data.ShapeItemData.WakuColor = Brushes.Transparent;
-            if(ComboBoxShapeStrokeColor.SelectedValue is Brush wakuBrush) {  data.ShapeItemData.WakuColor = wakuBrush;}
+            if (ComboBoxShapeStrokeColor.SelectedValue is Brush wakuBrush)
+            {
+                data.ShapeItemData.WakuColor = wakuBrush;
+            }
             data.ShapeItemData.StrokeThickness = SliderShapeStrokeThickness.Value;
 
-            
+            return MyRoot.AddNewThumbFromItemData(data);
+        }
+
+        /// <summary>
+        /// RectangleThumbの追加
+        /// </summary>
+        /// <returns></returns>
+        private bool AddRectItem()
+        {
+            ItemData data = new(ThumbType.Rect)
+            {
+                MyWidth = SliderShapeWidht.Value,
+                MyHeight = SliderShapeHeight.Value
+            };
+            data.ShapeItemData.MyFill = Brushes.Tomato;
+            if (ComboBoxShapeFill.SelectedValue is Brush bb) { data.ShapeItemData.MyFill = bb; }
+            data.ShapeItemData.WakuColor = Brushes.Transparent;
+            if (ComboBoxShapeStrokeColor.SelectedValue is Brush wakuBrush)
+            {
+                data.ShapeItemData.WakuColor = wakuBrush;
+            }
+            data.ShapeItemData.StrokeThickness = SliderShapeStrokeThickness.Value;
+
             return MyRoot.AddNewThumbFromItemData(data);
         }
 
