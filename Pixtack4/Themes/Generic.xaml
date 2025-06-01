@@ -180,6 +180,8 @@
                 Fill="{Binding ShapeItemData.MyFill}"
                 Stroke="{Binding ShapeItemData.WakuColor}"
                 StrokeThickness="{Binding ShapeItemData.StrokeThickness}"
+                RadiusX="{Binding ShapeItemData.RoundnessRadius}"
+                RadiusY="{Binding ShapeItemData.RoundnessRadius}"
                 />
             </Canvas>
             <Border Style="{StaticResource waku4}"/>
@@ -284,11 +286,11 @@
                 x:Name="geoShape"
                 DataContext="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=MyItemData}"
                 Canvas.Left="0" Canvas.Top="0"
-                MyPoints="{Binding MyPoints, Mode=TwoWay}"
-                Stroke="{Binding MyStroke}"
-                StrokeThickness="{Binding MyStrokeThickness}"
-                MyShapeType="{Binding MyShapeType}"
-                MyHeadBeginType="{Binding MyGeoShapeHeadCapType}"
+                MyPoints="{Binding GeoShapeItemData.MyPoints, Mode=TwoWay}"
+                Stroke="{Binding GeoShapeItemData.MyStroke}"
+                StrokeThickness="{Binding GeoShapeItemData.MyStrokeThickness}"
+                MyShapeType="{Binding GeoShapeItemData.MyShapeType}"
+                MyHeadBeginType="{Binding GeoShapeItemData.MyGeoShapeHeadCapType}"
                 RenderTransform="{Binding MyAngle, Converter={StaticResource rotate}}"
                 >
 

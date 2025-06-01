@@ -503,6 +503,24 @@ namespace Pixtack4
 
         }
 
+
+        private void Button_Click_GeoShapeAnchorVisibleSwitch(object sender, RoutedEventArgs e)
+        {
+            GeoShapeAnchorVisibleSwitch();
+        }
+        private void GeoShapeAnchorVisibleSwitch()
+        {
+            if (MyRoot.MyFocusThumb is GeoShapeThumb2 geo)
+            {
+                geo.AnchorSwitch();
+            }
+        }
+
+        private void Button_Click_AddGeoShapeItem(object sender, RoutedEventArgs e)
+        {
+            AddGeoShapeItem();
+        }
+
         private void Button_Click_AddEllipseItem(object sender, RoutedEventArgs e)
         {
             AddEllipseItem();
@@ -526,27 +544,29 @@ namespace Pixtack4
         /// </summary>
         private void InitializeMyComboBoxFont()
         {
+            Dictionary<string, Brush> brushDictionary = MakeBrushesDictionary();
+
             //Font
+            ComboBoxTextBackColor.ItemsSource = brushDictionary;
+            ComboBoxTextForeColor.ItemsSource = brushDictionary;
             if (MyAppData.FontNameList == null || MyAppData.FontNameList.Count == 0)
             {
                 RenewAppDataFontList();// アプリの設定のフォントリストを更新する
             }
-            //MyComboBoxFont.ItemsSource = MyAppData.FontNameList;
+            
 
             //FontWeight
             Dictionary<string, object> dict = MakePropertyDictionary(typeof(FontWeights));
             dict.Add("default", this.FontWeight);
             MyComboBoxFontWeight.ItemsSource = dict;
-            //MyComboBoxFontWeight.ItemsSource = dict.ToDictionary(a => a.Key, a => (FontWeight)a.Value);
-            //MyStackPanel2.Children.Add(box);
-            //SetComboBoxSelectedValueBinding(TextBox.FontWeightProperty, box);
 
-            //ShapeFill
+            //ShapeFill、基本図形塗りつぶし
+            ComboBoxShapeFill.ItemsSource = brushDictionary;
+            ComboBoxShapeStrokeColor.ItemsSource = brushDictionary;
 
-            Dictionary<string, Brush> filldict = MakeBrushesDictionary();
-            //ComboBoxShapeFill.DataContext = filldict;
-            ComboBoxShapeFill.ItemsSource = filldict;
-            ComboBoxShapeStrokeColor.ItemsSource = filldict;
+            //矢印図形の色
+            ComboBoxGeoShapeStrokeColor.ItemsSource = brushDictionary;
+
         }
 
         #region 完了
@@ -794,6 +814,30 @@ namespace Pixtack4
 
         #region Item追加
 
+        /// <summary>
+        /// 矢印図形Itemの追加
+        /// </summary>
+        /// <returns></returns>
+        private bool AddGeoShapeItem()
+        {
+            ItemData data = new(ThumbType.GeoShape);
+            data.GeoShapeItemData.MyPoints = [new Point(), new Point(100, 100)];
+            data.GeoShapeItemData.MyShapeType = ShapeType.Line;
+            data.GeoShapeItemData.MyGeoShapeHeadCapType = HeadType.Arrow;
+            data.GeoShapeItemData.MyStrokeThickness = SliderGeoShapeStrokeThickness.Value;
+            data.GeoShapeItemData.MyStroke = Brushes.Tomato;
+            if(ComboBoxGeoShapeStrokeColor.SelectedValue is Brush b)
+            {
+                data.GeoShapeItemData.MyStroke = b;
+            }
+
+            return MyRoot.AddNewThumbFromItemData(data);
+        }
+
+        /// <summary>
+        /// 楕円形Itemの追加
+        /// </summary>
+        /// <returns></returns>
         private bool AddEllipseItem()
         {
             ItemData data = new(ThumbType.Ellipse)
@@ -812,6 +856,8 @@ namespace Pixtack4
 
             return MyRoot.AddNewThumbFromItemData(data);
         }
+
+
 
         /// <summary>
         /// RectangleThumbの追加
@@ -832,6 +878,7 @@ namespace Pixtack4
                 data.ShapeItemData.WakuColor = wakuBrush;
             }
             data.ShapeItemData.StrokeThickness = SliderShapeStrokeThickness.Value;
+            data.ShapeItemData.RoundnessRadius = SliderShapeRectRoundnessRadius.Value;
 
             return MyRoot.AddNewThumbFromItemData(data);
         }
@@ -857,10 +904,14 @@ namespace Pixtack4
             if (MyComboBoxFontWeight.SelectedValue is FontWeight fw)
             {
                 data.TextItemData.FontWeight = fw.ToString();
-                //data.TextItemData.FontWeight = fw;
             }
             else { data.TextItemData.FontWeight = this.FontWeight.ToString(); }
-            //else { data.TextItemData.FontWeight = this.FontWeight; }
+
+            //文字色と背景色
+            data.MyForeground = Brushes.Black;
+            data.MyBackground = Brushes.Transparent;
+            if(ComboBoxTextForeColor.SelectedValue is Brush b) { data.MyForeground = b; }
+            if(ComboBoxTextBackColor.SelectedValue is Brush bb) { data.MyBackground = bb; }
 
             MyRoot.AddNewThumbFromItemData(data);
         }

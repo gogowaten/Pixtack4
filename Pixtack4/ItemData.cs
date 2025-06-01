@@ -306,6 +306,69 @@ namespace Pixtack4
     }
 
 
+
+    public class GeoShapeItemData : ItemDataKiso
+    {
+        public GeoShapeItemData() { MyInitBind(); }
+
+
+        private HeadType _myGeoShapeHeadCapType = HeadType.None;
+        public HeadType MyGeoShapeHeadCapType { get => _myGeoShapeHeadCapType; set => SetProperty(ref _myGeoShapeHeadCapType, value); }
+
+
+        private double _myStrokeThickness = 10.0;
+        public double MyStrokeThickness { get => _myStrokeThickness; set => SetProperty(ref _myStrokeThickness, value); }
+
+
+        private ShapeType _myShapeType = ShapeType.Line;
+        public ShapeType MyShapeType { get => _myShapeType; set => SetProperty(ref _myShapeType, value); }
+
+
+        private byte _myStrokeA;
+        [DataMember] public byte MyStrokeA { get => _myStrokeA; set => SetProperty(ref _myStrokeA, value); }
+        private byte _myStrokeR;
+        [DataMember] public byte MyStrokeR { get => _myStrokeR; set => SetProperty(ref _myStrokeR, value); }
+        private byte _myStrokeG;
+        [DataMember] public byte MyStrokeG { get => _myStrokeG; set => SetProperty(ref _myStrokeG, value); }
+        private byte _myStrokeB;
+        [DataMember] public byte MyStrokeB { get => _myStrokeB; set => SetProperty(ref _myStrokeB, value); }
+
+        [IgnoreDataMember]
+        public Brush MyStroke
+        {
+            get { return (Brush)GetValue(MyStrokeProperty); }
+            set { SetValue(MyStrokeProperty, value); }
+        }
+        public static readonly DependencyProperty MyStrokeProperty =
+            DependencyProperty.Register(nameof(MyStroke), typeof(Brush), typeof(GeoShapeItemData),
+                new FrameworkPropertyMetadata(Brushes.Red,
+                FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+
+        //アンカーポイント群
+        //通知プロパティだとリアルタイムで動作確認できないので依存関係プロパティにしている
+        [DataMember]
+        public PointCollection MyPoints
+        {
+            get { return (PointCollection)GetValue(MyPointsProperty); }
+            set { SetValue(MyPointsProperty, value); }
+        }
+        public static readonly DependencyProperty MyPointsProperty =
+            DependencyProperty.Register(nameof(MyPoints), typeof(PointCollection), typeof(GeoShapeItemData), new PropertyMetadata(null));
+
+        private void MyInitBind()
+        {
+            //矢印図形の色
+            MultiBinding mb;
+            mb = new() { Converter = new MyConverterARGBtoSolidBrush() };
+            mb.Bindings.Add(new Binding(nameof(MyStrokeA)) { Source = this });
+            mb.Bindings.Add(new Binding(nameof(MyStrokeR)) { Source = this });
+            mb.Bindings.Add(new Binding(nameof(MyStrokeG)) { Source = this });
+            mb.Bindings.Add(new Binding(nameof(MyStrokeB)) { Source = this });
+            _ = BindingOperations.SetBinding(this, MyStrokeProperty, mb);
+
+        }
+    }
+
     /// <summary>
     /// 図形用
     /// </summary>
@@ -333,6 +396,12 @@ namespace Pixtack4
             _ = BindingOperations.SetBinding(this, MyFillProperty, mb);
 
         }
+
+        //長方形用の角の丸さ半径
+
+        private double _roundnessRadius;
+        public double RoundnessRadius { get => _roundnessRadius; set => SetProperty(ref _roundnessRadius, value); }
+
 
         //枠幅
         private double _strokeThickness = 0;
@@ -552,12 +621,12 @@ namespace Pixtack4
             _ = BindingOperations.SetBinding(this, MyBackgroundProperty, mb);
 
 
-            mb = new MultiBinding() { Converter = new MyConverterARGBtoSolidBrush() };
-            mb.Bindings.Add(new Binding(nameof(MyStrokeA)) { Source = this });
-            mb.Bindings.Add(new Binding(nameof(MyStrokeR)) { Source = this });
-            mb.Bindings.Add(new Binding(nameof(MyStrokeG)) { Source = this });
-            mb.Bindings.Add(new Binding(nameof(MyStrokeB)) { Source = this });
-            _ = BindingOperations.SetBinding(this, MyStrokeProperty, mb);
+            //mb = new MultiBinding() { Converter = new MyConverterARGBtoSolidBrush() };
+            //mb.Bindings.Add(new Binding(nameof(MyStrokeA)) { Source = this });
+            //mb.Bindings.Add(new Binding(nameof(MyStrokeR)) { Source = this });
+            //mb.Bindings.Add(new Binding(nameof(MyStrokeG)) { Source = this });
+            //mb.Bindings.Add(new Binding(nameof(MyStrokeB)) { Source = this });
+            //_ = BindingOperations.SetBinding(this, MyStrokeProperty, mb);
 
         }
 
@@ -588,29 +657,33 @@ namespace Pixtack4
         #region 図形Geometry系
 
 
-        private HeadType _myGeoShapeHeadCapType = HeadType.None;
-        public HeadType MyGeoShapeHeadCapType { get => _myGeoShapeHeadCapType; set => SetProperty(ref _myGeoShapeHeadCapType, value); }
+        private GeoShapeItemData _GeoShapeItemData = new();
+        public GeoShapeItemData GeoShapeItemData { get => _GeoShapeItemData; set => SetProperty(ref _GeoShapeItemData, value); }
 
 
-        private double _myStrokeThickness = 10.0;
-        public double MyStrokeThickness { get => _myStrokeThickness; set => SetProperty(ref _myStrokeThickness, value); }
+        //private HeadType _myGeoShapeHeadCapType = HeadType.None;
+        //public HeadType MyGeoShapeHeadCapType { get => _myGeoShapeHeadCapType; set => SetProperty(ref _myGeoShapeHeadCapType, value); }
 
 
-        private ShapeType _myShapeType = ShapeType.Line;
-        public ShapeType MyShapeType { get => _myShapeType; set => SetProperty(ref _myShapeType, value); }
+        //private double _myStrokeThickness = 10.0;
+        //public double MyStrokeThickness { get => _myStrokeThickness; set => SetProperty(ref _myStrokeThickness, value); }
+
+
+        //private ShapeType _myShapeType = ShapeType.Line;
+        //public ShapeType MyShapeType { get => _myShapeType; set => SetProperty(ref _myShapeType, value); }
 
 
 
-        //アンカーポイント群
-        //通知プロパティだとリアルタイムで動作確認できないので依存関係プロパティにしている
-        [DataMember]
-        public PointCollection MyPoints
-        {
-            get { return (PointCollection)GetValue(MyPointsProperty); }
-            set { SetValue(MyPointsProperty, value); }
-        }
-        public static readonly DependencyProperty MyPointsProperty =
-            DependencyProperty.Register(nameof(MyPoints), typeof(PointCollection), typeof(ItemData), new PropertyMetadata(null));
+        ////アンカーポイント群
+        ////通知プロパティだとリアルタイムで動作確認できないので依存関係プロパティにしている
+        //[DataMember]
+        //public PointCollection MyPoints
+        //{
+        //    get { return (PointCollection)GetValue(MyPointsProperty); }
+        //    set { SetValue(MyPointsProperty, value); }
+        //}
+        //public static readonly DependencyProperty MyPointsProperty =
+        //    DependencyProperty.Register(nameof(MyPoints), typeof(PointCollection), typeof(ItemData), new PropertyMetadata(null));
 
 
         #endregion 図形Geometry系
@@ -691,25 +764,25 @@ namespace Pixtack4
                     FrameworkPropertyMetadataOptions.AffectsMeasure |
                     FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
-        private byte _myStrokeA;
-        [DataMember] public byte MyStrokeA { get => _myStrokeA; set => SetProperty(ref _myStrokeA, value); }
-        private byte _myStrokeR;
-        [DataMember] public byte MyStrokeR { get => _myStrokeR; set => SetProperty(ref _myStrokeR, value); }
-        private byte _myStrokeG;
-        [DataMember] public byte MyStrokeG { get => _myStrokeG; set => SetProperty(ref _myStrokeG, value); }
-        private byte _myStrokeB;
-        [DataMember] public byte MyStrokeB { get => _myStrokeB; set => SetProperty(ref _myStrokeB, value); }
+        //private byte _myStrokeA;
+        //[DataMember] public byte MyStrokeA { get => _myStrokeA; set => SetProperty(ref _myStrokeA, value); }
+        //private byte _myStrokeR;
+        //[DataMember] public byte MyStrokeR { get => _myStrokeR; set => SetProperty(ref _myStrokeR, value); }
+        //private byte _myStrokeG;
+        //[DataMember] public byte MyStrokeG { get => _myStrokeG; set => SetProperty(ref _myStrokeG, value); }
+        //private byte _myStrokeB;
+        //[DataMember] public byte MyStrokeB { get => _myStrokeB; set => SetProperty(ref _myStrokeB, value); }
 
-        [IgnoreDataMember]
-        public Brush MyStroke
-        {
-            get { return (Brush)GetValue(MyStrokeProperty); }
-            set { SetValue(MyStrokeProperty, value); }
-        }
-        public static readonly DependencyProperty MyStrokeProperty =
-            DependencyProperty.Register(nameof(MyStroke), typeof(Brush), typeof(ItemData),
-                new FrameworkPropertyMetadata(Brushes.Red,
-                FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+        //[IgnoreDataMember]
+        //public Brush MyStroke
+        //{
+        //    get { return (Brush)GetValue(MyStrokeProperty); }
+        //    set { SetValue(MyStrokeProperty, value); }
+        //}
+        //public static readonly DependencyProperty MyStrokeProperty =
+        //    DependencyProperty.Register(nameof(MyStroke), typeof(Brush), typeof(ItemData),
+        //        new FrameworkPropertyMetadata(Brushes.Red,
+        //        FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
 
 
@@ -726,16 +799,6 @@ namespace Pixtack4
 
         private TextItemData _textItemData = new();
         [DataMember] public TextItemData TextItemData { get => _textItemData; set => SetProperty(ref _textItemData, value); }
-
-        //private string _fontName = string.Empty;
-        //[DataMember] public string FontName { get => _fontName; set => SetProperty(ref _fontName, value); }
-
-        //private string _myText = string.Empty;
-        //[DataMember] public string MyText { get => _myText; set => SetProperty(ref _myText, value); }
-
-
-        //private double _myFontSize = SystemFonts.MessageFontSize;
-        //[DataMember] public double MyFontSize { get => _myFontSize; set => SetProperty(ref _myFontSize, value); }
 
         #endregion テキスト系
 

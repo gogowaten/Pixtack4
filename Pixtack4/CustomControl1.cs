@@ -1079,8 +1079,8 @@ namespace Pixtack4
         /// <param name="id">追加(挿入)位置、省略時は末尾に追加する</param>
         public void AddPoint(Point poi, int id = -1)
         {
-            if (id == -1) { id = MyItemData.MyPoints.Count; }
-            MyItemData.MyPoints.Insert(id, poi);
+            if (id == -1) { id = MyItemData.GeoShapeItemData.MyPoints.Count; }
+            MyItemData.GeoShapeItemData.MyPoints.Insert(id, poi);
             //アンカーハンドルが表示されている場合は、アンカーハンドルも追加する
             MyAnchorHandleAdorner?.AddAnchorHandleThumb(id, poi);
             UpdateLocateAndSize();
@@ -1093,8 +1093,8 @@ namespace Pixtack4
         /// <param name="id">削除位置、省略時は末尾のPointを削除する</param>
         public void RemovePoint(int id = -1)
         {
-            if (id == -1) { id = MyItemData.MyPoints.Count - 1; }
-            MyItemData.MyPoints.RemoveAt(id);
+            if (id == -1) { id = MyItemData.GeoShapeItemData.MyPoints.Count - 1; }
+            MyItemData.GeoShapeItemData.MyPoints.RemoveAt(id);
             MyAnchorHandleAdorner?.RemoveAnchorHandleThumb(id);
             UpdateLocateAndSize();
             MyParentThumb?.ReLayout3();
