@@ -980,10 +980,9 @@ namespace Pixtack4
     /// </summary>
     public class GeoShapeThumb2 : KisoThumb
     {
-        private AdornerLayer MyShepeAdornerLayer { get; set; } = null!;
-        //public AnchorHandleThumb? MyAnchorHandle { get; private set; }
-        public AnchorHandleAdorner? MyAnchorHandleAdorner { get; private set; }
-        public GeoShape MyGeoShape { get; private set; } = null!;
+        private AdornerLayer MyShepeAdornerLayer { get; set; } = null!;// アンカーハンドル表示用
+        public AnchorHandleAdorner? MyAnchorHandleAdorner { get; private set; }// アンカーハンドル
+        public GeoShape MyGeoShape { get; private set; } = null!;// 図形
         static GeoShapeThumb2()
         {
             DefaultStyleKeyProperty.OverrideMetadata(typeof(GeoShapeThumb2), new FrameworkPropertyMetadata(typeof(GeoShapeThumb2)));
@@ -1048,13 +1047,17 @@ namespace Pixtack4
         {
             if (MyGeoShape.MyShapeType == ShapeType.Line)
             {
-                ShapeTypeToBezier();
+                ShapeTypeToBezier();// ベジェ曲線から直線へ変更する
             }
             else
             {
-                ShapeTypeToLine();
+                ShapeTypeToLine();// 直線からベジェ曲線へ変更する
             }
         }
+
+        /// <summary>
+        /// 直線からベジェ曲線へ変更する
+        /// </summary>
         public void ShapeTypeToLine()
         {
             MyGeoShape.MyShapeType = ShapeType.Line;
@@ -1062,6 +1065,10 @@ namespace Pixtack4
             UpdateLocateAndSize();
             MyParentThumb?.ReLayout3();
         }
+
+        /// <summary>
+        /// ベジェ曲線から直線へ変更する
+        /// </summary>
         public void ShapeTypeToBezier()
         {
             MyGeoShape.MyShapeType = ShapeType.Bezier;
@@ -1103,11 +1110,19 @@ namespace Pixtack4
         #endregion アンカーPointの追加と削除
 
         #region アンカーハンドルの表示切り替え
+
+        /// <summary>
+        /// アンカーハンドルの表示非表示
+        /// </summary>
         public void AnchorSwitch()
         {
             if (MyAnchorHandleAdorner is null) { AnchorOn(); }
             else { AnchorOff(); }
         }
+
+        /// <summary>
+        /// アンカーハンドルを表示する
+        /// </summary>
         public void AnchorOn()
         {
             if (MyAnchorHandleAdorner is null)
@@ -1119,6 +1134,10 @@ namespace Pixtack4
                 MyParentThumb?.ReLayout3();
             }
         }
+
+        /// <summary>
+        /// アンカーハンドルを非表示にする
+        /// </summary>
         public void AnchorOff()
         {
             if (MyAnchorHandleAdorner != null)

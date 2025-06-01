@@ -65,8 +65,11 @@ namespace Pixtack4
         private const string DATE_TIME_STRING_FORMAT = "HHmmss";
         //private const string DATE_TIME_STRING_FORMAT = "yyyMMdd'_'HHmmss'.'fff";
 
-        //タブ型右クリックメニュー
+        //タブ型右クリックメニュー、メインメニュー
         private ContextTabMenu MyRootContextMenu { get; set; } = new();
+
+        //頂点図形用右クリックメニュー
+        private ContextMenu MyShapesContextMenu { get; set; } = new();
 
         public MainWindow()
         {
@@ -241,6 +244,22 @@ namespace Pixtack4
             MyRootContextMenu.AddTabItem(MakeContextMenuTabItem1());// 右クリックメニュータブ1
             MyRootContextMenu.AddTabItem(MakeContextMenuTabItem2());// 右クリックメニュータブ2
 
+            MyShapesContextMenu = new ContextMenu();
+            MyShapesContextMenu.Items.Add(new MenuItem() { Header = "kaisi" });
+
+        }
+
+        private void MyRoot_PreviewMouseRightButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (MyRoot.MyFocusThumb?.MyThumbType == ThumbType.GeoShape)
+            {
+                MyRoot.ContextMenu = MyShapesContextMenu;
+                var neko = e.GetPosition(this);
+            }
+            else
+            {
+                MyRoot.ContextMenu = MyRootContextMenu;
+            }
         }
 
         /// <summary>
@@ -553,7 +572,7 @@ namespace Pixtack4
             {
                 RenewAppDataFontList();// アプリの設定のフォントリストを更新する
             }
-            
+
 
             //FontWeight
             Dictionary<string, object> dict = MakePropertyDictionary(typeof(FontWeights));
@@ -826,7 +845,7 @@ namespace Pixtack4
             data.GeoShapeItemData.MyGeoShapeHeadCapType = HeadType.Arrow;
             data.GeoShapeItemData.MyStrokeThickness = SliderGeoShapeStrokeThickness.Value;
             data.GeoShapeItemData.MyStroke = Brushes.Tomato;
-            if(ComboBoxGeoShapeStrokeColor.SelectedValue is Brush b)
+            if (ComboBoxGeoShapeStrokeColor.SelectedValue is Brush b)
             {
                 data.GeoShapeItemData.MyStroke = b;
             }
@@ -910,8 +929,8 @@ namespace Pixtack4
             //文字色と背景色
             data.MyForeground = Brushes.Black;
             data.MyBackground = Brushes.Transparent;
-            if(ComboBoxTextForeColor.SelectedValue is Brush b) { data.MyForeground = b; }
-            if(ComboBoxTextBackColor.SelectedValue is Brush bb) { data.MyBackground = bb; }
+            if (ComboBoxTextForeColor.SelectedValue is Brush b) { data.MyForeground = b; }
+            if (ComboBoxTextBackColor.SelectedValue is Brush bb) { data.MyBackground = bb; }
 
             MyRoot.AddNewThumbFromItemData(data);
         }
@@ -975,9 +994,8 @@ namespace Pixtack4
             _ = MyRoot.SetBinding(KisoThumb.IsWakuVisibleProperty, new Binding(nameof(AppData.IsWakuVisible)) { Source = MyAppData, Mode = BindingMode.TwoWay });
             MyManageExCanvas = new ManageExCanvas(MyRoot, new ManageData(), this);
             MyScrollViewer.Content = MyManageExCanvas;
-            //MyGridMyItemsTree.DataContext = MyRoot.MyThumbs;
-            //DataContext = this;
 
+            MyRoot.PreviewMouseRightButtonUp += MyRoot_PreviewMouseRightButtonUp;
         }
 
         /// <summary>
