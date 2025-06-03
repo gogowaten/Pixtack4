@@ -223,7 +223,7 @@ namespace Pixtack4
         private double _top;
         [DataMember] public double Top { get => _top; set => SetProperty(ref _top, value); }
 
-        private double _width = 1000.0;
+        private double _width = 900.0;
         [DataMember] public double Width { get => _width; set => SetProperty(ref _width, value); }
 
         private double _height = 600.0;

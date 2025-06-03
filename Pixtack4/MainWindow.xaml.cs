@@ -71,6 +71,8 @@ namespace Pixtack4
         //頂点図形用右クリックメニュー
         private ContextMenu MyShapesContextMenu { get; set; } = new();
 
+        private Point MyRightClickDownPoint { get; set; }
+
         public MainWindow()
         {
             InitializeComponent();
@@ -183,6 +185,11 @@ namespace Pixtack4
             if (LoadAppData() is AppData appData) { MyAppData = appData; }
             else { MyAppData = new AppData(); }
 
+            MyMainGridPanel.PreviewMouseRightButtonDown += (a, b) =>
+            {
+                MyRightClickDownPoint = b.GetPosition(MyMainGridPanel);
+                var neko = MyRightClickDownPoint;
+            };
         }
 
 
@@ -202,6 +209,7 @@ namespace Pixtack4
 
             //RootThumbの右クリックメニュー作成
             MyInitializeMyRootContextMenu();
+            MyInitializeGeoShapeContextMenu();
 
             //フォント一覧のコンボボックスの初期化
             InitializeMyComboBoxFont();
@@ -228,7 +236,62 @@ namespace Pixtack4
             else { e.Accepted = false; }
         }
 
+
+
+
+
+
         #region 右クリックメニュー作成
+
+        /// <summary>
+        /// 図形編集時専用右クリックメニュー作成
+        /// </summary>
+        private void MyInitializeGeoShapeContextMenu()
+        {
+            MyShapesContextMenu = new ContextMenu();
+            MenuItem item;
+            item = new() { Header = "頂点編集終了" };
+            item.Click += (a, b) =>
+            {
+                if (MyRoot.MyFocusThumb is GeoShapeThumb2 geo)
+                {
+                    //図形専用右クリックメニューを外す
+                    MyMainGridPanel.ContextMenu = null;
+                    geo.IsEditing = false;
+                }
+            };
+            MyShapesContextMenu.Items.Add(item);
+
+            item = new() { Header = "ここに頂点追加" }; MyShapesContextMenu.Items.Add(item);
+            item = new() { Header = "ここに頂点追加(延長)" }; MyShapesContextMenu.Items.Add(item);
+            item.Click += (a, b) =>
+            {
+                if (MyRoot.MyFocusThumb is GeoShapeThumb2 geo)
+                {
+                    var x = MyRightClickDownPoint.X - geo.MyItemData.MyLeft;
+                    var y = MyRightClickDownPoint.Y - geo.MyItemData.MyTop;
+                    x = (int)(x + 0.5);
+                    y = (int)(y + 0.5);
+                    geo.AddPoint(new Point(x, y));
+                }
+            };
+            item = new() { Header = "この頂点を削除" }; MyShapesContextMenu.Items.Add(item);
+
+            MyMainGridPanel.ContextMenuOpening += MyMainGridPanel_ContextMenuOpening;
+        }
+
+        private void MyMainGridPanel_ContextMenuOpening(object sender, ContextMenuEventArgs e)
+        {
+            if (MyRoot.MyFocusThumb?.IsEditing == true)
+            {
+                MyMainGridPanel.ContextMenu = MyShapesContextMenu;
+                MyShapesContextMenu.IsOpen = true;
+            }
+            else
+            {
+                MyMainGridPanel.ContextMenu = null;
+            }
+        }
 
         /// <summary>
         /// 右クリックメニューの作成
@@ -244,23 +307,60 @@ namespace Pixtack4
             MyRootContextMenu.AddTabItem(MakeContextMenuTabItem1());// 右クリックメニュータブ1
             MyRootContextMenu.AddTabItem(MakeContextMenuTabItem2());// 右クリックメニュータブ2
 
-            MyShapesContextMenu = new ContextMenu();
-            MyShapesContextMenu.Items.Add(new MenuItem() { Header = "kaisi" });
+            MyRoot.ContextMenuOpening += MyRoot_ContextMenuOpening;
+            //MyRootContextMenu.Opened += MyRootContextMenu_Opened;
+
+
 
         }
-
-        private void MyRoot_PreviewMouseRightButtonUp(object sender, MouseButtonEventArgs e)
+        /// <summary>
+        /// ルート要素の <see cref="FrameworkElement.ContextMenuOpening"/> イベントを処理します。
+        /// </summary>
+        /// <remarks>このメソッドは、ルート要素内のフォーカスされたサムネイルの状態に基づいて、表示するコンテキストメニューを決定します。フォーカスされたサムネイルが編集モードの場合は、図形固有のコンテキストメニューが表示され、それ以外の場合は、一般的なルートコンテキストメニューが表示されます。</remarks>
+        /// <param name="sender">イベントのソース。通常はルート要素です。</param>
+        /// <param name="e">カーソル位置など、コンテキストメニューの開きに関する情報を含むイベントデータです。</param>
+        ///
+        private void MyRoot_ContextMenuOpening(object sender, ContextMenuEventArgs e)
         {
-            if (MyRoot.MyFocusThumb?.MyThumbType == ThumbType.GeoShape)
+            //var top = e.CursorTop;
+            //var leftr = e.CursorLeft;
+
+            if (MyRoot.MyFocusThumb != null)
             {
-                MyRoot.ContextMenu = MyShapesContextMenu;
-                var neko = e.GetPosition(this);
+                if (MyRoot.MyFocusThumb.IsEditing)
+                {
+                    //MyRoot.ContextMenu = MyShapesContextMenu;
+                    MyRoot.ContextMenu = null;
+                }
+                else
+                {
+                    MyRoot.ContextMenu = MyRootContextMenu;
+                    MyRootContextMenu.IsOpen = true;
+                }
             }
-            else
-            {
-                MyRoot.ContextMenu = MyRootContextMenu;
-            }
+
         }
+
+
+        //private void MyRoot_PreviewMouseRightButtonUp(object sender, MouseButtonEventArgs e)
+        //{
+        //    if(MyRoot.MyFocusThumb is GeoShapeThumb2 geo)
+        //    {
+        //        MyRoot.ContextMenu = MyShapesContextMenu;
+        //        var inu = e.GetPosition(MyRoot.MyFocusThumb);
+        //        //geo.AddPoint(inu);
+        //        var neko = e.GetPosition(this);
+        //    }
+        //    //if (MyRoot.MyFocusThumb?.MyThumbType == ThumbType.GeoShape)
+        //    //{
+
+        //    //}
+        //    else
+        //    {
+        //        MyRoot.ContextMenu = MyRootContextMenu;
+        //    }
+        //}
+
 
         /// <summary>
         /// 右クリックメニュータブ1
@@ -280,16 +380,27 @@ namespace Pixtack4
                 Content = menuPanel
             };
 
-            MenuItem mItem = new() { Header = "複製", InputGestureText = "Ctrl+D" };
-            mItem.Click += (a, b) => { MyRoot.Dupulicate(MyRoot.MyFocusThumb); };
-            menuPanel.Children.Add(mItem);
+            MenuItem item;
+            item = new() { Header = "頂点編集開始" }; menuPanel.Children.Add(item);
+            item.Click += (a, b) =>
+            {
+                if (MyRoot.MyFocusThumb is GeoShapeThumb2 geo)
+                {
+                    geo.IsEditing = true;
+                    MyMainGridPanel.ContextMenu = MyShapesContextMenu;
+                }
+            };
 
-            mItem = new() { Header = "画像として複製" };
-            mItem.Click += (a, b) => { MyRoot.DupulicateAsImage(MyRoot.MyFocusThumb); };
-            menuPanel.Children.Add(mItem);
+            item = new() { Header = "複製", InputGestureText = "Ctrl+D" };
+            item.Click += (a, b) => { MyRoot.Dupulicate(MyRoot.MyFocusThumb); };
+            menuPanel.Children.Add(item);
 
-            mItem = new() { Header = "名前を付けて保存" };
-            mItem.Click += (a, b) =>
+            item = new() { Header = "画像として複製" };
+            item.Click += (a, b) => { MyRoot.DupulicateAsImage(MyRoot.MyFocusThumb); };
+            menuPanel.Children.Add(item);
+
+            item = new() { Header = "名前を付けて保存" };
+            item.Click += (a, b) =>
             {
                 if (MyRoot.MyFocusThumb is KisoThumb item)
                 {
@@ -300,66 +411,66 @@ namespace Pixtack4
                     }
                 }
             };
-            menuPanel.Children.Add(mItem);
+            menuPanel.Children.Add(item);
 
-            mItem = new() { Header = "名前を付けて画像として保存" };
-            mItem.Click += (a, b) => { _ = SaveItemToImageFile(MyRoot.MyFocusThumb); };
-            menuPanel.Children.Add(mItem);
+            item = new() { Header = "名前を付けて画像として保存" };
+            item.Click += (a, b) => { _ = SaveItemToImageFile(MyRoot.MyFocusThumb); };
+            menuPanel.Children.Add(item);
 
             //mItem = new() { Header = "削除" };
             //menuPanel.Children.Add(mItem);
             //mItem.Click += (a, b) => { MyRoot.RemoveThumb(MyRoot.MyFocusThumb); };
 
-            mItem = new() { InputGestureText = "F4" };
+            item = new() { InputGestureText = "F4" };
             StackPanel sp = new() { Orientation = Orientation.Horizontal };
             sp.Children.Add(new TextBlock() { Text = "削除：選択Item " });
             TextBlock tb = new();
             tb.SetBinding(TextBlock.TextProperty, new Binding(nameof(ObservableCollection<KisoThumb>.Count)) { Source = MyRoot.MySelectedThumbs });
             sp.Children.Add(tb);
             sp.Children.Add(new TextBlock() { Text = " 個を削除" });
-            mItem.Header = sp;
-            mItem.Click += (a, b) => { MyRoot.RemoveSelectedThumbs(); };
-            menuPanel.Children.Add(mItem);
+            item.Header = sp;
+            item.Click += (a, b) => { MyRoot.RemoveSelectedThumbs(); };
+            menuPanel.Children.Add(item);
 
-            mItem = new() { Header = "最前面" };
-            menuPanel.Children.Add(mItem);
-            mItem.Click += (a, b) => { MyRoot.MyFocusThumb?.ZIndexTop(); };
-            mItem = new() { Header = "前面", InputGestureText = "PageUp" };
-            menuPanel.Children.Add(mItem);
-            mItem.Click += (a, b) => { MyRoot.MyFocusThumb?.ZIndexUp(); };
-            mItem = new() { Header = "背面", InputGestureText = "PageDown" };
-            menuPanel.Children.Add(mItem);
-            mItem.Click += (a, b) => { MyRoot.MyFocusThumb?.ZIndexDown(); };
-            mItem = new() { Header = "最背面" };
-            mItem.Click += (a, b) => { MyRoot.MyFocusThumb?.ZIndexBottom(); };
-            menuPanel.Children.Add(mItem);
+            item = new() { Header = "最前面" };
+            menuPanel.Children.Add(item);
+            item.Click += (a, b) => { MyRoot.MyFocusThumb?.ZIndexTop(); };
+            item = new() { Header = "前面", InputGestureText = "PageUp" };
+            menuPanel.Children.Add(item);
+            item.Click += (a, b) => { MyRoot.MyFocusThumb?.ZIndexUp(); };
+            item = new() { Header = "背面", InputGestureText = "PageDown" };
+            menuPanel.Children.Add(item);
+            item.Click += (a, b) => { MyRoot.MyFocusThumb?.ZIndexDown(); };
+            item = new() { Header = "最背面" };
+            item.Click += (a, b) => { MyRoot.MyFocusThumb?.ZIndexBottom(); };
+            menuPanel.Children.Add(item);
 
-            mItem = new() { Header = "Focusを画像としてコピー" };
-            mItem.Click += (a, b) => { CopyAsImageForItem(MyRoot.MyFocusThumb); };
-            menuPanel.Children.Add(mItem);
-            mItem = new() { Header = "Groupを画像としてコピー" };
-            mItem.Click += (a, b) => { CopyAsImageForItem(MyRoot.MyActiveGroupThumb); };
-            menuPanel.Children.Add(mItem);
-            mItem = new() { Header = "Rootを画像としてコピー" };
-            mItem.Click += (a, b) => { CopyAsImageForItem(MyRoot); };
-            menuPanel.Children.Add(mItem);
-            mItem = new() { Header = "Clickedを画像としてコピー" };
-            mItem.Click += (a, b) => { CopyAsImageForItem(MyRoot.MyClickedThumb); };
-            menuPanel.Children.Add(mItem);
+            item = new() { Header = "Focusを画像としてコピー" };
+            item.Click += (a, b) => { CopyAsImageForItem(MyRoot.MyFocusThumb); };
+            menuPanel.Children.Add(item);
+            item = new() { Header = "Groupを画像としてコピー" };
+            item.Click += (a, b) => { CopyAsImageForItem(MyRoot.MyActiveGroupThumb); };
+            menuPanel.Children.Add(item);
+            item = new() { Header = "Rootを画像としてコピー" };
+            item.Click += (a, b) => { CopyAsImageForItem(MyRoot); };
+            menuPanel.Children.Add(item);
+            item = new() { Header = "Clickedを画像としてコピー" };
+            item.Click += (a, b) => { CopyAsImageForItem(MyRoot.MyClickedThumb); };
+            menuPanel.Children.Add(item);
 
-            mItem = new() { Header = "画像を貼り付け(png)" };
-            mItem.Click += (a, b) => { AddImageFromClipboardPng(); };
-            menuPanel.Children.Add(mItem);
-            mItem = new() { Header = "画像を貼り付け(bmp)" };
-            mItem.Click += (a, b) => { AddImageFromClipboardBmp(); };
-            menuPanel.Children.Add(mItem);
+            item = new() { Header = "画像を貼り付け(png)" };
+            item.Click += (a, b) => { AddImageFromClipboardPng(); };
+            menuPanel.Children.Add(item);
+            item = new() { Header = "画像を貼り付け(bmp)" };
+            item.Click += (a, b) => { AddImageFromClipboardBmp(); };
+            menuPanel.Children.Add(item);
 
-            mItem = new() { Header = "グループ化", InputGestureText = "Ctrl+G" };
-            mItem.Click += (a, b) => { MyRoot.AddGroupingFromSelected(); };
-            menuPanel.Children.Add(mItem);
-            mItem = new() { Header = "グループ解除", InputGestureText = "Ctrl+Shift+G" };
-            mItem.Click += (a, b) => { MyRoot.UngroupFocusThumb(); };
-            menuPanel.Children.Add(mItem);
+            item = new() { Header = "グループ化", InputGestureText = "Ctrl+G" };
+            item.Click += (a, b) => { MyRoot.AddGroupingFromSelected(); };
+            menuPanel.Children.Add(item);
+            item = new() { Header = "グループ解除", InputGestureText = "Ctrl+Shift+G" };
+            item.Click += (a, b) => { MyRoot.UngroupFocusThumb(); };
+            menuPanel.Children.Add(item);
 
             return tabItem;
         }
@@ -995,7 +1106,17 @@ namespace Pixtack4
             MyManageExCanvas = new ManageExCanvas(MyRoot, new ManageData(), this);
             MyScrollViewer.Content = MyManageExCanvas;
 
-            MyRoot.PreviewMouseRightButtonUp += MyRoot_PreviewMouseRightButtonUp;
+            //FocusThumbが変更されたとき
+            //MainGridPanelの右クリックメニューをnullにする
+            MyRoot.MyFocusThumbChenged += (arata, old) =>
+            {
+                if (old is GeoShapeThumb2 geo)
+                {
+                    MyMainGridPanel.ContextMenu = null;
+                }
+            };
+
+            //MyRoot.PreviewMouseRightButtonUp += MyRoot_PreviewMouseRightButtonUp;
         }
 
         /// <summary>

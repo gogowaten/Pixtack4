@@ -185,7 +185,7 @@ namespace Pixtack4
     /// <summary>
     /// 基礎Thumb、すべてのCustomControlThumbの派生元
     /// </summary>
-    [DebuggerDisplay("{MyThumbType} {MyItemData.MyText}")]
+    [DebuggerDisplay("{MyThumbType}")]
     public abstract class KisoThumb : Thumb
     {
         //クリックダウンとドラッグ移動完了時に使う、直前に選択されたものかの判断用
@@ -764,6 +764,31 @@ namespace Pixtack4
         }
         public static readonly DependencyProperty IsFocusProperty =
             DependencyProperty.Register(nameof(IsFocus), typeof(bool), typeof(KisoThumb), new PropertyMetadata(false));
+
+
+
+        //public event Action? IsEditingChanged;
+
+        /// <summary>
+        /// 編集中フラグ、図形頂点、テキスト
+        /// </summary>
+        public bool IsEditing
+        {
+            get { return (bool)GetValue(IsEditProperty); }
+            set { SetValue(IsEditProperty, value); }
+        }
+        public static readonly DependencyProperty IsEditProperty =
+            DependencyProperty.Register(nameof(IsEditing), typeof(bool), typeof(KisoThumb), new FrameworkPropertyMetadata(false, new PropertyChangedCallback(OnIsEditingChanged)));
+        //図形頂点のアンカーハンドル表示切替
+        private static void OnIsEditingChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is GeoShapeThumb2 geo)
+            {
+                if (e.NewValue is true) { geo.AnchorOn(); }
+                else { geo.AnchorOff(); }
+                //geo.IsEditingChanged?.Invoke();
+            }
+        }
 
 
         #endregion 枠表示用
@@ -1496,8 +1521,13 @@ namespace Pixtack4
             Initialized += RootThumb_Initialized;
             Loaded += RootThumb_Loaded;
 
-
+            //MyFocusThumb.IsEditingChanged += MyFocusThumb_IsEditingChanged;
         }
+
+        //private void MyFocusThumb_IsEditingChanged()
+        //{
+        //    throw new NotImplementedException();
+        //}
 
 
 
@@ -2398,6 +2428,10 @@ namespace Pixtack4
 
                         SelectedThumbsClearAndAddThumb(lastOne);
                     }
+                    else
+                    {
+                        SelectedThumbsClearAndAddThumb(this.MyThumbs[0]);
+                    }
                 }
                 //グループ維持の場合は、
                 //FocusThumbとSelectedThumbsの選定、
@@ -2408,6 +2442,7 @@ namespace Pixtack4
                     if (nextIndex > 0) { nextIndex--; }
                     SelectedThumbsClearAndAddThumb(MyActiveGroupThumb.MyThumbs[nextIndex]);
                 }
+                MyClickedThumb = null;
                 MyActiveGroupThumb.ReLayout3();
             }
         }
@@ -2939,6 +2974,8 @@ namespace Pixtack4
             }
         }
 
+        //変更通知用
+        public event Action<KisoThumb?, KisoThumb?>? MyFocusThumbChenged;
 
         /// <summary>
         /// フォーカスされたThumb
@@ -2953,19 +2990,27 @@ namespace Pixtack4
 
 
         /// <summary>
-        /// フォーカスされたThumbが変更されたとき、IsFocusの変更
+        /// フォーカスされたThumbが変更されたとき、IsFocusの変更、
+        /// IsEditingをfalse
         /// </summary>
         /// <param name="d"></param>
         /// <param name="e"></param>
         private static void OnMyFocusThumbChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is RootThumb rt)
+            if (d is RootThumb root)
             {
-                if (e.NewValue is KisoThumb n)
+                if (e.NewValue is KisoThumb arata)
                 {
-                    n.IsFocus = true;
+                    arata.IsFocus = true;
+                    arata.IsEditing = false;
                 }
-                if (e.OldValue is KisoThumb o) { o.IsFocus = false; }
+                if (e.OldValue is KisoThumb hurui)
+                {
+                    hurui.IsFocus = false;
+                    hurui.IsEditing = false;
+                }
+                //変更通知
+                root.MyFocusThumbChenged?.Invoke(e.NewValue as KisoThumb, e.OldValue as KisoThumb);
             }
         }
 
@@ -2974,6 +3019,12 @@ namespace Pixtack4
         #endregion 依存関係プロパティ
 
     }
+
+
+
+
+
+
 
 
 

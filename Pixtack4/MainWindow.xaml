@@ -396,7 +396,7 @@
                 <TabItem Header="mozi">
                   <StackPanel>
                     <Button Content="フォントリスト更新" Click="Button_Click_RenewFontList"/>
-                    
+
                     <TextBlock Text="フォント" VerticalAlignment="Center"/>
                     <ComboBox x:Name="MyComboBoxFont" SelectedIndex="{Binding MyAppData.FontComboBoxSelectedIndex}" ItemsSource="{Binding MyAppData.FontNameList}">
                       <!--<ComboBox x:Name="MyComboBoxFont" SelectedValuePath="Key">-->
@@ -663,10 +663,13 @@
                   <TextBlock Text="{Binding MyItemData.MyTop, StringFormat=MyTop  {0:0.0}}"/>
                   <TextBlock Text="{Binding MyItemData.MyZIndex, StringFormat=MyZIndex  {0:0}}"/>
                   <TextBlock Text="{Binding MyItemData.MyGuid, StringFormat=Guid  {0:0}}"/>
+                  <TextBlock Text="{Binding IsFocus, StringFormat=IsFocus  {0:0}}"/>
+                  <TextBlock Text="{Binding IsEditing, StringFormat=IsEditing  {0:0}}"/>
                   <TextBlock Text="{Binding MyItemData.TextItemData.FontName, StringFormat=FontName  {0:0}}"/>
                   <TextBlock Text="{Binding MyItemData.TextItemData.MyFontSize, StringFormat=MyFontSize  {0:0}}"/>
                   <TextBlock Text="{Binding MyItemData.TextItemData.MyText, StringFormat=MyText  {0:0}}"/>
                   <TextBlock Text="{Binding MyItemData.TextItemData.FontWeight, StringFormat=FontWeight  {0:0}}"/>
+                  <TextBlock Text="{Binding MyItemData.GeoShapeItemData.MyPoints, StringFormat=Points  {0:0 }}"/>
                   <TextBlock Text="{Binding IsSelectable, StringFormat=IsSelectable  {0:0}}"/>
                   <TextBlock Text="{Binding IsSelected, StringFormat=IsSelected  {0:0}}"/>
                   <TextBlock Text="{Binding MyItemData.MyThumbsItemData.Count, StringFormat=MyThumbsItemData.Count  {0:0}}"/>
@@ -675,7 +678,7 @@
             </TabItem>
 
             <TabItem Header="Clicked" DataContext="{Binding MyClickedThumb}">
-              <GroupBox Header="FocusItem">
+              <GroupBox Header="ClickedItem">
                 <StackPanel>
                   <Canvas Width="100" Height="100">
                     <Canvas.Background>
@@ -870,7 +873,8 @@
         </Grid>
 
         <!--右側4、メインパネル-->
-        <ScrollViewer
+        <Grid x:Name="MyMainGridPanel" DockPanel.Dock="Right" Background="Transparent">
+          <ScrollViewer
           x:Name="MyScrollViewer"
           UseLayoutRounding="True"
           DockPanel.Dock="Right"
@@ -878,7 +882,7 @@
           VerticalScrollBarVisibility="Visible"
           HorizontalAlignment="Left"
           VerticalAlignment="Top">
-          <!--<Canvas Width="2000" Height="1000" Background="AliceBlue">
+            <!--<Canvas Width="2000" Height="1000" Background="AliceBlue">
             <TextBlock>
                ScrollViewerの中の、ここがメインのパネルになる<LineBreak/>
             </TextBlock>
@@ -886,8 +890,8 @@
 
 
 
-        </ScrollViewer>
-
+          </ScrollViewer>
+        </Grid>
       </DockPanel>
       <!--中間ここまで-->
 
