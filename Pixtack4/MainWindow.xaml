@@ -9,7 +9,8 @@
         Title="MainWindow" Height="600" Width="600"
         ResizeMode="CanResizeWithGrip"
         AllowDrop="True"
-        Drop="Window_Drop">
+        Drop="Window_Drop"
+        >
   <Window.Resources>
     <local:MyConvVisibleCollapsedIsBoolFalse x:Key="visibleTrue"/>
     <local:MyConvVisibleHiddenIsBoolFalse x:Key="VisibleOrHidden"/>
@@ -527,7 +528,7 @@
                       <TextBlock Text="{Binding ElementName=SliderGeoShapeStrokeThickness, Path=Value, StringFormat=線幅 {0:0}}"/>
                     </UniformGrid>
                     <Button Content="直線矢印追加" Click="Button_Click_AddGeoShapeItem"/>
-                    <Button Content="アンカー表示切替" Click="Button_Click_GeoShapeAnchorVisibleSwitch"/>
+                    <!--<Button Content="アンカー表示切替" Click="Button_Click_GeoShapeAnchorVisibleSwitch"/>-->
                   </StackPanel>
                 </TabItem>
                 <TabItem Header="その他">
@@ -577,7 +578,7 @@
               Width="220"
               DataContext="{Binding MyRoot}"
               TextOptions.TextFormattingMode="Display">
-          <TabControl TabStripPlacement="Right" BorderThickness="0">
+          <TabControl TabStripPlacement="Right" BorderThickness="0" SelectedIndex="5">
             <TabControl.Resources>
               <Style TargetType="TabItem">
                 <Setter Property="LayoutTransform">
@@ -744,6 +745,30 @@
               </TreeView.ItemContainerStyle>-->
                 </TreeView>
               </ScrollViewer>
+            </TabItem>
+            <TabItem Header="AppData">
+              <GroupBox Header="アプリの設定">
+                <StackPanel DataContext="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=local:MainWindow}, Path=MyAppData}">
+                  <StackPanel.Resources>
+                    <Style TargetType="TextBlock">
+                      <Setter Property="TextWrapping" Value="Wrap"/>
+                    </Style>
+                  </StackPanel.Resources>
+                  <TextBlock Text="{Binding CurrentOpenFilePath, StringFormat=CurrentOpenFilePath {0:0}}"/>
+                  <TextBlock Text="{Binding DefaultSaveDataFileName, StringFormat=DefaultSaveDataFileName {0:0}}"/>
+                  <TextBlock Text="{Binding DefaultSaveImageFileName, StringFormat=DefaultSaveImageFileName {0:0}}"/>
+                  <TextBlock Text="{Binding FontComboBoxSelectedIndex, StringFormat=FontComboBoxSelectedIndex {0:0}}"/>
+                  <TextBlock Text="{Binding FontWeightComboBoxSelectedIndex, StringFormat=FontWeightComboBoxSelectedIndex {0:0}}"/>
+                  <TextBlock Text="{Binding GeoShapeHandleSize, StringFormat=GeoShapeHandleSize {0:0}}"/>
+                  <Slider Minimum="10" Maximum="100" Value="{Binding GeoShapeHandleSize}" TickFrequency="1.0" IsSnapToTickEnabled="True"/>
+                  <TextBlock Text="{Binding InitialDirectory, StringFormat=InitialDirectory {0:0}}"/>
+                  <TextBlock Text="{Binding IsFileNameDescendingOrder, StringFormat=IsFileNameDescendingOrder {0:0}}"/>
+                  <TextBlock Text="{Binding IsWakuVisible, StringFormat=IsWakuVisible {0}}"/>
+                  <TextBlock Text="{Binding MaxGridSize, StringFormat=MaxGridSize {0:0}}"/>
+                  <TextBlock Text="{Binding MinGridSize, StringFormat=MinGridSize {0:0}}"/>
+                  <TextBlock Text="{Binding MyJpegQuality, StringFormat=MyJpegQuality {0:0}}"/>
+                </StackPanel>
+              </GroupBox>
             </TabItem>
           </TabControl>
         </Grid>

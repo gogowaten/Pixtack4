@@ -1005,7 +1005,7 @@ namespace Pixtack4
     /// </summary>
     public class GeoShapeThumb2 : KisoThumb
     {
-        private AdornerLayer MyShepeAdornerLayer { get; set; } = null!;// アンカーハンドル表示用
+        private AdornerLayer MyShepeAdornerLayer { get; set; } = null!;// アンカーハンドル表示用レイヤー
         public AnchorHandleAdorner? MyAnchorHandleAdorner { get; private set; }// アンカーハンドル
         public GeoShape MyGeoShape { get; private set; } = null!;// 図形
         static GeoShapeThumb2()
@@ -1153,6 +1153,7 @@ namespace Pixtack4
             if (MyAnchorHandleAdorner is null)
             {
                 MyAnchorHandleAdorner = new(MyGeoShape);
+                //MyAnchorHandleAdorner.MyAnchorHandleSize = 20;
                 MyAnchorHandleAdorner.OnHandleThumbDragCompleted += MyAnchorHandleAdorner_OnDragCompleted;
                 MyShepeAdornerLayer.Add(MyAnchorHandleAdorner);
                 UpdateLocateAndSize();
@@ -2973,6 +2974,7 @@ namespace Pixtack4
                 }
             }
         }
+
 
         //変更通知用
         public event Action<KisoThumb?, KisoThumb?>? MyFocusThumbChenged;

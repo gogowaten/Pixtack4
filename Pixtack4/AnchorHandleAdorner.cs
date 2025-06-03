@@ -124,6 +124,9 @@ namespace Pixtack4
 
 
 
+    /// <summary>
+    /// アンカーハンドル表示用のAdorner
+    /// </summary>
     public class AnchorHandleAdorner : Adorner
     {
 
@@ -162,6 +165,9 @@ namespace Pixtack4
             return base.ArrangeOverride(finalSize);
         }
 
+        #region 制御線
+
+
         private void MySetControlLine()
         {
             //装飾ターゲットがベジェ曲線なら制御線を作成、追加            
@@ -182,6 +188,11 @@ namespace Pixtack4
         {
             MyCanvas.Children.Remove(MyControlLine);
         }
+
+        #endregion 制御線
+
+
+        #region アンカーハンドル追加と削除
 
         private void AddAnchorThumb()
         {
@@ -227,6 +238,8 @@ namespace Pixtack4
             }
             return false;
         }
+        #endregion アンカーハンドル追加と削除
+
 
         private AnchorHandleThumb MakeAnchorHandleThumb(int id, Point poi)
         {
@@ -237,6 +250,8 @@ namespace Pixtack4
                 MyLeft = poi.X - MyAnchorHandleSize / 2.0,
                 MyTop = poi.Y - MyAnchorHandleSize / 2.0
             };
+
+
             thumb.SetBinding(AnchorHandleThumb.MySizeProperty,
                 new Binding()
                 {
@@ -250,6 +265,8 @@ namespace Pixtack4
             return thumb;
         }
 
+
+        #region ドラッグ移動
 
         /// <summary>
         /// ハンドル移動終了時にそれを知らせるためのイベント、
@@ -282,19 +299,57 @@ namespace Pixtack4
 
         }
 
+        #endregion ドラッグ移動
+
+
         #region 依存関係プロパティ
 
+        /// <summary>
+        /// アンカーハンドルのサイズ
+        /// 変更時にはアンカーハンドルの位置を修正する
+        /// </summary>
         public double MyAnchorHandleSize
         {
             get { return (double)GetValue(MyAnchorHandleSizeProperty); }
             set { SetValue(MyAnchorHandleSizeProperty, value); }
         }
         public static readonly DependencyProperty MyAnchorHandleSizeProperty =
-            DependencyProperty.Register(nameof(MyAnchorHandleSize), typeof(double), typeof(AnchorHandleAdorner), new PropertyMetadata(40.0));
+            DependencyProperty.Register(nameof(MyAnchorHandleSize), typeof(double), typeof(AnchorHandleAdorner), new FrameworkPropertyMetadata(20.0, new PropertyChangedCallback(OnMyAnchorHandleSizeChanged)));
+
+        private static void OnMyAnchorHandleSizeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is AnchorHandleAdorner adorner)
+            {
+                // アンカーハンドルの位置を修正する
+                for (int i = 0; i < adorner.MyAnchorHandleThumbsList.Count; i++)
+                {
+                    var t = adorner.MyAnchorHandleThumbsList[i];
+                    var poi = adorner.MyTarget.MyPoints[i];
+                    t.MyLeft = poi.X - (adorner.MyAnchorHandleSize / 2.0);
+                    t.MyTop = poi.Y - (adorner.MyAnchorHandleSize / 2.0);
+                }
+            }
+        }
 
         #endregion 依存関係プロパティ
 
+
+
+
         #region メソッド
+
+        //// アンカーハンドルの位置を修正する
+        //public void FixAnchorHandleLocate()
+        //{
+        //    for (int i = 0; i < MyAnchorHandleThumbsList.Count; i++)
+        //    {
+        //        AnchorHandleThumb t = MyAnchorHandleThumbsList[i];
+        //        var poi = MyTarget.MyPoints[i];
+        //        t.MyLeft = poi.X - (MyAnchorHandleSize / 2.0);
+        //        t.MyTop = poi.Y - (MyAnchorHandleSize / 2.0);
+        //    }
+        //}
+
 
 
         /// <summary>
@@ -304,6 +359,8 @@ namespace Pixtack4
         /// <returns></returns>
         public Rect GetHandlesRenderBounds()
         {
+            //FixAnchorHandleLocate();// アンカーハンドルの位置を修正する後付
+
             //全てのPointにRenderTransformを適用したPointCollectionを作成
             PointCollection pc = [];
             foreach (var item in MyTarget.MyPoints)

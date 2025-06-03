@@ -101,6 +101,12 @@ namespace Pixtack4
     {
         public AppData() { }
 
+
+        //図形のアンカーハンドルのサイズ
+        private double _geoShapeHandleSize = 100.0;
+        public double GeoShapeHandleSize { get => _geoShapeHandleSize; set => SetProperty(ref _geoShapeHandleSize, value); }
+
+
         //フォントweight選択ComboBoxの選択Index
         private int _fontWeightComboBoxSelectedIndex = -1;
         [DataMember] public int FontWeightComboBoxSelectedIndex { get => _fontWeightComboBoxSelectedIndex; set => SetProperty(ref _fontWeightComboBoxSelectedIndex, value); }

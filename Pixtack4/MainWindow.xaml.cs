@@ -263,30 +263,44 @@ namespace Pixtack4
             MyShapesContextMenu.Items.Add(item);
 
             item = new() { Header = "ここに頂点追加" }; MyShapesContextMenu.Items.Add(item);
-            item = new() { Header = "ここに頂点追加(延長)" }; MyShapesContextMenu.Items.Add(item);
             item.Click += (a, b) =>
             {
-                if (MyRoot.MyFocusThumb is GeoShapeThumb2 geo)
-                {
-                    var x = MyRightClickDownPoint.X - geo.MyItemData.MyLeft;
-                    var y = MyRightClickDownPoint.Y - geo.MyItemData.MyTop;
-                    x = (int)(x + 0.5);
-                    y = (int)(y + 0.5);
-                    geo.AddPoint(new Point(x, y));
-                }
+
             };
+            item = new() { Header = "ここに頂点追加(延長)" }; MyShapesContextMenu.Items.Add(item);
+            item.Click += (a, b) => { AddPointFromRightClickPoint(); };
             item = new() { Header = "この頂点を削除" }; MyShapesContextMenu.Items.Add(item);
 
             MyMainGridPanel.ContextMenuOpening += MyMainGridPanel_ContextMenuOpening;
         }
 
+        // GeoShapeのPointsの末尾に右クリック位置に追加する、頂点追加(延長)
+        private void AddPointFromRightClickPoint()
+        {
+            if (MyRoot.MyFocusThumb is GeoShapeThumb2 geo)
+            {
+                var (left, top) = GetTopLeftFromPoints(geo.MyItemData.GeoShapeItemData.MyPoints);
+                var x = MyRightClickDownPoint.X - geo.MyItemData.MyLeft - MyAppData.GeoShapeHandleSize / 2.0;
+                var y = MyRightClickDownPoint.Y - geo.MyItemData.MyTop - MyAppData.GeoShapeHandleSize / 2.0;
+                x += left;
+                y += top;
+                x = (int)(x + 0.5);
+                y = (int)(y + 0.5);
+                geo.AddPoint(new Point(x, y));
+            }
+        }
+
+
+        //MainGridPanelの右クリックメニューを開くとき
         private void MyMainGridPanel_ContextMenuOpening(object sender, ContextMenuEventArgs e)
         {
+            //FocusThumbが編集状態なら、図形専用メニューに切り替えて開く
             if (MyRoot.MyFocusThumb?.IsEditing == true)
             {
                 MyMainGridPanel.ContextMenu = MyShapesContextMenu;
                 MyShapesContextMenu.IsOpen = true;
             }
+            // 非編集状態なら
             else
             {
                 MyMainGridPanel.ContextMenu = null;
@@ -322,9 +336,6 @@ namespace Pixtack4
         ///
         private void MyRoot_ContextMenuOpening(object sender, ContextMenuEventArgs e)
         {
-            //var top = e.CursorTop;
-            //var leftr = e.CursorLeft;
-
             if (MyRoot.MyFocusThumb != null)
             {
                 if (MyRoot.MyFocusThumb.IsEditing)
@@ -340,26 +351,6 @@ namespace Pixtack4
             }
 
         }
-
-
-        //private void MyRoot_PreviewMouseRightButtonUp(object sender, MouseButtonEventArgs e)
-        //{
-        //    if(MyRoot.MyFocusThumb is GeoShapeThumb2 geo)
-        //    {
-        //        MyRoot.ContextMenu = MyShapesContextMenu;
-        //        var inu = e.GetPosition(MyRoot.MyFocusThumb);
-        //        //geo.AddPoint(inu);
-        //        var neko = e.GetPosition(this);
-        //    }
-        //    //if (MyRoot.MyFocusThumb?.MyThumbType == ThumbType.GeoShape)
-        //    //{
-
-        //    //}
-        //    else
-        //    {
-        //        MyRoot.ContextMenu = MyRootContextMenu;
-        //    }
-        //}
 
 
         /// <summary>
@@ -384,11 +375,8 @@ namespace Pixtack4
             item = new() { Header = "頂点編集開始" }; menuPanel.Children.Add(item);
             item.Click += (a, b) =>
             {
-                if (MyRoot.MyFocusThumb is GeoShapeThumb2 geo)
-                {
-                    geo.IsEditing = true;
-                    MyMainGridPanel.ContextMenu = MyShapesContextMenu;
-                }
+                //MainGridPanelの右クリックメニューをGeoShape用に切り替える
+                MainGridPanelContextMenuToGeoShapeType();
             };
 
             item = new() { Header = "複製", InputGestureText = "Ctrl+D" };
@@ -541,6 +529,38 @@ namespace Pixtack4
         }
 
 
+
+        /// <summary>
+        /// コンボボックスの初期化
+        /// </summary>
+        private void InitializeMyComboBoxFont()
+        {
+            Dictionary<string, Brush> brushDictionary = MakeBrushesDictionary();
+
+            //Font
+            ComboBoxTextBackColor.ItemsSource = brushDictionary;
+            ComboBoxTextForeColor.ItemsSource = brushDictionary;
+            if (MyAppData.FontNameList == null || MyAppData.FontNameList.Count == 0)
+            {
+                RenewAppDataFontList();// アプリの設定のフォントリストを更新する
+            }
+
+
+            //FontWeight
+            Dictionary<string, object> dict = MakePropertyDictionary(typeof(FontWeights));
+            dict.Add("default", this.FontWeight);
+            MyComboBoxFontWeight.ItemsSource = dict;
+
+            //ShapeFill、基本図形塗りつぶし
+            ComboBoxShapeFill.ItemsSource = brushDictionary;
+            ComboBoxShapeStrokeColor.ItemsSource = brushDictionary;
+
+            //矢印図形の色
+            ComboBoxGeoShapeStrokeColor.ItemsSource = brushDictionary;
+
+        }
+
+
         #region アプリのウィンドウ設定
 
         /// <summary>
@@ -624,6 +644,12 @@ namespace Pixtack4
             //    return pp.MyThumbType == ThumbType.Group;
             //};
             var uma = MyThumbsTreeView.SelectedItem;
+            var appdata = MyAppData;
+            if (MyRoot.MyFocusThumb is GeoShapeThumb2 geo)
+            {
+                var handlesize = geo.MyAnchorHandleAdorner?.MyAnchorHandleSize;
+
+            }
         }
 
 
@@ -633,18 +659,6 @@ namespace Pixtack4
 
         }
 
-
-        private void Button_Click_GeoShapeAnchorVisibleSwitch(object sender, RoutedEventArgs e)
-        {
-            GeoShapeAnchorVisibleSwitch();
-        }
-        private void GeoShapeAnchorVisibleSwitch()
-        {
-            if (MyRoot.MyFocusThumb is GeoShapeThumb2 geo)
-            {
-                geo.AnchorSwitch();
-            }
-        }
 
         private void Button_Click_AddGeoShapeItem(object sender, RoutedEventArgs e)
         {
@@ -669,35 +683,6 @@ namespace Pixtack4
             AddTextBlockItem();// MainWindowからTextBlockItemをMyRootに追加する
         }
 
-        /// <summary>
-        /// コンボボックスの初期化
-        /// </summary>
-        private void InitializeMyComboBoxFont()
-        {
-            Dictionary<string, Brush> brushDictionary = MakeBrushesDictionary();
-
-            //Font
-            ComboBoxTextBackColor.ItemsSource = brushDictionary;
-            ComboBoxTextForeColor.ItemsSource = brushDictionary;
-            if (MyAppData.FontNameList == null || MyAppData.FontNameList.Count == 0)
-            {
-                RenewAppDataFontList();// アプリの設定のフォントリストを更新する
-            }
-
-
-            //FontWeight
-            Dictionary<string, object> dict = MakePropertyDictionary(typeof(FontWeights));
-            dict.Add("default", this.FontWeight);
-            MyComboBoxFontWeight.ItemsSource = dict;
-
-            //ShapeFill、基本図形塗りつぶし
-            ComboBoxShapeFill.ItemsSource = brushDictionary;
-            ComboBoxShapeStrokeColor.ItemsSource = brushDictionary;
-
-            //矢印図形の色
-            ComboBoxGeoShapeStrokeColor.ItemsSource = brushDictionary;
-
-        }
 
         #region 完了
 
@@ -941,6 +926,37 @@ namespace Pixtack4
         }
 
         #region メソッド
+
+
+        #region GeoShapeItem関連
+
+        /// <summary>
+        /// MainGridPanelの右クリックメニューをGeoShape用に切り替える
+        /// </summary>
+        private void MainGridPanelContextMenuToGeoShapeType()
+        {
+            //MainGridPanelの右クリックメニューをGeoShape用に切り替える
+            if (MyRoot.MyFocusThumb is GeoShapeThumb2 geo)
+            {
+                geo.IsEditing = true;
+                MyMainGridPanel.ContextMenu = MyShapesContextMenu;
+                GeoShapeAnchorHandleSizeBindAppData(geo);// GeoShapeのアンカーハンドルのサイズをアプリの設定にバインド
+            }
+        }
+
+        /// <summary>
+        /// GeoShapeのアンカーハンドルのサイズをアプリの設定にバインド
+        /// </summary>
+        /// <param name="geo"></param>
+        private void GeoShapeAnchorHandleSizeBindAppData(GeoShapeThumb2 geo)
+        {
+            geo.MyAnchorHandleAdorner?.SetBinding(AnchorHandleAdorner.MyAnchorHandleSizeProperty, new Binding(nameof(AppData.GeoShapeHandleSize)) { Source = MyAppData, Mode = BindingMode.TwoWay });
+            //サイズと位置の更新
+            geo.UpdateLocateAndSize();
+            geo.MyParentThumb?.ReLayout3();
+        }
+        #endregion GeoShapeItem関連
+
 
         #region Item追加
 
@@ -1497,6 +1513,25 @@ namespace Pixtack4
 
 
         #region その他
+
+
+        /// <summary>
+        /// PointCollectionの左上座標を返す
+        /// </summary>
+        /// <param name="points"></param>
+        /// <returns></returns>
+        private (double left, double top) GetTopLeftFromPoints(PointCollection points)
+        {
+            double left = double.MaxValue;
+            double top = double.MaxValue;
+            foreach (var item in points)
+            {
+                if (left > item.X) { left = item.X; }
+                if (top > item.Y) { top = item.Y; }
+            }
+            return (left, top);
+        }
+
 
         /// <summary>
         /// 定義済みブラシの名前を対応する <see cref="Brush"/> オブジェクトにマッピングするディクショナリを作成します。
