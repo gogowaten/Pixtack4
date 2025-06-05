@@ -140,6 +140,7 @@ namespace Pixtack4
         private readonly Canvas MyCanvas = new();
         private readonly VisualCollection MyVisualCollection;
         private readonly GeoShape MyTarget;//装飾ターゲット
+        //private ContextMenu MyContextMenu;
 
         public AnchorHandleAdorner(GeoShape adornedElement) : base(adornedElement)
         {
@@ -157,6 +158,10 @@ namespace Pixtack4
 
             //アンカーハンドルを追加
             AddAnchorThumb();
+
+            //MyContextMenu = new();
+            //MyContextMenu.Items.Add(new MenuItem() { Header = "menuitem" });
+
         }
 
         protected override Size ArrangeOverride(Size finalSize)
@@ -225,10 +230,11 @@ namespace Pixtack4
         //削除
         public bool RemoveAnchorHandleThumb(int index)
         {
-            if (index <= MyAnchorHandleThumbsList.Count - 1)
+            if (MyAnchorHandleThumbsList[index] is AnchorHandleThumb handleThumb)
             {
-                MyCanvas.Children.RemoveAt(index);
-                MyAnchorHandleThumbsList.RemoveAt(index);
+                //AnchorHandleThumb handleThumb = MyAnchorHandleThumbsList[index];
+                MyCanvas.Children.Remove(handleThumb);
+                MyAnchorHandleThumbsList.Remove(handleThumb);
                 //削除箇所Indexより後ろのTagを更新する
                 for (int i = index; i < MyAnchorHandleThumbsList.Count; i++)
                 {
@@ -262,7 +268,19 @@ namespace Pixtack4
             thumb.DragDelta += Thumb_DragDelta;
             thumb.DragCompleted += Thumb_DragCompleted;
             thumb.DragStarted += Thumb_DragStarted;
+            thumb.PreviewMouseRightButtonDown += Thumb_PreviewMouseRightButtonDown;
             return thumb;
+        }
+
+
+        // ハンドル右クリック時、対応するPointのIndexを通知する用イベント
+        public event Action<int>? OnHandleThumbPreviewMouseRightDown;
+        private void Thumb_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is AnchorHandleThumb thumb)
+            {
+                OnHandleThumbPreviewMouseRightDown?.Invoke((int)thumb.Tag);
+            }
         }
 
 
@@ -278,10 +296,15 @@ namespace Pixtack4
             OnHandleThumbDragCompleted?.Invoke(e);
         }
 
-        public event Action<DragStartedEventArgs>? OnHandleThumbDragStarted;
+        public event Action<DragStartedEventArgs, int>? OnHandleThumbDragStarted;
         private void Thumb_DragStarted(object sender, DragStartedEventArgs e)
         {
-            OnHandleThumbDragStarted?.Invoke(e);
+            if (sender is AnchorHandleThumb thumb)
+            {
+                int id = (int)thumb.Tag;
+                OnHandleThumbDragStarted?.Invoke(e, id);
+                e.Handled = true;
+            }
         }
 
         //ハンドルThumbのマウスドラッグ移動、対応するPointも更新する

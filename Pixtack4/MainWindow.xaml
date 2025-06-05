@@ -670,7 +670,7 @@
                   <TextBlock Text="{Binding MyItemData.TextItemData.MyFontSize, StringFormat=MyFontSize  {0:0}}"/>
                   <TextBlock Text="{Binding MyItemData.TextItemData.MyText, StringFormat=MyText  {0:0}}"/>
                   <TextBlock Text="{Binding MyItemData.TextItemData.FontWeight, StringFormat=FontWeight  {0:0}}"/>
-                  <TextBlock Text="{Binding MyItemData.GeoShapeItemData.MyPoints, StringFormat=Points  {0:0 }}"/>
+                  <TextBlock Text="{Binding MyItemData.GeoShapeItemData.MyPoints, StringFormat=Points  {0:0 }}" TextWrapping="Wrap"/>
                   <TextBlock Text="{Binding IsSelectable, StringFormat=IsSelectable  {0:0}}"/>
                   <TextBlock Text="{Binding IsSelected, StringFormat=IsSelected  {0:0}}"/>
                   <TextBlock Text="{Binding MyItemData.MyThumbsItemData.Count, StringFormat=MyThumbsItemData.Count  {0:0}}"/>

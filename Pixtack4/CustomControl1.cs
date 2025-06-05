@@ -9,6 +9,7 @@ using System.Diagnostics.Eventing.Reader;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.Serialization;
 using System.Text;
@@ -1008,6 +1009,8 @@ namespace Pixtack4
         private AdornerLayer MyShepeAdornerLayer { get; set; } = null!;// アンカーハンドル表示用レイヤー
         public AnchorHandleAdorner? MyAnchorHandleAdorner { get; private set; }// アンカーハンドル
         public GeoShape MyGeoShape { get; private set; } = null!;// 図形
+        public int MyDragMovePointIndex { get; private set; } = -1;// ハンドルによってドラッグ移動中のPointのIndex
+
         static GeoShapeThumb2()
         {
             DefaultStyleKeyProperty.OverrideMetadata(typeof(GeoShapeThumb2), new FrameworkPropertyMetadata(typeof(GeoShapeThumb2)));
@@ -1056,9 +1059,16 @@ namespace Pixtack4
         /// <param name="obj"></param>
         private void MyAnchorHandleAdorner_OnDragCompleted(DragCompletedEventArgs obj)
         {
+            MyDragMovePointIndex = -1;
             //位置とサイズの修正、全体の再レイアウト
             UpdateLocateAndSize();
             MyParentThumb?.ReLayout3();
+        }
+
+        // ハンドルの右クリック時、ハンドルと対になっているPointのIndexを取得、記録する
+        private void MyAnchorHandleAdorner_OnHandleThumbPreviewMouseRightDown(int obj)
+        {
+            MyDragMovePointIndex = obj;
         }
 
         #endregion イベント
@@ -1122,12 +1132,17 @@ namespace Pixtack4
         /// <summary>
         /// Pointの削除
         /// </summary>
-        /// <param name="id">削除位置、省略時は末尾のPointを削除する</param>
-        public void RemovePoint(int id = -1)
+        /// <param name="id">削除するPointのIndex位置</param>
+        public void RemovePoint(int id)
         {
-            if (id == -1) { id = MyItemData.GeoShapeItemData.MyPoints.Count - 1; }
+            if (id < 0) { return; }
+            if (MyItemData.GeoShapeItemData.MyPoints.Count < 1) { return; }
+
             MyItemData.GeoShapeItemData.MyPoints.RemoveAt(id);
-            MyAnchorHandleAdorner?.RemoveAnchorHandleThumb(id);
+            if (MyAnchorHandleAdorner?.RemoveAnchorHandleThumb(id) == false)
+            {
+                MessageBox.Show("正常に削除できなかった");
+            }
             UpdateLocateAndSize();
             MyParentThumb?.ReLayout3();
         }
@@ -1153,13 +1168,14 @@ namespace Pixtack4
             if (MyAnchorHandleAdorner is null)
             {
                 MyAnchorHandleAdorner = new(MyGeoShape);
-                //MyAnchorHandleAdorner.MyAnchorHandleSize = 20;
                 MyAnchorHandleAdorner.OnHandleThumbDragCompleted += MyAnchorHandleAdorner_OnDragCompleted;
+                MyAnchorHandleAdorner.OnHandleThumbPreviewMouseRightDown += MyAnchorHandleAdorner_OnHandleThumbPreviewMouseRightDown;
                 MyShepeAdornerLayer.Add(MyAnchorHandleAdorner);
                 UpdateLocateAndSize();
                 MyParentThumb?.ReLayout3();
             }
         }
+
 
         /// <summary>
         /// アンカーハンドルを非表示にする
@@ -1169,6 +1185,7 @@ namespace Pixtack4
             if (MyAnchorHandleAdorner != null)
             {
                 MyAnchorHandleAdorner.OnHandleThumbDragCompleted -= MyAnchorHandleAdorner_OnDragCompleted;
+                MyAnchorHandleAdorner.OnHandleThumbPreviewMouseRightDown -= MyAnchorHandleAdorner_OnHandleThumbPreviewMouseRightDown;
                 MyShepeAdornerLayer.Remove(MyAnchorHandleAdorner);
                 MyAnchorHandleAdorner = null;
                 UpdateLocateAndSize();

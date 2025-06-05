@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Numerics;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Windows;
@@ -10,12 +11,12 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Xml;
-using static System.Net.WebRequestMethods;
 
 namespace Pixtack4
 {
@@ -71,7 +72,10 @@ namespace Pixtack4
         //頂点図形用右クリックメニュー
         private ContextMenu MyShapesContextMenu { get; set; } = new();
 
+        // 頂点追加時に使う、MainGridPanel上での右クリック位置
         private Point MyRightClickDownPoint { get; set; }
+
+
 
         public MainWindow()
         {
@@ -83,7 +87,6 @@ namespace Pixtack4
             PreviewKeyDown += MainWindow_PreviewKeyDown;// 主にホットキーの設定
             DataContext = this;
 
-            //TextBlock tb = new() { FontWeight = FontWeights.b };
         }
 
 
@@ -185,13 +188,14 @@ namespace Pixtack4
             if (LoadAppData() is AppData appData) { MyAppData = appData; }
             else { MyAppData = new AppData(); }
 
+            // 右クリック位置を記録
             MyMainGridPanel.PreviewMouseRightButtonDown += (a, b) =>
             {
                 MyRightClickDownPoint = b.GetPosition(MyMainGridPanel);
-                var neko = MyRightClickDownPoint;
             };
-        }
 
+
+        }
 
         private void MyInitialize2()
         {
@@ -248,9 +252,25 @@ namespace Pixtack4
         /// </summary>
         private void MyInitializeGeoShapeContextMenu()
         {
+            MyMainGridPanel.ContextMenuOpening += MyMainGridPanel_ContextMenuOpening;
+
             MyShapesContextMenu = new ContextMenu();
             MenuItem item;
-            item = new() { Header = "頂点編集終了" };
+
+            item = new() { Header = "ここに頂点追加" }; MyShapesContextMenu.Items.Add(item);
+            item.Click += (a, b) => { AddPointFromRightClickPoint(); };
+
+            item = new() { Header = "ここに頂点追加(延長)" }; MyShapesContextMenu.Items.Add(item);
+            item.Click += (a, b) => { AddPointEndFromRightClickPoint(); };
+
+            MyShapesContextMenu.Items.Add(new Separator());
+
+            item = new() { Header = "この頂点を削除" }; MyShapesContextMenu.Items.Add(item);
+            item.Click += (a, b) => { RemovePoint(); };
+
+            MyShapesContextMenu.Items.Add(new Separator());
+
+            item = new() { Header = "頂点編集終了" }; MyShapesContextMenu.Items.Add(item);
             item.Click += (a, b) =>
             {
                 if (MyRoot.MyFocusThumb is GeoShapeThumb2 geo)
@@ -260,35 +280,10 @@ namespace Pixtack4
                     geo.IsEditing = false;
                 }
             };
-            MyShapesContextMenu.Items.Add(item);
 
-            item = new() { Header = "ここに頂点追加" }; MyShapesContextMenu.Items.Add(item);
-            item.Click += (a, b) =>
-            {
 
-            };
-            item = new() { Header = "ここに頂点追加(延長)" }; MyShapesContextMenu.Items.Add(item);
-            item.Click += (a, b) => { AddPointFromRightClickPoint(); };
-            item = new() { Header = "この頂点を削除" }; MyShapesContextMenu.Items.Add(item);
-
-            MyMainGridPanel.ContextMenuOpening += MyMainGridPanel_ContextMenuOpening;
         }
 
-        // GeoShapeのPointsの末尾に右クリック位置に追加する、頂点追加(延長)
-        private void AddPointFromRightClickPoint()
-        {
-            if (MyRoot.MyFocusThumb is GeoShapeThumb2 geo)
-            {
-                var (left, top) = GetTopLeftFromPoints(geo.MyItemData.GeoShapeItemData.MyPoints);
-                var x = MyRightClickDownPoint.X - geo.MyItemData.MyLeft - MyAppData.GeoShapeHandleSize / 2.0;
-                var y = MyRightClickDownPoint.Y - geo.MyItemData.MyTop - MyAppData.GeoShapeHandleSize / 2.0;
-                x += left;
-                y += top;
-                x = (int)(x + 0.5);
-                y = (int)(y + 0.5);
-                geo.AddPoint(new Point(x, y));
-            }
-        }
 
 
         //MainGridPanelの右クリックメニューを開くとき
@@ -327,6 +322,7 @@ namespace Pixtack4
 
 
         }
+
         /// <summary>
         /// ルート要素の <see cref="FrameworkElement.ContextMenuOpening"/> イベントを処理します。
         /// </summary>
@@ -340,7 +336,6 @@ namespace Pixtack4
             {
                 if (MyRoot.MyFocusThumb.IsEditing)
                 {
-                    //MyRoot.ContextMenu = MyShapesContextMenu;
                     MyRoot.ContextMenu = null;
                 }
                 else
@@ -930,6 +925,77 @@ namespace Pixtack4
 
         #region GeoShapeItem関連
 
+
+        private void RemovePoint()
+        {
+            if (MyRoot.MyFocusThumb is GeoShapeThumb2 geo)
+            {
+                geo.RemovePoint(geo.MyDragMovePointIndex);
+            }
+        }
+
+        // 右クリックした座標にPointを追加する、GeoShapeのPointsの適切なインデックスにPointを追加する
+        private void AddPointFromRightClickPoint()
+        {
+            if (MyRoot.MyFocusThumb is GeoShapeThumb2 geo)
+            {
+                int insertIndex = 0;// 求める適切なインデックス
+                double maxAngle = 0.0;// 最大角度
+                Point migi = GetPointRightClickAtGeoShape(geo);// 右クリック座標
+                PointCollection pc = geo.MyItemData.GeoShapeItemData.MyPoints;
+
+                // Pointが1このときは末尾に追加
+                if (pc.Count == 1) { geo.AddPoint(migi); return; }
+
+                // すべてのPointと右クリック座標を中心とする角度を比較
+                for (int i = 0; i < pc.Count - 1; i++)
+                {
+                    Point front = pc[i];
+                    Point rear = pc[i + 1];
+
+                    // abc3点からできる∠abcの角度を取得
+                    double angle = CalculateAngleABC(front, migi, rear);
+                    if (angle > maxAngle)
+                    {
+                        maxAngle = angle;
+                        insertIndex = i + 1;
+                    }
+                }
+                geo.AddPoint(migi, insertIndex);
+            }
+        }
+
+        /// <summary>
+        /// GeoShapeItemから見た、右クリックの座標を返す、
+        /// MainGridPanelの右クリックメニュー専用、頂点追加するときに使う
+        /// </summary>
+        /// <param name="geo"></param>
+        /// <returns></returns>
+        private Point GetPointRightClickAtGeoShape(GeoShapeThumb2 geo)
+        {
+            // MainGridPanel上での右クリック位置 - GeoShapeItemの位置 - ハンドルサイズ / 2
+            var x = MyRightClickDownPoint.X - geo.MyItemData.MyLeft - MyAppData.GeoShapeHandleSize / 2.0;
+            var y = MyRightClickDownPoint.Y - geo.MyItemData.MyTop - MyAppData.GeoShapeHandleSize / 2.0;
+            // GeoShapeのPointsの左上座標を考慮
+            var (left, top) = GetTopLeftFromPoints(geo.MyItemData.GeoShapeItemData.MyPoints);
+            x += left;
+            y += top;
+            // 四捨五入
+            x = (int)(x + 0.5);
+            y = (int)(y + 0.5);
+            return new Point(x, y);
+        }
+
+        // GeoShapeのPointsの末尾に右クリック位置に追加する、頂点追加(延長)
+        private void AddPointEndFromRightClickPoint()
+        {
+            if (MyRoot.MyFocusThumb is GeoShapeThumb2 geo)
+            {
+                geo.AddPoint(GetPointRightClickAtGeoShape(geo));
+            }
+        }
+
+
         /// <summary>
         /// MainGridPanelの右クリックメニューをGeoShape用に切り替える
         /// </summary>
@@ -1514,6 +1580,46 @@ namespace Pixtack4
 
         #region その他
 
+
+
+
+        /// <summary>
+        /// 3点（a, b, c）から点bを頂点とする角度（∠abc）を度で返す
+        /// </summary>
+        /// <param name="a">始点座標</param>
+        /// <param name="b">頂点座標</param>
+        /// <param name="c">終点座標</param>
+        /// <returns>角度（度）</returns>
+        public static double CalculateAngleABC(Vector2 a, Vector2 b, Vector2 c)
+        {
+            // ベクトルba, bcを求める
+            Vector2 ba = a - b;
+            Vector2 bc = c - b;
+
+            // ベクトルの大きさ
+            double lenBA = ba.Length();
+            double lenBC = bc.Length();
+
+            if (lenBA == 0 || lenBC == 0) return 0; // 0除算防止
+
+            // 内積
+            double dot = Vector2.Dot(ba, bc);
+
+            // 余弦定理で角度（ラジアン）
+            double cosTheta = dot / (lenBA * lenBC);
+            // 計算誤差対策で範囲を制限
+            cosTheta = Math.Clamp(cosTheta, -1.0, 1.0);
+
+            double angleRad = Math.Acos(cosTheta);
+
+            // 度に変換
+            return angleRad * 180.0 / Math.PI;
+        }
+
+        public static double CalculateAngleABC(Point a, Point b, Point c)
+        {
+            return CalculateAngleABC(new Vector2((float)a.X, (float)a.Y), new Vector2((float)b.X, (float)b.Y), new Vector2((float)c.X, (float)c.Y));
+        }
 
         /// <summary>
         /// PointCollectionの左上座標を返す
