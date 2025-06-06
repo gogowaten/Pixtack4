@@ -524,7 +524,7 @@
                       </ComboBox.ItemTemplate>
                     </ComboBox>
                     <UniformGrid Columns="2" Margin="4">
-                      <Slider x:Name="SliderGeoShapeStrokeThickness" Minimum="1" Maximum="50" Value="20" TickFrequency="1" IsSnapToTickEnabled="True"/>
+                      <Slider x:Name="SliderGeoShapeStrokeThickness" Minimum="1" Maximum="50" Value="{Binding MyAppData.GeoShapeStrokeThickness}" TickFrequency="1" IsSnapToTickEnabled="True"/>
                       <TextBlock Text="{Binding ElementName=SliderGeoShapeStrokeThickness, Path=Value, StringFormat=線幅 {0:0}}"/>
                     </UniformGrid>
                     <Button Content="直線矢印追加" Click="Button_Click_AddGeoShapeItem"/>
@@ -916,7 +916,7 @@
           </ScrollViewer>
           
           <!--マウスクリックで頂点追加用グリッド-->
-          <Grid x:Name="MyMainGridCoverAddClickPoint"  Visibility="Collapsed" Cursor="Cross">
+          <Grid x:Name="MyMainGridCover"  Visibility="Collapsed" Cursor="Cross">
             <Grid.Background>
               <SolidColorBrush>
                 <SolidColorBrush.Color>
@@ -924,7 +924,7 @@
                 </SolidColorBrush.Color>
               </SolidColorBrush>
             </Grid.Background>
-            <Polyline x:Name="MyTempPolyline" Stroke="Red" StrokeThickness="20" Points="0,0,100,100"/>
+            <Polyline x:Name="MyTempPolyline" Stroke="{Binding ElementName=ComboBoxGeoShapeStrokeColor, Path=SelectedValue}" StrokeThickness="{Binding MyAppData.GeoShapeStrokeThickness}" Points="0,0,100,100"/>
           </Grid>
         </Grid>
       </DockPanel>

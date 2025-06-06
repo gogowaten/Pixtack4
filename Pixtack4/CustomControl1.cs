@@ -2170,13 +2170,13 @@ namespace Pixtack4
         /// </summary>
         /// <param name="data"></param>
         /// <param name="addTo"></param>
-        public bool AddNewThumbFromItemData(ItemData data, GroupThumb addTo)
+        public bool AddNewThumbFromItemData(ItemData data, GroupThumb addTo, bool isTopLeft = false)
         {
             if (MyBuilder.MakeThumb(data) is KisoThumb thumb)
             {
                 if (addTo == MyActiveGroupThumb)
                 {
-                    return AddThumbToActiveGroup(thumb, addTo);
+                    return AddThumbToActiveGroup(thumb, addTo, isTopLeft);
                 }
                 else
                 {
@@ -2185,6 +2185,7 @@ namespace Pixtack4
             }
             return false;
         }
+
 
         public bool AddNewThumbFromItemData(ItemData data)
         {
@@ -2229,16 +2230,23 @@ namespace Pixtack4
         /// <remarks>フォーカスされているサムが存在する場合、新しいサムの位置は、フォーカスされているサムの位置を基準として計算され、グループのグリッドサイズとオフセット設定によって調整されます。フォーカスされているサムが存在しない場合は、グループのデフォルトの位置にサムが追加されます。</remarks>
         /// <param name="thumb">グループに追加する <see cref="KisoThumb"/>。このサムは追加後に選択可能になります。</param>
         /// <param name="group"><paramref name="thumb"/> が追加される <see cref="GroupThumb"/>。グループのグリッドとオフセット設定によってサムの配置が決まります。</param>
-        public bool AddThumb(KisoThumb? thumb, GroupThumb? group)
+        public bool AddThumb(KisoThumb? thumb, GroupThumb? group, bool isTopLeft = false)
         {
             if (thumb == null || group == null) { return false; }
-
             double left = 0;
             double top = 0;
-            if (MyFocusThumb?.MyItemData is ItemData focusData)
+            if (isTopLeft)
             {
-                left = GetIntLocate(group.MyItemData.GridSize, group.MyItemData.MyAddOffsetLeft + focusData.MyLeft);
-                top = GetIntLocate(group.MyItemData.GridSize, group.MyItemData.MyAddOffsetTop + focusData.MyTop);
+                left = thumb.MyItemData.MyLeft;
+                top = thumb.MyItemData.MyTop;
+            }
+            else
+            {
+                if (MyFocusThumb?.MyItemData is ItemData focusData)
+                {
+                    left = GetIntLocate(group.MyItemData.GridSize, group.MyItemData.MyAddOffsetLeft + focusData.MyLeft);
+                    top = GetIntLocate(group.MyItemData.GridSize, group.MyItemData.MyAddOffsetTop + focusData.MyTop);
+                }                
             }
             return AddThumb(thumb, group, left, top);
         }
@@ -2303,9 +2311,9 @@ namespace Pixtack4
         }
 
 
-        public bool AddThumbToActiveGroup(KisoThumb thumb, GroupThumb parent)
+        public bool AddThumbToActiveGroup(KisoThumb thumb, GroupThumb parent, bool isTopLeft = false)
         {
-            if (AddThumb(thumb, parent))
+            if (AddThumb(thumb, parent, isTopLeft))
             {
                 thumb.IsSelectable = true;
                 return true;

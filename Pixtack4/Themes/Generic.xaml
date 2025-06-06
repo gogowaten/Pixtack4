@@ -290,7 +290,7 @@
                 Stroke="{Binding GeoShapeItemData.MyStroke}"
                 StrokeThickness="{Binding GeoShapeItemData.MyStrokeThickness}"
                 MyShapeType="{Binding GeoShapeItemData.MyShapeType}"
-                MyHeadBeginType="{Binding GeoShapeItemData.MyGeoShapeHeadCapType}"
+                MyHeadEndType="{Binding GeoShapeItemData.MyGeoShapeHeadCapType}"
                 RenderTransform="{Binding MyAngle, Converter={StaticResource rotate}}"
                 >
 

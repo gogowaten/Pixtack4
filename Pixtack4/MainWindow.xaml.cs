@@ -195,14 +195,14 @@ namespace Pixtack4
                 MyRightClickDownPoint = b.GetPosition(MyMainGridPanel);
             };
 
-            MyMainGridCoverAddClickPoint.PreviewMouseLeftButtonDown += (a, b) =>
+            MyMainGridCover.PreviewMouseLeftButtonDown += (a, b) =>
             {
                 var neko = b.GetPosition(MyMainGridPanel);
                 var inu = b.GetPosition(MyScrollViewer);
                 var yoko = MyScrollViewer.HorizontalOffset;
                 var tate = MyScrollViewer.VerticalOffset;
 
-                var po = b.GetPosition(MyMainGridPanel);
+                var po = b.GetPosition(MyMainGridCover);
                 po = new Point((int)(po.X + 0.5), (int)(po.Y + 0.5));
                 MyPoints.Add(po);
                 //MyPoints.Add(b.GetPosition(MyMainGridPanel));
@@ -571,6 +571,7 @@ namespace Pixtack4
 
             //矢印図形の色
             ComboBoxGeoShapeStrokeColor.ItemsSource = brushDictionary;
+            ComboBoxGeoShapeStrokeColor.SelectedIndex = 12;
 
         }
 
@@ -672,7 +673,7 @@ namespace Pixtack4
         private void AddGeoShapeFromMouseClick()
         {
             MyScrollViewer.IsEnabled = false;
-            MyMainGridCoverAddClickPoint.Visibility = Visibility.Visible;
+            MyMainGridCover.Visibility = Visibility.Visible;
             MyPoints = [];
             MyTempPolyline.Points = MyPoints;
         }
@@ -681,7 +682,12 @@ namespace Pixtack4
         private void AddGeoShapeFromMouseClickEnd()
         {
             MyScrollViewer.IsEnabled = true;
-            MyMainGridCoverAddClickPoint.Visibility = Visibility.Collapsed;
+            MyMainGridCover.Visibility = Visibility.Collapsed;
+            if (MyPoints.Count > 1)
+            {
+                ItemData data = MakeGeoShapeArrowLineItemData(MyPoints);
+                _ = MyRoot.AddNewThumbFromItemData(data, MyRoot.MyActiveGroupThumb, true);
+            }
         }
 
 
@@ -1071,18 +1077,51 @@ namespace Pixtack4
         /// <returns></returns>
         private bool AddGeoShapeItem()
         {
+            PointCollection pc = [new Point(), new Point(100, 100)];
+            return MyRoot.AddNewThumbFromItemData(MakeGeoShapeArrowLineItemData(pc));
+        }
+
+
+        /// <summary>
+        /// 矢印図形のItemDataを作成
+        /// </summary>
+        /// <param name="pc"></param>
+        /// <returns></returns>
+        private ItemData MakeGeoShapeArrowLineItemData(PointCollection pc)
+        {
             ItemData data = new(ThumbType.GeoShape);
-            data.GeoShapeItemData.MyPoints = [new Point(), new Point(100, 100)];
+            var (left, top) = ZeroFixPointCollection(pc);
+            left += MyScrollViewer.HorizontalOffset;
+            top += MyScrollViewer.VerticalOffset;
+            data.MyLeft = left;
+            data.MyTop = top;
+            data.GeoShapeItemData.MyPoints = pc;
             data.GeoShapeItemData.MyShapeType = ShapeType.Line;
             data.GeoShapeItemData.MyGeoShapeHeadCapType = HeadType.Arrow;
-            data.GeoShapeItemData.MyStrokeThickness = SliderGeoShapeStrokeThickness.Value;
-            data.GeoShapeItemData.MyStroke = Brushes.Tomato;
+            data.GeoShapeItemData.MyStrokeThickness = MyAppData.GeoShapeStrokeThickness;
+            data.GeoShapeItemData.MyStroke = Brushes.Maroon;
             if (ComboBoxGeoShapeStrokeColor.SelectedValue is Brush b)
             {
                 data.GeoShapeItemData.MyStroke = b;
             }
+            return data;
+        }
 
-            return MyRoot.AddNewThumbFromItemData(data);
+        /// <summary>
+        /// 指定された <see cref="PointCollection"/> 内のすべての点を調整し、左上点が原点 (0, 0) になるようにします。
+        /// </summary>
+        /// <remarks>このメソッドは、入力された <see cref="PointCollection"/> を、各点から左上座標を減算することで、すべての点が左上点 (0, 0) になるようにシフトされます。</remarks>
+        /// <param name="pc">調整する <see cref="PointCollection"/>。null にすることはできません。</param>
+        /// <returns> <see cref="PointCollection"/> の元の左上座標を含むタプル。最初の値は X 座標、2 番目の値は Y 座標です。</returns>
+        ///
+        private (double left, double top) ZeroFixPointCollection(PointCollection pc)
+        {
+            var (left, top) = GetTopLeftFromPoints(pc);
+            for (int i = 0; i < pc.Count; i++)
+            {
+                pc[i] = new Point(pc[i].X - left, pc[i].Y - top);
+            }
+            return (left, top);
         }
 
         /// <summary>
