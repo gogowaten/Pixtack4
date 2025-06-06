@@ -528,7 +528,8 @@
                       <TextBlock Text="{Binding ElementName=SliderGeoShapeStrokeThickness, Path=Value, StringFormat=線幅 {0:0}}"/>
                     </UniformGrid>
                     <Button Content="直線矢印追加" Click="Button_Click_AddGeoShapeItem"/>
-                    <!--<Button Content="アンカー表示切替" Click="Button_Click_GeoShapeAnchorVisibleSwitch"/>-->
+                    <Button Content="マウスクリックで追加" Click="Button_Click_AddGeoShapeFromMouseClick"/>
+                    <Button Content="マウスクリックで追加終了" Click="Button_Click_AddGeoShapeFromMouseClickEnd"/>
                   </StackPanel>
                 </TabItem>
                 <TabItem Header="その他">
@@ -912,10 +913,19 @@
                ScrollViewerの中の、ここがメインのパネルになる<LineBreak/>
             </TextBlock>
           </Canvas>-->
-
-
-
           </ScrollViewer>
+          
+          <!--マウスクリックで頂点追加用グリッド-->
+          <Grid x:Name="MyMainGridCoverAddClickPoint"  Visibility="Collapsed" Cursor="Cross">
+            <Grid.Background>
+              <SolidColorBrush>
+                <SolidColorBrush.Color>
+                  <Color A="100" R="255" G="255" B="255"/>
+                </SolidColorBrush.Color>
+              </SolidColorBrush>
+            </Grid.Background>
+            <Polyline x:Name="MyTempPolyline" Stroke="Red" StrokeThickness="20" Points="0,0,100,100"/>
+          </Grid>
         </Grid>
       </DockPanel>
       <!--中間ここまで-->

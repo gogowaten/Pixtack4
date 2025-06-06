@@ -787,7 +787,6 @@ namespace Pixtack4
             {
                 if (e.NewValue is true) { geo.AnchorOn(); }
                 else { geo.AnchorOff(); }
-                //geo.IsEditingChanged?.Invoke();
             }
         }
 

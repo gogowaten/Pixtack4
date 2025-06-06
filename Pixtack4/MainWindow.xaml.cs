@@ -75,6 +75,7 @@ namespace Pixtack4
         // 頂点追加時に使う、MainGridPanel上での右クリック位置
         private Point MyRightClickDownPoint { get; set; }
 
+        private PointCollection MyPoints { get; set; } = new();
 
 
         public MainWindow()
@@ -194,6 +195,24 @@ namespace Pixtack4
                 MyRightClickDownPoint = b.GetPosition(MyMainGridPanel);
             };
 
+            MyMainGridCoverAddClickPoint.PreviewMouseLeftButtonDown += (a, b) =>
+            {
+                var neko = b.GetPosition(MyMainGridPanel);
+                var inu = b.GetPosition(MyScrollViewer);
+                var yoko = MyScrollViewer.HorizontalOffset;
+                var tate = MyScrollViewer.VerticalOffset;
+
+                var po = b.GetPosition(MyMainGridPanel);
+                po = new Point((int)(po.X + 0.5), (int)(po.Y + 0.5));
+                MyPoints.Add(po);
+                //MyPoints.Add(b.GetPosition(MyMainGridPanel));
+            };
+
+            MyMainGridPanel.PreviewMouseLeftButtonDown += (a, b) =>
+            {
+                var sou = b.Source;
+                var neko = MyPoints;
+            };
 
         }
 
@@ -628,23 +647,8 @@ namespace Pixtack4
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            var neko = MyGroupItemView;
+            var neko = MyPoints;
             var inu = MyCollectionViewOnlyGroupItems;
-            //System.ComponentModel.ICollectionView filterView = new CollectionViewSource() { Source = MyRoot.MyThumbs }.View;
-            ////System.ComponentModel.ICollectionView uma = CollectionViewSource.GetDefaultView(MyRoot.MyThumbs);
-
-            //filterView.Filter = x =>
-            //{
-            //    var pp = (KisoThumb)x;
-            //    return pp.MyThumbType == ThumbType.Group;
-            //};
-            var uma = MyThumbsTreeView.SelectedItem;
-            var appdata = MyAppData;
-            if (MyRoot.MyFocusThumb is GeoShapeThumb2 geo)
-            {
-                var handlesize = geo.MyAnchorHandleAdorner?.MyAnchorHandleSize;
-
-            }
         }
 
 
@@ -654,19 +658,49 @@ namespace Pixtack4
 
         }
 
+        private void Button_Click_AddGeoShapeFromMouseClickEnd(object sender, RoutedEventArgs e)
+        {
+            AddGeoShapeFromMouseClickEnd();
+        }
+
+        private void Button_Click_AddGeoShapeFromMouseClick(object sender, RoutedEventArgs e)
+        {
+            AddGeoShapeFromMouseClick();
+        }
+
+        // 開始
+        private void AddGeoShapeFromMouseClick()
+        {
+            MyScrollViewer.IsEnabled = false;
+            MyMainGridCoverAddClickPoint.Visibility = Visibility.Visible;
+            MyPoints = [];
+            MyTempPolyline.Points = MyPoints;
+        }
+
+        // 終了
+        private void AddGeoShapeFromMouseClickEnd()
+        {
+            MyScrollViewer.IsEnabled = true;
+            MyMainGridCoverAddClickPoint.Visibility = Visibility.Collapsed;
+        }
+
+
+
+
+        #region 完成
+
+
+
 
         private void Button_Click_AddGeoShapeItem(object sender, RoutedEventArgs e)
         {
-            AddGeoShapeItem();
+            AddGeoShapeItem();// 矢印図形Itemの追加
         }
 
         private void Button_Click_AddEllipseItem(object sender, RoutedEventArgs e)
         {
-            AddEllipseItem();
+            AddEllipseItem();// 楕円形Itemの追加
         }
-
-
-
 
         private void Button_Click_AddRectItem(object sender, RoutedEventArgs e)
         {
@@ -677,13 +711,6 @@ namespace Pixtack4
         {
             AddTextBlockItem();// MainWindowからTextBlockItemをMyRootに追加する
         }
-
-
-        #region 完了
-
-
-
-
 
         private void Button_Click_RenewFontList(object sender, RoutedEventArgs e)
         {
@@ -904,7 +931,7 @@ namespace Pixtack4
         {
             ResetWindowState();// ウィンドウの位置とサイズをリセット
         }
-        #endregion 完了
+        #endregion 完成
 
         #endregion ボタンクリック
 
@@ -986,12 +1013,24 @@ namespace Pixtack4
             return new Point(x, y);
         }
 
-        // GeoShapeのPointsの末尾に右クリック位置に追加する、頂点追加(延長)
+        // 右クリックしたところに頂点を追加
+        // 始点、終点で近い方に延長追加する
         private void AddPointEndFromRightClickPoint()
         {
             if (MyRoot.MyFocusThumb is GeoShapeThumb2 geo)
             {
-                geo.AddPoint(GetPointRightClickAtGeoShape(geo));
+                var migi = GetPointRightClickAtGeoShape(geo);
+                PointCollection pc = geo.MyItemData.GeoShapeItemData.MyPoints;
+
+                // 右クリック地点との距離、始点 > 終点なら
+                if (EuclideanDistance(migi, pc[0]) > EuclideanDistance(migi, pc[^1]))
+                {
+                    geo.AddPoint(migi, pc.Count);// 末尾に追加
+                }
+                else
+                {
+                    geo.AddPoint(migi, 0);// 先頭に追加
+                }
             }
         }
 
@@ -1581,7 +1620,18 @@ namespace Pixtack4
         #region その他
 
 
-
+        /// <summary>
+        /// 2点間のユークリッド距離を返す
+        /// </summary>
+        /// <param name="a">1つ目の点</param>
+        /// <param name="b">2つ目の点</param>
+        /// <returns>ユークリッド距離</returns>
+        private double EuclideanDistance(Point a, Point b)
+        {
+            double dx = a.X - b.X;
+            double dy = a.Y - b.Y;
+            return Math.Sqrt(dx * dx + dy * dy);
+        }
 
         /// <summary>
         /// 3点（a, b, c）から点bを頂点とする角度（∠abc）を度で返す
@@ -2188,5 +2238,6 @@ namespace Pixtack4
             var ori = e.OriginalSource;
             var sou = e.Source;
         }
+
     }
 }
