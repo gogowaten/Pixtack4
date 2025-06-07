@@ -195,11 +195,17 @@ namespace Pixtack4
                 MyRightClickDownPoint = b.GetPosition(MyMainGridPanel);
             };
 
+            // マウスクリックでCanvasに直線を描画その2、Polyline、WPFとC# - 午後わてんのブログ
+            // https://gogowaten.hatenablog.com/entry/15540488
             // クリックで図形追加用、頂点追加
             MyMainGridCover.PreviewMouseLeftButtonDown += (a, b) =>
             {
                 var po = b.GetPosition(MyMainGridCover);
                 po = new Point((int)(po.X + 0.5), (int)(po.Y + 0.5));
+                if (MyPoints.Count == 0)
+                {
+                    MyPoints.Add(po);
+                }
                 MyPoints.Add(po);
             };
 
@@ -207,6 +213,19 @@ namespace Pixtack4
             MyMainGridCover.PreviewMouseRightButtonDown += (a, b) =>
             {
                 AddGeoShapeFromMouseClickEnd();
+            };
+
+            // 追加中
+            MyMainGridCover.MouseMove += (a, b) =>
+            {
+                if (MyPoints.Count > 0)
+                {
+                    var po = b.GetPosition(MyMainGridCover);
+                    po = new Point((int)(po.X + 0.5), (int)(po.Y + 0.5));
+                    int i = MyPoints.Count - 1;
+                    MyPoints[i] = po;
+                }
+
             };
         }
 
@@ -662,7 +681,8 @@ namespace Pixtack4
 
         private void Button_Click_AddGeoShapeFromMouseClickEnd(object sender, RoutedEventArgs e)
         {
-            AddGeoShapeFromMouseClickEnd();// 図形新規追加終了、クリック箇所が2個以上なら図形追加
+            // 図形新規追加終了、クリック箇所が2個以上なら図形追加、最後の頂点は削除して追加
+            AddGeoShapeFromMouseClickEnd(isRemoveEndPoint: true);
         }
 
         private void Button_Click_AddGeoShapeFromMouseClick(object sender, RoutedEventArgs e)
@@ -1055,8 +1075,15 @@ namespace Pixtack4
         }
 
         // 矢印図形新規追加終了、クリック箇所が2個以上なら図形追加
-        private void AddGeoShapeFromMouseClickEnd()
+        /// <summary>
+        /// ユーザーのマウスクリックに基づいて、幾何学的な矢印図形の追加を完了します。
+        /// </summary>
+        /// <remarks>このメソッドは、スクロールビューアを有効にし、メインのグリッドカバーを非表示にします。ユーザーが少なくとも2つの点をクリックした場合、新しい矢印図形が作成され、アクティブなグループに追加されます。</remarks>
+        /// <param name="isRemoveEndPoint">図形の端点を削除するかどうかを示します。<see langword="true"/> の場合、端点は図形から除外されます。それ以外の場合は、端点は図形に含まれます。</param>
+        ///
+        private void AddGeoShapeFromMouseClickEnd(bool isRemoveEndPoint = false)
         {
+            if (isRemoveEndPoint) { MyPoints.RemoveAt(MyPoints.Count - 1); }
             MyScrollViewer.IsEnabled = true;
             MyMainGridCover.Visibility = Visibility.Collapsed;
             if (MyPoints.Count > 1)
