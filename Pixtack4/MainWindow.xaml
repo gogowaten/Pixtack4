@@ -445,7 +445,7 @@
                       </ComboBox.ItemTemplate>
                     </ComboBox>
 
-                    <TextBox x:Name="MyTextBoxAddText" AcceptsReturn="True" Height="100" Text="ここに文字列入力して&#xa;追加ボタン"/>
+                    <TextBox x:Name="MyTextBoxAddText" AcceptsReturn="True" Height="100" Text="ここに文字列入力して&#xa;追加ボタン" GotFocus="MyTextBoxAddText_GotFocus"/>
                     <Button Content="追加" Click="Button_Click_AddTextBlockItem"/>
 
                   </StackPanel>
@@ -524,12 +524,21 @@
                       </ComboBox.ItemTemplate>
                     </ComboBox>
                     <UniformGrid Columns="2" Margin="4">
-                      <Slider x:Name="SliderGeoShapeStrokeThickness" Minimum="1" Maximum="50" Value="{Binding MyAppData.GeoShapeStrokeThickness}" TickFrequency="1" IsSnapToTickEnabled="True"/>
-                      <TextBlock Text="{Binding ElementName=SliderGeoShapeStrokeThickness, Path=Value, StringFormat=線幅 {0:0}}"/>
+                      <TextBlock Text="終端形状" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                      <ComboBox x:Name="ComboBoxGeoShapeEndCapType"/>
                     </UniformGrid>
-                    <Button Content="直線矢印追加" Click="Button_Click_AddGeoShapeItem"/>
+                    <UniformGrid Columns="2" Margin="4">
+                      <TextBlock Text="{Binding ElementName=SliderGeoShapeStrokeThickness, Path=Value, StringFormat=線幅 {0:0}}" HorizontalAlignment="Center"/>
+                      <Slider x:Name="SliderGeoShapeStrokeThickness" Minimum="1" Maximum="50" Value="{Binding MyAppData.GeoShapeStrokeThickness}" TickFrequency="1" IsSnapToTickEnabled="True"/>
+                    </UniformGrid>
+                    <Button Content="直線追加" Click="Button_Click_AddGeoShapeLineItem"/>
                     <Button Content="マウスクリックで追加" Click="Button_Click_AddGeoShapeFromMouseClick"/>
                     <Button Content="マウスクリックで追加終了" Click="Button_Click_AddGeoShapeFromMouseClickEnd"/>
+                    
+                    <Button Content="曲線追加" Click="Button_Click_AddGeoShapeBezierItem"/>
+                    <Button Content="マウスクリックで追加(曲線)" Click="Button_Click_AddGeoShapeFromMouseClick" IsEnabled="False"/>
+                    <Button Content="マウスクリックで追加終了(曲線)" Click="Button_Click_AddGeoShapeFromMouseClickEnd" IsEnabled="False"/>
+                    
                   </StackPanel>
                 </TabItem>
                 <TabItem Header="その他">
@@ -926,6 +935,18 @@
             </Grid.Background>
             <Polyline x:Name="MyTempPolyline" Stroke="{Binding ElementName=ComboBoxGeoShapeStrokeColor, Path=SelectedValue}" StrokeThickness="{Binding MyAppData.GeoShapeStrokeThickness}" Points="0,0,100,100"/>
           </Grid>
+          
+          <Grid x:Name="MyMainGridCoverBezier"  Visibility="Collapsed" Cursor="Cross">
+            <Grid.Background>
+              <SolidColorBrush>
+                <SolidColorBrush.Color>
+                  <Color A="120" R="5" G="5" B="5"/>
+                </SolidColorBrush.Color>
+              </SolidColorBrush>
+            </Grid.Background>
+            <Polyline x:Name="MyTempBezierline" Stroke="{Binding ElementName=ComboBoxGeoShapeStrokeColor, Path=SelectedValue}" StrokeThickness="{Binding MyAppData.GeoShapeStrokeThickness}" Points="0,0,100,100"/>
+          </Grid>
+          
         </Grid>
       </DockPanel>
       <!--中間ここまで-->

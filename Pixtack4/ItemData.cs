@@ -321,8 +321,11 @@ namespace Pixtack4
         public GeoShapeItemData() { MyInitBind(); }
 
 
-        private HeadType _myGeoShapeHeadCapType = HeadType.None;
-        public HeadType MyGeoShapeHeadCapType { get => _myGeoShapeHeadCapType; set => SetProperty(ref _myGeoShapeHeadCapType, value); }
+        private HeadType _myGeoShapeHeadBeginCapType;
+        public HeadType MyGeoShapeHeadBeginCapType { get => _myGeoShapeHeadBeginCapType; set => SetProperty(ref _myGeoShapeHeadBeginCapType, value); }
+
+        private HeadType _myGeoShapeHeadEndCapType = HeadType.None;
+        public HeadType MyGeoShapeHeadEndCapType { get => _myGeoShapeHeadEndCapType; set => SetProperty(ref _myGeoShapeHeadEndCapType, value); }
 
 
         private double _myStrokeThickness = 10.0;
@@ -366,7 +369,7 @@ namespace Pixtack4
 
         private void MyInitBind()
         {
-            //矢印図形の色
+            //直線図形の色
             MultiBinding mb;
             mb = new() { Converter = new MyConverterARGBtoSolidBrush() };
             mb.Bindings.Add(new Binding(nameof(MyStrokeA)) { Source = this });

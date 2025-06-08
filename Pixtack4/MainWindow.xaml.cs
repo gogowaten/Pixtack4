@@ -200,8 +200,7 @@ namespace Pixtack4
             // クリックで図形追加用、頂点追加
             MyMainGridCover.PreviewMouseLeftButtonDown += (a, b) =>
             {
-                var po = b.GetPosition(MyMainGridCover);
-                po = new Point((int)(po.X + 0.5), (int)(po.Y + 0.5));
+                var po = GetIntPosition(b, MyMainGridCover);
                 if (MyPoints.Count == 0)
                 {
                     MyPoints.Add(po);
@@ -220,12 +219,18 @@ namespace Pixtack4
             {
                 if (MyPoints.Count > 0)
                 {
-                    var po = b.GetPosition(MyMainGridCover);
-                    po = new Point((int)(po.X + 0.5), (int)(po.Y + 0.5));
+                    var po = GetIntPosition(b, MyMainGridCover);
                     int i = MyPoints.Count - 1;
                     MyPoints[i] = po;
                 }
 
+            };
+
+            // 入力用テキストボックスクリック時、テキスト全選択
+            MyTextBoxAddText.PreviewMouseLeftButtonDown += (a, b) =>
+            {
+                MyTextBoxAddText.Focus();
+                b.Handled = true;
             };
         }
 
@@ -582,9 +587,13 @@ namespace Pixtack4
             ComboBoxShapeFill.ItemsSource = brushDictionary;
             ComboBoxShapeStrokeColor.ItemsSource = brushDictionary;
 
-            //矢印図形の色
+            //直線図形の色
             ComboBoxGeoShapeStrokeColor.ItemsSource = brushDictionary;
             ComboBoxGeoShapeStrokeColor.SelectedIndex = 12;
+
+            //終端形状
+            ComboBoxGeoShapeEndCapType.ItemsSource = Enum.GetValues(typeof(HeadType));
+            ComboBoxGeoShapeEndCapType.SelectedValue = HeadType.Arrow;
 
         }
 
@@ -691,9 +700,14 @@ namespace Pixtack4
         }
 
 
-        private void Button_Click_AddGeoShapeItem(object sender, RoutedEventArgs e)
+        private void Button_Click_AddGeoShapeBezierItem(object sender, RoutedEventArgs e)
         {
-            AddGeoShapeItem();// 矢印図形Itemの追加
+            AddGeoShapeBezierItem();// 曲線図形Itemの追加
+        }
+
+        private void Button_Click_AddGeoShapeLineItem(object sender, RoutedEventArgs e)
+        {
+            AddGeoShapeLineItem();// 直線図形Itemの追加
         }
 
         private void Button_Click_AddEllipseItem(object sender, RoutedEventArgs e)
@@ -1065,7 +1079,16 @@ namespace Pixtack4
         #region Item追加
 
 
-        // 矢印図形新規追加開始、クリックで頂点追加
+        //// 曲線図形新規追加開始、クリックで頂点追加
+        //private void AddGeoShapeFromMouseClick()
+        //{
+        //    MyScrollViewer.IsEnabled = false;
+        //    MyMainGridCover.Visibility = Visibility.Visible;
+        //    MyPoints = [];
+        //    MyTempPolyline.Points = MyPoints;
+        //}
+
+        // 直線図形新規追加開始、クリックで頂点追加
         private void AddGeoShapeFromMouseClick()
         {
             MyScrollViewer.IsEnabled = false;
@@ -1074,11 +1097,11 @@ namespace Pixtack4
             MyTempPolyline.Points = MyPoints;
         }
 
-        // 矢印図形新規追加終了、クリック箇所が2個以上なら図形追加
+        // 直線図形新規追加終了、クリック箇所が2個以上なら図形追加
         /// <summary>
-        /// ユーザーのマウスクリックに基づいて、幾何学的な矢印図形の追加を完了します。
+        /// ユーザーのマウスクリックに基づいて、幾何学的な直線図形の追加を完了します。
         /// </summary>
-        /// <remarks>このメソッドは、スクロールビューアを有効にし、メインのグリッドカバーを非表示にします。ユーザーが少なくとも2つの点をクリックした場合、新しい矢印図形が作成され、アクティブなグループに追加されます。</remarks>
+        /// <remarks>このメソッドは、スクロールビューアを有効にし、メインのグリッドカバーを非表示にします。ユーザーが少なくとも2つの点をクリックした場合、新しい直線図形が作成され、アクティブなグループに追加されます。</remarks>
         /// <param name="isRemoveEndPoint">図形の端点を削除するかどうかを示します。<see langword="true"/> の場合、端点は図形から除外されます。それ以外の場合は、端点は図形に含まれます。</param>
         ///
         private void AddGeoShapeFromMouseClickEnd(bool isRemoveEndPoint = false)
@@ -1088,29 +1111,40 @@ namespace Pixtack4
             MyMainGridCover.Visibility = Visibility.Collapsed;
             if (MyPoints.Count > 1)
             {
-                ItemData data = MakeGeoShapeArrowLineItemData(MyPoints);
+                ItemData data = MakeGeoShapeLineItemData(MyPoints, ShapeType.Line);
                 _ = MyRoot.AddNewThumbFromItemData(data, MyRoot.MyActiveGroupThumb, true);
             }
         }
 
 
+
         /// <summary>
-        /// 矢印図形Itemの追加
+        /// 曲線図形Itemの追加
         /// </summary>
         /// <returns></returns>
-        private bool AddGeoShapeItem()
+        private bool AddGeoShapeBezierItem()
+        {
+            PointCollection pc = [new Point(), new Point(100, 0), new Point(100, 100), new Point(0, 100)];
+            return MyRoot.AddNewThumbFromItemData(MakeGeoShapeLineItemData(pc, ShapeType.Bezier));
+        }
+
+        /// <summary>
+        /// 直線図形Itemの追加
+        /// </summary>
+        /// <returns></returns>
+        private bool AddGeoShapeLineItem()
         {
             PointCollection pc = [new Point(), new Point(100, 100)];
-            return MyRoot.AddNewThumbFromItemData(MakeGeoShapeArrowLineItemData(pc));
+            return MyRoot.AddNewThumbFromItemData(MakeGeoShapeLineItemData(pc, ShapeType.Line));
         }
 
 
         /// <summary>
-        /// 矢印図形のItemDataを作成
+        /// 直線図形のItemDataを作成
         /// </summary>
         /// <param name="pc"></param>
         /// <returns></returns>
-        private ItemData MakeGeoShapeArrowLineItemData(PointCollection pc)
+        private ItemData MakeGeoShapeLineItemData(PointCollection pc, ShapeType shapeType)
         {
             ItemData data = new(ThumbType.GeoShape);
             var (left, top) = ZeroFixPointCollection(pc);// Point全体を左上に寄せる
@@ -1119,8 +1153,14 @@ namespace Pixtack4
             data.MyLeft = left;
             data.MyTop = top;
             data.GeoShapeItemData.MyPoints = pc;
-            data.GeoShapeItemData.MyShapeType = ShapeType.Line;
-            data.GeoShapeItemData.MyGeoShapeHeadCapType = HeadType.Arrow;
+            data.GeoShapeItemData.MyShapeType = shapeType;
+            //data.GeoShapeItemData.MyShapeType = ShapeType.Line;
+
+            data.GeoShapeItemData.MyGeoShapeHeadEndCapType = HeadType.None;
+            if (ComboBoxGeoShapeEndCapType.SelectedValue is HeadType head)
+            {
+                data.GeoShapeItemData.MyGeoShapeHeadEndCapType = head;
+            }
             data.GeoShapeItemData.MyStrokeThickness = MyAppData.GeoShapeStrokeThickness;
             data.GeoShapeItemData.MyStroke = Brushes.Maroon;
             if (ComboBoxGeoShapeStrokeColor.SelectedValue is Brush b)
@@ -1674,6 +1714,21 @@ namespace Pixtack4
 
 
         #region その他
+
+        /// <summary>
+        /// 指定された入力要素を基準としたマウスポインターの相対的な整数位置を計算します。
+        /// </summary>
+        /// <remarks>このメソッドは、マウス位置のX座標とY座標を四捨五入して整数に丸めます。</remarks>
+        /// <param name="e">マウスイベントデータを含む<see cref="MouseEventArgs"/>。</param>
+        /// <param name="element">マウス位置の計算の基準となる<see cref="IInputElement"/>。</param>
+        /// <returns>マウス位置を表す<see cref="Point"/>。X座標とY座標は最も近い整数に丸められます。</returns>
+        ///
+        private static Point GetIntPosition(MouseEventArgs e, IInputElement element)
+        {
+            var po = e.GetPosition(element);
+            po = new Point((int)(po.X + 0.5), (int)(po.Y + 0.5));
+            return po;
+        }
 
         /// <summary>
         /// 指定された <see cref="PointCollection"/> 内のすべての点を調整し、左上点が原点 (0, 0) になるようにします。
@@ -2306,11 +2361,21 @@ namespace Pixtack4
         }
         #endregion TreeView
 
+        #region ボタンクリック以外のイベントでの動作
+
         private void Viewbox_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             var ori = e.OriginalSource;
             var sou = e.Source;
         }
 
+        // 入力用テキストボックスクリック時、テキスト全選択
+        private void MyTextBoxAddText_GotFocus(object sender, RoutedEventArgs e)
+        {
+            MyTextBoxAddText.SelectAll();
+        }
+
+
+        #endregion ボタンクリック以外のイベントでの動作
     }
 }
