@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Numerics;
+using System.Reflection.Emit;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Windows;
@@ -223,6 +224,7 @@ namespace Pixtack4
 
             };
 
+            // ベジェ曲線、クリックでアンカー点追加
             MyMainGridCoverBezier.PreviewMouseLeftButtonDown += (a, b) =>
             {
                 var po = GetIntPosition(b, MyMainGridCoverBezier);
@@ -235,35 +237,47 @@ namespace Pixtack4
                 {
                     MyPoints.Add(po); MyPoints.Add(po); MyPoints.Add(po);
                 }
-
             };
 
+            // ベジェ曲線、右クリックで終了
+            MyMainGridCoverBezier.PreviewMouseRightButtonDown += (a, b) =>
+            {
+                AddGeoShapeBezierFromMouseClickEnd(isRemoveEndPoint: false);
+            };
+
+            // ベジェ曲線、マウス移動時
             MyMainGridCoverBezier.MouseMove += (a, b) =>
             {
-                Point pNow = GetIntPosition(b, MyMainGridCoverBezier);
-                int pCount = MyPoints.Count;
-                if (pCount > 5)
+                if (MyPoints.Count > 0)
                 {
-                    MyPoints[^1] = pNow;
-                    Point ap1 = MyPoints[^4];
-                    Point ap2;
-                    if (pCount < 7) { ap2 = MyPoints[0]; }
-                    else { ap2 = MyPoints[^7]; }
-
-                    double xDiff = (pNow.X - ap2.X) / 4.0;
-                    double yDiff = (pNow.Y - ap2.Y) / 4.0;
-                    MyPoints[^3] = new Point(ap1.X + xDiff, ap1.Y + yDiff);
-                    MyPoints[^5] = new Point(ap1.X - xDiff, ap1.Y - yDiff);
-
-                    xDiff = (pNow.X - MyPoints[^3].X) / 4.0;
-                    yDiff = (pNow.Y - MyPoints[^5].Y) / 4.0;
-                    MyPoints[^2] = new Point(pNow.X - xDiff, pNow.Y - yDiff);
-
+                    Point ima = GetIntPosition(b, MyMainGridCoverBezier);
+                    MyPoints[^1] = ima;
+                    MouseMoveBezier(MyPoints, ima, 0.3);
                 }
-                else if (pCount > 0)
-                {
-                    MyPoints[^1] = pNow;
-                }
+                //Point pNow = GetIntPosition(b, MyMainGridCoverBezier);
+                //int pCount = MyPoints.Count;
+                //if (pCount > 5)
+                //{
+                //    MyPoints[^1] = pNow;// 終点、マウス座標
+                //    Point ap1 = MyPoints[^4];
+                //    Point ap2;
+                //    if (pCount < 7) { ap2 = MyPoints[0]; }
+                //    else { ap2 = MyPoints[^7]; }
+
+                //    double xDiff = (pNow.X - ap2.X) / 4.0;
+                //    double yDiff = (pNow.Y - ap2.Y) / 4.0;
+                //    MyPoints[^3] = new Point(ap1.X + xDiff, ap1.Y + yDiff);
+                //    MyPoints[^5] = new Point(ap1.X - xDiff, ap1.Y - yDiff);
+
+                //    xDiff = (pNow.X - MyPoints[^3].X) / 4.0;
+                //    yDiff = (pNow.Y - MyPoints[^3].Y) / 4.0;
+                //    MyPoints[^2] = new Point(pNow.X - xDiff, pNow.Y - yDiff);
+                //}
+                //else if (pCount > 0)
+                //{
+                //    MyPoints[^1] = pNow;
+                //}
+
             };
 
 
@@ -634,8 +648,7 @@ namespace Pixtack4
 
             //終端形状
             ComboBoxGeoShapeEndCapType.ItemsSource = Enum.GetValues(typeof(HeadType));
-            ComboBoxGeoShapeEndCapType.SelectedValue = HeadType.Arrow;
-
+            ComboBoxGeoShapeEndCapType.SelectedValue = MyAppData.GeoShapeEndHeadType;
         }
 
 
@@ -1785,6 +1798,140 @@ namespace Pixtack4
 
 
         #region その他
+
+
+        // マウス移動中ベジェ曲線
+        private void MouseMoveBezier(PointCollection pc, Point mousePoint, double magari)
+        {
+            if (pc.Count < 7 || (pc.Count - 1) % 3 != 0) { return; }
+
+            //終点の一個手前のアンカーの制御点を設定
+            Point beginP = pc[^7];// 前の前のアンカーポイント
+            Point middleP = pc[^4];// 前のアンカーポイント、これの制御点を設定
+
+            (double begin, double end) = DistanceSeparate(beginP, middleP, mousePoint);
+            (double beginSide, double endSide) = GetRadianDirectionLine(beginP, middleP, mousePoint);
+
+            //始点側制御点座標
+            double xDiff = Math.Cos(beginSide) * begin * magari;
+            double yDiff = Math.Sin(beginSide) * begin * magari;
+            pc[^5] = new Point(middleP.X + xDiff, middleP.Y + yDiff);// [2],[5],[8]
+
+            //終点側制御点座標
+            xDiff = Math.Cos(endSide) * end * magari;
+            yDiff = Math.Sin(endSide) * end * magari;
+            pc[^3] = new Point(middleP.X + xDiff, middleP.Y + yDiff);// [4], [7], [10]
+
+            // 終点の制御点を設定
+            double dis = GetDistance(pc[^2], pc[^3]) * magari;
+            xDiff = 0.3 * (pc[^1].X - pc[^3].X);
+            yDiff = 0.3 * (pc[^1].Y - pc[^3].Y);
+
+            pc[^2] = new Point(pc[^1].X - xDiff, pc[^1].Y - yDiff);
+        }
+
+
+        //制御点座標を決めて曲線化
+        /// <summary>
+        /// 制御点の座標を調整することで、点のコレクションを曲線に変換します。
+        /// </summary>
+        /// <remarks>このメソッドは、曲率係数 (<paramref name="magari"/>) とアンカーポイントの相対位置に基づいて制御点を再計算することにより、入力された <paramref name="pc"/> を直接変更します。入力コレクションが、アンカーポイントと制御点の想定される構造に従っていることを確認してください。</remarks>
+        /// <param name="pc">変更する点のコレクション。このコレクションには、アンカーポイントと制御点が特定の順序で含まれている必要があります。</param>
+        /// <param name="magari">制御点の曲率を決定する乗数。値が大きいほど、曲線は急になります。</param>
+        /// <param name="isAll">コレクション内のすべての点を処理するかどうかを示すブール値。 <see langword="true"/> の場合、
+        /// すべてのポイントが処理されます。それ以外の場合は、最後のセグメントのみが処理されます。</param>
+        ///
+        private bool ToCurveTypeC(PointCollection pc, double magari, bool isAll)
+        {
+            if (pc.Count < 4 || pc.Count - 1 % 3 != 0) { return false; }
+
+            int beginCount = 3;
+            if (!isAll) { beginCount = pc.Count - 3; }
+
+            for (int i = beginCount; i < pc.Count - 1; i += 3)
+            {
+                Point beginP = pc[i - 3];// 始点側のアンカーポイント
+                Point middleP = pc[i];// 中間のアンカーポイント
+                Point endP = pc[i + 3];// 終点側のアンカーポイント
+                //前後の方向線長さ取得
+                double beginDistance;
+                double endDistance;
+                (beginDistance, endDistance) = DistanceSeparate(beginP, middleP, endP);
+
+                //方向線弧度取得
+                (double bRadian, double eRadian) = GetRadianDirectionLine(beginP, middleP, endP);
+
+                //始点側制御点座標
+                double xDiff = Math.Cos(bRadian) * beginDistance * magari;
+                double yDiff = Math.Sin(bRadian) * beginDistance * magari;
+                pc[i - 1] = new Point(middleP.X + xDiff, middleP.Y + yDiff);// [2],[5],[8]
+
+                //終点側制御点座標
+                xDiff = Math.Cos(eRadian) * endDistance * magari;
+                yDiff = Math.Sin(eRadian) * endDistance * magari;
+                pc[i + 1] = new Point(middleP.X + xDiff, middleP.Y + yDiff);// [4], [7], [10]
+            }
+
+
+            return true;
+        }
+
+        /// <summary>
+        /// 現在アンカー点とその前後のアンカー点それぞれの中間弧度に直角な弧度を計算
+        /// </summary>
+        /// <param name="beginP">始点側アンカー点</param>
+        /// <param name="currentP">現在アンカー点</param>
+        /// <param name="endP">終点側アンカー点</param>
+        /// <returns>始点側方向線弧度、終点側方向線弧度</returns>
+        private (double beginSide, double endSide) GetRadianDirectionLine(Point beginP, Point currentP, Point endP)
+        {
+            //ラジアン(角度)
+            double bRadian = GetRadianFrom2Points(currentP, beginP);//現在から始点側
+            double eRadian = GetRadianFrom2Points(currentP, endP);//現在から終点側
+            double midRadian = (bRadian + eRadian) / 2.0;//中間角度
+
+            //中間角度に直角なのは90度を足した右回りと、90を引いた左回りがある
+            //始点側、終点側角度を比較して大きい方が、右回りの方向線角度になる
+            double bControlRadian, eControlRadian;
+            if (bRadian > eRadian)
+            {
+                bControlRadian = midRadian + (Math.PI / 2.0);
+                eControlRadian = midRadian - (Math.PI / 2.0);
+            }
+            else
+            {
+                bControlRadian = midRadian - (Math.PI / 2.0);
+                eControlRadian = midRadian + (Math.PI / 2.0);
+            }
+
+            return (bControlRadian, eControlRadian);
+        }
+
+        //前後のアンカー点それぞれの距離
+        private static (double begin, double end) DistanceSeparate(Point beginP, Point currentP, Point endP)
+        {
+            double bSide = GetDistance(currentP, beginP);
+            double eSide = GetDistance(currentP, endP);
+            return (bSide, eSide);
+        }
+
+        //2点間距離を取得
+        private static double GetDistance(Point p1, Point p2)
+        {
+            return Math.Sqrt(Math.Pow(p2.X - p1.X, 2.0) + Math.Pow(p2.Y - p1.Y, 2.0));
+        }
+
+        //2点間線分のラジアン(弧度)を取得
+        private double GetRadianFrom2Points(Point begin, Point end)
+        {
+            return Math.Atan2(end.Y - begin.Y, end.X - begin.X);
+        }
+
+        //ラジアンを角度に変換
+        private double RadianToDegree(double radian)
+        {
+            return radian / Math.PI * 180.0;
+        }
 
         /// <summary>
         /// 指定された入力要素を基準としたマウスポインターの相対的な整数位置を計算します。

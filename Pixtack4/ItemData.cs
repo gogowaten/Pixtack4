@@ -101,13 +101,18 @@ namespace Pixtack4
     {
         public AppData() { }
 
+        // 図形の終端形状
+        private HeadType _geoShapeEndHeadType = HeadType.Arrow;
+        [DataMember] public HeadType GeoShapeEndHeadType { get => _geoShapeEndHeadType; set => SetProperty(ref _geoShapeEndHeadType, value); }
+
+
         // 図形の線の太さ
         private double _geoShapeStrokeThickness = 20.0;
-        public double GeoShapeStrokeThickness { get => _geoShapeStrokeThickness; set => SetProperty(ref _geoShapeStrokeThickness, value); }
+        [DataMember] public double GeoShapeStrokeThickness { get => _geoShapeStrokeThickness; set => SetProperty(ref _geoShapeStrokeThickness, value); }
 
         //図形のアンカーハンドルのサイズ
         private double _geoShapeHandleSize = 30.0;
-        public double GeoShapeHandleSize { get => _geoShapeHandleSize; set => SetProperty(ref _geoShapeHandleSize, value); }
+        [DataMember] public double GeoShapeHandleSize { get => _geoShapeHandleSize; set => SetProperty(ref _geoShapeHandleSize, value); }
 
 
         //フォントweight選択ComboBoxの選択Index

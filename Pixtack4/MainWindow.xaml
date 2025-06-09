@@ -525,7 +525,8 @@
                     </ComboBox>
                     <UniformGrid Columns="2" Margin="4">
                       <TextBlock Text="終端形状" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                      <ComboBox x:Name="ComboBoxGeoShapeEndCapType"/>
+                      <ComboBox x:Name="ComboBoxGeoShapeEndCapType"
+                                SelectedValue="{Binding MyAppData.GeoShapeEndHeadType}"/>
                     </UniformGrid>
                     <UniformGrid Columns="2" Margin="4">
                       <TextBlock Text="{Binding ElementName=SliderGeoShapeStrokeThickness, Path=Value, StringFormat=線幅 {0:0}}" HorizontalAlignment="Center"/>
@@ -945,7 +946,10 @@
               </SolidColorBrush>
             </Grid.Background>
             <!--<Polyline x:Name="MyTempBezierline" Stroke="{Binding ElementName=ComboBoxGeoShapeStrokeColor, Path=SelectedValue}" StrokeThickness="{Binding MyAppData.GeoShapeStrokeThickness}" Points="0,0,100,100"/>-->
-            <local:GeoShape x:Name="MyTempBezier" MyShapeType="Bezier" Stroke="{Binding ElementName=ComboBoxGeoShapeStrokeColor, Path=SelectedValue}" StrokeThickness="{Binding MyAppData.GeoShapeStrokeThickness}"/>
+            <local:GeoShape x:Name="MyTempBezier" MyShapeType="Bezier"
+                            Stroke="{Binding ElementName=ComboBoxGeoShapeStrokeColor, Path=SelectedValue}"
+                            StrokeThickness="{Binding MyAppData.GeoShapeStrokeThickness}"
+                            MyHeadEndType="{Binding MyAppData.GeoShapeEndHeadType}"/>
           </Grid>
           
         </Grid>
