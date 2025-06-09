@@ -532,13 +532,13 @@
                       <Slider x:Name="SliderGeoShapeStrokeThickness" Minimum="1" Maximum="50" Value="{Binding MyAppData.GeoShapeStrokeThickness}" TickFrequency="1" IsSnapToTickEnabled="True"/>
                     </UniformGrid>
                     <Button Content="直線追加" Click="Button_Click_AddGeoShapeLineItem"/>
-                    <Button Content="マウスクリックで追加" Click="Button_Click_AddGeoShapeFromMouseClick"/>
+                    <Button Content="マウスクリックで追加開始" Click="Button_Click_AddGeoShapeFromMouseClick"/>
                     <Button Content="マウスクリックで追加終了" Click="Button_Click_AddGeoShapeFromMouseClickEnd"/>
                     
                     <Button Content="曲線追加" Click="Button_Click_AddGeoShapeBezierItem"/>
-                    <Button Content="マウスクリックで追加(曲線)" Click="Button_Click_AddGeoShapeFromMouseClick" IsEnabled="False"/>
-                    <Button Content="マウスクリックで追加終了(曲線)" Click="Button_Click_AddGeoShapeFromMouseClickEnd" IsEnabled="False"/>
-                    
+                    <Button Content="マウスクリックで追加開始(曲線)" Click="Button_Click_AddGeoShapeBezierFromMouseClickBegin"/>
+                    <Button Content="マウスクリックで追加終了(曲線)" Click="Button_Click_AddGeoShapeBezierFromMouseClickEnd"/>
+
                   </StackPanel>
                 </TabItem>
                 <TabItem Header="その他">
@@ -944,7 +944,8 @@
                 </SolidColorBrush.Color>
               </SolidColorBrush>
             </Grid.Background>
-            <Polyline x:Name="MyTempBezierline" Stroke="{Binding ElementName=ComboBoxGeoShapeStrokeColor, Path=SelectedValue}" StrokeThickness="{Binding MyAppData.GeoShapeStrokeThickness}" Points="0,0,100,100"/>
+            <!--<Polyline x:Name="MyTempBezierline" Stroke="{Binding ElementName=ComboBoxGeoShapeStrokeColor, Path=SelectedValue}" StrokeThickness="{Binding MyAppData.GeoShapeStrokeThickness}" Points="0,0,100,100"/>-->
+            <local:GeoShape x:Name="MyTempBezier" MyShapeType="Bezier" Stroke="{Binding ElementName=ComboBoxGeoShapeStrokeColor, Path=SelectedValue}" StrokeThickness="{Binding MyAppData.GeoShapeStrokeThickness}"/>
           </Grid>
           
         </Grid>

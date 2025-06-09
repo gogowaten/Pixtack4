@@ -106,7 +106,7 @@ namespace Pixtack4
         public double GeoShapeStrokeThickness { get => _geoShapeStrokeThickness; set => SetProperty(ref _geoShapeStrokeThickness, value); }
 
         //図形のアンカーハンドルのサイズ
-        private double _geoShapeHandleSize = 100.0;
+        private double _geoShapeHandleSize = 30.0;
         public double GeoShapeHandleSize { get => _geoShapeHandleSize; set => SetProperty(ref _geoShapeHandleSize, value); }
 
 

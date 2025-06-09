@@ -201,10 +201,7 @@ namespace Pixtack4
             MyMainGridCover.PreviewMouseLeftButtonDown += (a, b) =>
             {
                 var po = GetIntPosition(b, MyMainGridCover);
-                if (MyPoints.Count == 0)
-                {
-                    MyPoints.Add(po);
-                }
+                if (MyPoints.Count == 0) { MyPoints.Add(po); }
                 MyPoints.Add(po);
             };
 
@@ -225,6 +222,50 @@ namespace Pixtack4
                 }
 
             };
+
+            MyMainGridCoverBezier.PreviewMouseLeftButtonDown += (a, b) =>
+            {
+                var po = GetIntPosition(b, MyMainGridCoverBezier);
+                if (MyPoints.Count == 0)
+                {
+                    MyPoints.Add(po); MyPoints.Add(po);
+                    MyPoints.Add(po); MyPoints.Add(po);
+                }
+                else
+                {
+                    MyPoints.Add(po); MyPoints.Add(po); MyPoints.Add(po);
+                }
+
+            };
+
+            MyMainGridCoverBezier.MouseMove += (a, b) =>
+            {
+                Point pNow = GetIntPosition(b, MyMainGridCoverBezier);
+                int pCount = MyPoints.Count;
+                if (pCount > 5)
+                {
+                    MyPoints[^1] = pNow;
+                    Point ap1 = MyPoints[^4];
+                    Point ap2;
+                    if (pCount < 7) { ap2 = MyPoints[0]; }
+                    else { ap2 = MyPoints[^7]; }
+
+                    double xDiff = (pNow.X - ap2.X) / 4.0;
+                    double yDiff = (pNow.Y - ap2.Y) / 4.0;
+                    MyPoints[^3] = new Point(ap1.X + xDiff, ap1.Y + yDiff);
+                    MyPoints[^5] = new Point(ap1.X - xDiff, ap1.Y - yDiff);
+
+                    xDiff = (pNow.X - MyPoints[^3].X) / 4.0;
+                    yDiff = (pNow.Y - MyPoints[^5].Y) / 4.0;
+                    MyPoints[^2] = new Point(pNow.X - xDiff, pNow.Y - yDiff);
+
+                }
+                else if (pCount > 0)
+                {
+                    MyPoints[^1] = pNow;
+                }
+            };
+
 
             // 入力用テキストボックスクリック時、テキスト全選択
             MyTextBoxAddText.PreviewMouseLeftButtonDown += (a, b) =>
@@ -686,17 +727,15 @@ namespace Pixtack4
 
         #region 完成
 
-
-
-        private void Button_Click_AddGeoShapeFromMouseClickEnd(object sender, RoutedEventArgs e)
+        private void Button_Click_AddGeoShapeBezierFromMouseClickEnd(object sender, RoutedEventArgs e)
         {
-            // 図形新規追加終了、クリック箇所が2個以上なら図形追加、最後の頂点は削除して追加
-            AddGeoShapeFromMouseClickEnd(isRemoveEndPoint: true);
+            // 曲線新規追加終了
+            AddGeoShapeBezierFromMouseClickEnd(isRemoveEndPoint: true);
         }
 
-        private void Button_Click_AddGeoShapeFromMouseClick(object sender, RoutedEventArgs e)
+        private void Button_Click_AddGeoShapeBezierFromMouseClickBegin(object sender, RoutedEventArgs e)
         {
-            AddGeoShapeFromMouseClick();// 図形新規追加開始、クリックで頂点追加
+            AddGeoShapeBezierFromMouseClickBegin();// 曲線新規追加開始、クリックで頂点追加
         }
 
 
@@ -704,6 +743,18 @@ namespace Pixtack4
         {
             AddGeoShapeBezierItem();// 曲線図形Itemの追加
         }
+
+        private void Button_Click_AddGeoShapeFromMouseClickEnd(object sender, RoutedEventArgs e)
+        {
+            // 直線新規追加終了
+            AddGeoShapeFromMouseClickEnd(isRemoveEndPoint: true);
+        }
+
+        private void Button_Click_AddGeoShapeFromMouseClick(object sender, RoutedEventArgs e)
+        {
+            AddGeoShapeFromMouseClick();// 直線新規追加開始、クリックで頂点追加
+        }
+
 
         private void Button_Click_AddGeoShapeLineItem(object sender, RoutedEventArgs e)
         {
@@ -1079,14 +1130,34 @@ namespace Pixtack4
         #region Item追加
 
 
-        //// 曲線図形新規追加開始、クリックで頂点追加
-        //private void AddGeoShapeFromMouseClick()
-        //{
-        //    MyScrollViewer.IsEnabled = false;
-        //    MyMainGridCover.Visibility = Visibility.Visible;
-        //    MyPoints = [];
-        //    MyTempPolyline.Points = MyPoints;
-        //}
+        // 曲線図形新規追加開始、クリックで頂点追加
+        private void AddGeoShapeBezierFromMouseClickBegin()
+        {
+            MyScrollViewer.IsEnabled = false;
+            MyMainGridCoverBezier.Visibility = Visibility.Visible;
+            MyPoints = [];
+            //MyTempBezierline.Points = MyPoints;
+            MyTempBezier.MyPoints = MyPoints;
+        }
+
+        // 曲線追加終了
+        private void AddGeoShapeBezierFromMouseClickEnd(bool isRemoveEndPoint = false)
+        {
+            if (isRemoveEndPoint)
+            {
+                MyPoints.Remove(MyPoints[^1]);
+                MyPoints.Remove(MyPoints[^1]);
+                MyPoints.Remove(MyPoints[^1]);
+            }
+            MyScrollViewer.IsEnabled = true;
+            MyMainGridCoverBezier.Visibility = Visibility.Collapsed;
+            if (MyPoints.Count >= 4)
+            {
+                ItemData data = MakeGeoShapeLineItemData(MyPoints, ShapeType.Bezier);
+                _ = MyRoot.AddNewThumbFromItemData(data, MyRoot.MyActiveGroupThumb, true);
+            }
+        }
+
 
         // 直線図形新規追加開始、クリックで頂点追加
         private void AddGeoShapeFromMouseClick()
@@ -1109,7 +1180,7 @@ namespace Pixtack4
             if (isRemoveEndPoint) { MyPoints.RemoveAt(MyPoints.Count - 1); }
             MyScrollViewer.IsEnabled = true;
             MyMainGridCover.Visibility = Visibility.Collapsed;
-            if (MyPoints.Count > 1)
+            if (MyPoints.Count >= 2)
             {
                 ItemData data = MakeGeoShapeLineItemData(MyPoints, ShapeType.Line);
                 _ = MyRoot.AddNewThumbFromItemData(data, MyRoot.MyActiveGroupThumb, true);
