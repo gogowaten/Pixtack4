@@ -532,13 +532,20 @@
                       <TextBlock Text="{Binding ElementName=SliderGeoShapeStrokeThickness, Path=Value, StringFormat=線幅 {0:0}}" HorizontalAlignment="Center"/>
                       <Slider x:Name="SliderGeoShapeStrokeThickness" Minimum="1" Maximum="50" Value="{Binding MyAppData.GeoShapeStrokeThickness}" TickFrequency="1" IsSnapToTickEnabled="True"/>
                     </UniformGrid>
-                    <Button Content="直線追加" Click="Button_Click_AddGeoShapeLineItem"/>
-                    <Button Content="マウスクリックで追加開始" Click="Button_Click_AddGeoShapeFromMouseClick"/>
-                    <Button Content="マウスクリックで追加終了" Click="Button_Click_AddGeoShapeFromMouseClickEnd"/>
-                    
-                    <Button Content="曲線追加" Click="Button_Click_AddGeoShapeBezierItem"/>
-                    <Button Content="マウスクリックで追加開始(曲線)" Click="Button_Click_AddGeoShapeBezierFromMouseClickBegin"/>
-                    <Button Content="マウスクリックで追加終了(曲線)" Click="Button_Click_AddGeoShapeBezierFromMouseClickEnd"/>
+                    <Button x:Name="ButtonAddGeoShapeLine" Content="直線追加" Click="Button_Click_AddGeoShapeLineItem"/>
+                    <Button x:Name="ButtonAddGeoShapeLineFromClickBegin"
+                            Content="マウスクリックで追加開始"
+                            Click="Button_Click_AddGeoShapeFromMouseClick"/>
+                    <Button x:Name="ButtonAddGeoShapeLineFromClickEnd"
+                            Content="マウスクリックで追加終了" IsEnabled="False"
+                            Click="Button_Click_AddGeoShapeFromMouseClickEnd"/>
+                    <Button x:Name="ButtonAddGeoShapeBezier" Content="曲線追加" Click="Button_Click_AddGeoShapeBezierItem"/>
+                    <Button x:Name="ButtonAddGeoShapeBezierFromClickBegin"
+                            Content="マウスクリックで追加開始(曲線)"
+                            Click="Button_Click_AddGeoShapeBezierFromMouseClickBegin"/>
+                    <Button x:Name="ButtonAddGeoShapeBezierFromClickEnd"
+                            Content="マウスクリックで追加終了(曲線)" IsEnabled="False"
+                            Click="Button_Click_AddGeoShapeBezierFromMouseClickEnd"/>
 
                   </StackPanel>
                 </TabItem>
@@ -546,6 +553,9 @@
 
                 </TabItem>
               </TabControl>
+            </TabItem>
+            <TabItem Header="特殊" Style="{StaticResource verticalTab}">
+              
             </TabItem>
           </TabControl>
         </Expander>

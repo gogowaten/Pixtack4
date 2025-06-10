@@ -242,7 +242,7 @@ namespace Pixtack4
             // ベジェ曲線、右クリックで終了
             MyMainGridCoverBezier.PreviewMouseRightButtonDown += (a, b) =>
             {
-                AddGeoShapeBezierFromMouseClickEnd(isRemoveEndPoint: false);
+                AddGeoShapeBezierFromMouseClickEnd(MyPoints, 0.3);
             };
 
             // ベジェ曲線、マウス移動時
@@ -254,30 +254,6 @@ namespace Pixtack4
                     MyPoints[^1] = ima;
                     MouseMoveBezier(MyPoints, ima, 0.3);
                 }
-                //Point pNow = GetIntPosition(b, MyMainGridCoverBezier);
-                //int pCount = MyPoints.Count;
-                //if (pCount > 5)
-                //{
-                //    MyPoints[^1] = pNow;// 終点、マウス座標
-                //    Point ap1 = MyPoints[^4];
-                //    Point ap2;
-                //    if (pCount < 7) { ap2 = MyPoints[0]; }
-                //    else { ap2 = MyPoints[^7]; }
-
-                //    double xDiff = (pNow.X - ap2.X) / 4.0;
-                //    double yDiff = (pNow.Y - ap2.Y) / 4.0;
-                //    MyPoints[^3] = new Point(ap1.X + xDiff, ap1.Y + yDiff);
-                //    MyPoints[^5] = new Point(ap1.X - xDiff, ap1.Y - yDiff);
-
-                //    xDiff = (pNow.X - MyPoints[^3].X) / 4.0;
-                //    yDiff = (pNow.Y - MyPoints[^3].Y) / 4.0;
-                //    MyPoints[^2] = new Point(pNow.X - xDiff, pNow.Y - yDiff);
-                //}
-                //else if (pCount > 0)
-                //{
-                //    MyPoints[^1] = pNow;
-                //}
-
             };
 
 
@@ -740,10 +716,18 @@ namespace Pixtack4
 
         #region 完成
 
+        // 曲線新規追加終了
         private void Button_Click_AddGeoShapeBezierFromMouseClickEnd(object sender, RoutedEventArgs e)
         {
-            // 曲線新規追加終了
-            AddGeoShapeBezierFromMouseClickEnd(isRemoveEndPoint: true);
+            // 確定していない終端の3つを削除
+            MyPoints.Remove(MyPoints[^1]);
+            MyPoints.Remove(MyPoints[^1]);
+            MyPoints.Remove(MyPoints[^1]);
+
+            // 終点の制御点を設定
+            SetBezierEndControlPoint(MyPoints, 0.3);
+
+            AddGeoShapeBezierFromMouseClickEnd(MyPoints, 0.3);
         }
 
         private void Button_Click_AddGeoShapeBezierFromMouseClickBegin(object sender, RoutedEventArgs e)
@@ -1148,24 +1132,37 @@ namespace Pixtack4
         {
             MyScrollViewer.IsEnabled = false;
             MyMainGridCoverBezier.Visibility = Visibility.Visible;
+            
+            // ボタン有効化制御
+            ButtonAddGeoShapeLineFromClickBegin.IsEnabled = false;
+            ButtonAddGeoShapeLineFromClickEnd.IsEnabled = false;
+            ButtonAddGeoShapeLine.IsEnabled = false;
+            ButtonAddGeoShapeBezierFromClickBegin.IsEnabled = false;
+            ButtonAddGeoShapeBezierFromClickEnd.IsEnabled = true;// 終了ボタンだけ有効化
+            ButtonAddGeoShapeBezier.IsEnabled = false;
+
             MyPoints = [];
             //MyTempBezierline.Points = MyPoints;
             MyTempBezier.MyPoints = MyPoints;
         }
 
         // 曲線追加終了
-        private void AddGeoShapeBezierFromMouseClickEnd(bool isRemoveEndPoint = false)
+        private void AddGeoShapeBezierFromMouseClickEnd(PointCollection pc, double magari)
         {
-            if (isRemoveEndPoint)
-            {
-                MyPoints.Remove(MyPoints[^1]);
-                MyPoints.Remove(MyPoints[^1]);
-                MyPoints.Remove(MyPoints[^1]);
-            }
             MyScrollViewer.IsEnabled = true;
             MyMainGridCoverBezier.Visibility = Visibility.Collapsed;
+            
+            // ボタン有効化制御
+            ButtonAddGeoShapeLineFromClickBegin.IsEnabled = true;
+            ButtonAddGeoShapeLineFromClickEnd.IsEnabled = false;
+            ButtonAddGeoShapeLine.IsEnabled = true;
+            ButtonAddGeoShapeBezierFromClickBegin.IsEnabled = true;
+            ButtonAddGeoShapeBezierFromClickEnd.IsEnabled = false;
+            ButtonAddGeoShapeBezier.IsEnabled = true;
+
             if (MyPoints.Count >= 4)
             {
+
                 ItemData data = MakeGeoShapeLineItemData(MyPoints, ShapeType.Bezier);
                 _ = MyRoot.AddNewThumbFromItemData(data, MyRoot.MyActiveGroupThumb, true);
             }
@@ -1175,10 +1172,18 @@ namespace Pixtack4
         // 直線図形新規追加開始、クリックで頂点追加
         private void AddGeoShapeFromMouseClick()
         {
-            MyScrollViewer.IsEnabled = false;
-            MyMainGridCover.Visibility = Visibility.Visible;
+            MyScrollViewer.IsEnabled = false;// スクロール無効
+            MyMainGridCover.Visibility = Visibility.Visible;// 直線描画用パネル表示
             MyPoints = [];
             MyTempPolyline.Points = MyPoints;
+
+            // ボタン有効化制御
+            ButtonAddGeoShapeLineFromClickBegin.IsEnabled = false;
+            ButtonAddGeoShapeLineFromClickEnd.IsEnabled = true;
+            ButtonAddGeoShapeLine.IsEnabled = false;
+            ButtonAddGeoShapeBezierFromClickBegin.IsEnabled = false;
+            ButtonAddGeoShapeBezierFromClickEnd.IsEnabled = false;
+            ButtonAddGeoShapeBezier.IsEnabled = false;
         }
 
         // 直線図形新規追加終了、クリック箇所が2個以上なら図形追加
@@ -1190,9 +1195,19 @@ namespace Pixtack4
         ///
         private void AddGeoShapeFromMouseClickEnd(bool isRemoveEndPoint = false)
         {
-            if (isRemoveEndPoint) { MyPoints.RemoveAt(MyPoints.Count - 1); }
             MyScrollViewer.IsEnabled = true;
             MyMainGridCover.Visibility = Visibility.Collapsed;
+
+            // ボタン有効化制御
+            ButtonAddGeoShapeLineFromClickBegin.IsEnabled = true;
+            ButtonAddGeoShapeLineFromClickEnd.IsEnabled = false;
+            ButtonAddGeoShapeLine.IsEnabled = true;
+            ButtonAddGeoShapeBezierFromClickBegin.IsEnabled = true;
+            ButtonAddGeoShapeBezierFromClickEnd.IsEnabled = false;
+            ButtonAddGeoShapeBezier.IsEnabled = true;
+
+            if (MyPoints.Count  <= 0) return;
+            if (isRemoveEndPoint) { MyPoints.RemoveAt(MyPoints.Count - 1); }
             if (MyPoints.Count >= 2)
             {
                 ItemData data = MakeGeoShapeLineItemData(MyPoints, ShapeType.Line);
@@ -1799,7 +1814,8 @@ namespace Pixtack4
 
         #region その他
 
-
+        // WPF、ベジェ曲線、違和感なく滑らかになるような制御点座標はどこ？その3(終) - 午後わてんのブログ
+        //        https://gogowaten.hatenablog.com/entry/15735391
         // マウス移動中ベジェ曲線
         private void MouseMoveBezier(PointCollection pc, Point mousePoint, double magari)
         {
@@ -1823,13 +1839,24 @@ namespace Pixtack4
             pc[^3] = new Point(middleP.X + xDiff, middleP.Y + yDiff);// [4], [7], [10]
 
             // 終点の制御点を設定
-            double dis = GetDistance(pc[^2], pc[^3]) * magari;
-            xDiff = 0.3 * (pc[^1].X - pc[^3].X);
-            yDiff = 0.3 * (pc[^1].Y - pc[^3].Y);
+            SetBezierEndControlPoint(pc, magari);
 
-            pc[^2] = new Point(pc[^1].X - xDiff, pc[^1].Y - yDiff);
+            // 始点の制御点を設定
+            if (pc.Count == 7)
+            {
+                xDiff = magari * (pc[0].X - pc[2].X);
+                yDiff = magari * (pc[0].Y - pc[2].Y);
+                pc[1] = new Point(pc[0].X - xDiff, pc[0].Y - yDiff);
+            }
         }
 
+        // ベジェ曲線の終点の制御点を設定する
+        private static void SetBezierEndControlPoint(PointCollection pc, double magari)
+        {
+            pc[^2] = new Point(
+                pc[^1].X - (magari * (pc[^1].X - pc[^3].X)),
+                pc[^1].Y - (magari * (pc[^1].Y - pc[^3].Y)));
+        }
 
         //制御点座標を決めて曲線化
         /// <summary>
