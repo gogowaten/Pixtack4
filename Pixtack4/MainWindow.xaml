@@ -546,7 +546,13 @@
                     <Button x:Name="ButtonAddGeoShapeBezierFromClickEnd"
                             Content="マウスクリックで追加終了(曲線)" IsEnabled="False"
                             Click="Button_Click_AddGeoShapeBezierFromMouseClickEnd"/>
-
+                    <Button x:Name="ButtonAddGeoShapeMouseFreeHandBegin"
+                            Content="フリーハンド開始"
+                            Click="Button_Click_ButtonAddGeoShapeFreeHandBegin"/>
+                    
+                    <Button x:Name="ButtonAddGeoShapeMouseFreeHandEnd"
+                            Content="フリーハンド終了" IsEnabled="False"/>
+                    
                   </StackPanel>
                 </TabItem>
                 <TabItem Header="その他">
@@ -955,11 +961,22 @@
                 </SolidColorBrush.Color>
               </SolidColorBrush>
             </Grid.Background>
-            <!--<Polyline x:Name="MyTempBezierline" Stroke="{Binding ElementName=ComboBoxGeoShapeStrokeColor, Path=SelectedValue}" StrokeThickness="{Binding MyAppData.GeoShapeStrokeThickness}" Points="0,0,100,100"/>-->
             <local:GeoShape x:Name="MyTempBezier" MyShapeType="Bezier"
                             Stroke="{Binding ElementName=ComboBoxGeoShapeStrokeColor, Path=SelectedValue}"
                             StrokeThickness="{Binding MyAppData.GeoShapeStrokeThickness}"
                             MyHeadEndType="{Binding MyAppData.GeoShapeEndHeadType}"/>
+          </Grid>
+          
+          
+          <Grid x:Name="MyMainGridCoverFreeHand"  Visibility="Collapsed" Cursor="Cross">
+            <Grid.Background>
+              <SolidColorBrush>
+                <SolidColorBrush.Color>
+                  <Color A="120" R="5" G="5" B="255"/>
+                </SolidColorBrush.Color>
+              </SolidColorBrush>
+            </Grid.Background>
+            
           </Grid>
           
         </Grid>

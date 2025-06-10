@@ -712,6 +712,30 @@ namespace Pixtack4
         }
 
 
+        private void Button_Click_ButtonAddGeoShapeFreeHandBegin(object sender, RoutedEventArgs e)
+        {
+            ButtonAddGeoShapeFreeHandBegin();
+        }
+
+        private void ButtonAddGeoShapeFreeHandBegin()
+        {
+            // フリーハンド開始
+            MyScrollViewer.IsEnabled = false;
+            MyMainGridCoverFreeHand.Visibility = Visibility.Visible;
+
+            // ボタン有効化制御
+            ButtonAddGeoShapeLineFromClickBegin.IsEnabled = false;
+            ButtonAddGeoShapeLineFromClickEnd.IsEnabled = false;
+            ButtonAddGeoShapeLine.IsEnabled = false;
+            ButtonAddGeoShapeBezierFromClickBegin.IsEnabled = false;
+            ButtonAddGeoShapeBezierFromClickEnd.IsEnabled = true;// 終了ボタンだけ有効化
+            ButtonAddGeoShapeBezier.IsEnabled = false;
+            ButtonAddGeoShapeMouseFreeHandBegin.IsEnabled = false;
+            ButtonAddGeoShapeMouseFreeHandEnd.IsEnabled = true;
+
+
+        }
+
 
 
         #region 完成
