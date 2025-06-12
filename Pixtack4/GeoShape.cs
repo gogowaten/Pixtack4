@@ -415,6 +415,10 @@ namespace Pixtack4
     }
 
 
+
+
+    #region コンバーター
+
     //Segment用のPointCollection生成
     //ソースに影響を与えないためにクローン作成して、その始点と終点要素を削除して返す
     public class MyConverterSegmentPoints : IValueConverter
@@ -441,7 +445,7 @@ namespace Pixtack4
         }
     }
 
-
+    #endregion コンバーター
 
 
 }

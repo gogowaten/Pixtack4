@@ -76,8 +76,14 @@ namespace Pixtack4
         // 頂点追加時に使う、MainGridPanel上での右クリック位置
         private Point MyRightClickDownPoint { get; set; }
 
+        // マウスクリックで図形追加で使う
         private PointCollection MyPoints { get; set; } = new();
 
+        // フリーハンドで使う
+        private Polyline MyTempFreehandPolyline { get; set; } = new();
+        private List<Polyline> MyTempFreehandPolylinesList { get; set; } = [];
+        private List<PointCollection> MyTempFreehandPointsList { get; set; } = [];
+        private bool IsDrawingFreehand;
 
         public MainWindow()
         {
@@ -257,6 +263,56 @@ namespace Pixtack4
             };
 
 
+            // フリーハンド開始、始点
+            MyMainGridCoverFreehand.MouseLeftButtonDown += (a, b) =>
+            {
+                //MyMainGridCoverFreehand.CaptureMouse(); // 有効にするとGrid範囲外でもクリック扱いになる
+                IsDrawingFreehand = true;
+                MyTempFreehandPolyline = MakeFreehandPolyline();// line作成
+                MyTempFreehandPolylinesList.Add(MyTempFreehandPolyline);// lineをリストに追加
+                MyMainGridCoverFreehand.Children.Add(MyTempFreehandPolyline);// lineをGridに追加
+                MyTempFreehandPolyline.Points.Add(b.GetPosition(MyMainGridCoverFreehand));// lineにクリック点を追加
+                //MyTempFreehandPointsList.Add(MyTempFreehandPolyline.Points);// 
+            };
+
+            // フリーハンド、ドラッグ移動中はPointを追加し続ける
+            MyMainGridCoverFreehand.MouseMove += (a, b) =>
+            {
+                //アプリのウィンドウがアクティブじゃなくなったら区切り
+                if (this.IsActive == false && IsDrawingFreehand == true)
+                {
+                    FreehandDrawingSeparate(); //マウスで線を引いていたのを止め、区切りをいれる
+                    return;
+                }
+
+                //ドラッグなら座標追加
+                if (b.LeftButton == MouseButtonState.Pressed)
+                {
+                    MyTempFreehandPolyline.Points.Add(b.GetPosition(MyMainGridCoverFreehand));
+                }
+            };
+
+            // フリーハンド、マウスUpで一つのlineを完成、区切りを入れる
+            MyMainGridCoverFreehand.PreviewMouseLeftButtonUp += (a, b) =>
+            {
+                FreehandDrawingSeparate();
+            };
+
+            // フリーハンド、右クリックで直前のlineを削除
+            MyMainGridCoverFreehand.MouseRightButtonDown += (a, b) =>
+            {
+                if (MyTempFreehandPointsList.Count > 0)
+                {
+                    if (MyTempFreehandPointsList.Remove(MyTempFreehandPointsList[^1]))
+                    {
+                        Polyline line = MyTempFreehandPolylinesList[^1];
+                        MyMainGridCoverFreehand.Children.Remove(line);
+                        MyTempFreehandPolylinesList.Remove(line);
+                    }
+                }
+            };
+
+
             // 入力用テキストボックスクリック時、テキスト全選択
             MyTextBoxAddText.PreviewMouseLeftButtonDown += (a, b) =>
             {
@@ -264,6 +320,19 @@ namespace Pixtack4
                 b.Handled = true;
             };
         }
+
+        // フリーハンド描画での区切りをいれる
+        private void FreehandDrawingSeparate()
+        {
+            IsDrawingFreehand = false;
+            if (MyTempFreehandPolyline.Points.Count > 1)
+            {
+                // 完了したlineのPointsをリストに追加
+                MyTempFreehandPointsList.Add(MyTempFreehandPolyline.Points);
+            }
+        }
+
+
 
         private void MyInitialize2()
         {
@@ -711,29 +780,55 @@ namespace Pixtack4
 
         }
 
-
-        private void Button_Click_ButtonAddGeoShapeFreeHandBegin(object sender, RoutedEventArgs e)
+        private void Button_Click_ButtonAddGeoShapeFreehandEnd(object sender, RoutedEventArgs e)
         {
-            ButtonAddGeoShapeFreeHandBegin();
+            AddGeoShapeFreehandEnd();
         }
 
-        private void ButtonAddGeoShapeFreeHandBegin()
+        private void AddGeoShapeFreehandEnd()
+        {
+            // フリーハンド終了
+            MyScrollViewer.IsEnabled = true;
+            MyMainGridCoverFreehand.Visibility = Visibility.Collapsed;
+
+            // ボタン有効化制御
+            ButtonAddGeoShapeLineFromClickBegin.IsEnabled = true;
+            ButtonAddGeoShapeLineFromClickEnd.IsEnabled = false;
+            ButtonAddGeoShapeLine.IsEnabled = true;
+            ButtonAddGeoShapeBezierFromClickBegin.IsEnabled = true;
+            ButtonAddGeoShapeBezierFromClickEnd.IsEnabled = false;
+            ButtonAddGeoShapeBezier.IsEnabled = true;
+            ButtonAddGeoShapeMouseFreehandBegin.IsEnabled = true;
+            ButtonAddGeoShapeMouseFreehandEnd.IsEnabled = false;
+
+
+        }
+
+        private void Button_Click_ButtonAddGeoShapeFreehandBegin(object sender, RoutedEventArgs e)
+        {
+            AddGeoShapeFreehandBegin();
+        }
+
+        private void AddGeoShapeFreehandBegin()
         {
             // フリーハンド開始
             MyScrollViewer.IsEnabled = false;
-            MyMainGridCoverFreeHand.Visibility = Visibility.Visible;
+            MyMainGridCoverFreehand.Visibility = Visibility.Visible;
 
             // ボタン有効化制御
             ButtonAddGeoShapeLineFromClickBegin.IsEnabled = false;
             ButtonAddGeoShapeLineFromClickEnd.IsEnabled = false;
             ButtonAddGeoShapeLine.IsEnabled = false;
             ButtonAddGeoShapeBezierFromClickBegin.IsEnabled = false;
-            ButtonAddGeoShapeBezierFromClickEnd.IsEnabled = true;// 終了ボタンだけ有効化
+            ButtonAddGeoShapeBezierFromClickEnd.IsEnabled = false;
             ButtonAddGeoShapeBezier.IsEnabled = false;
-            ButtonAddGeoShapeMouseFreeHandBegin.IsEnabled = false;
-            ButtonAddGeoShapeMouseFreeHandEnd.IsEnabled = true;
+            ButtonAddGeoShapeMouseFreehandBegin.IsEnabled = false;
+            ButtonAddGeoShapeMouseFreehandEnd.IsEnabled = true;// 終了ボタンだけ有効化
 
+            for (int i = 0; i < MyTempFreehandPointsList.Count; i++)
+            {
 
+            }
         }
 
 
@@ -1038,6 +1133,21 @@ namespace Pixtack4
         #region GeoShapeItem関連
 
 
+        // FreehandPolyline
+        private Polyline MakeFreehandPolyline()
+        {
+            var poliline = new Polyline
+            {
+                Stroke = Brushes.Red,
+                StrokeThickness = 10,
+                StrokeLineJoin = PenLineJoin.Round,
+                StrokeEndLineCap = PenLineCap.Round,
+                StrokeStartLineCap = PenLineCap.Round,
+            };
+            return poliline;
+        }
+
+
         private void RemovePoint()
         {
             if (MyRoot.MyFocusThumb is GeoShapeThumb2 geo)
@@ -1156,7 +1266,7 @@ namespace Pixtack4
         {
             MyScrollViewer.IsEnabled = false;
             MyMainGridCoverBezier.Visibility = Visibility.Visible;
-            
+
             // ボタン有効化制御
             ButtonAddGeoShapeLineFromClickBegin.IsEnabled = false;
             ButtonAddGeoShapeLineFromClickEnd.IsEnabled = false;
@@ -1175,7 +1285,7 @@ namespace Pixtack4
         {
             MyScrollViewer.IsEnabled = true;
             MyMainGridCoverBezier.Visibility = Visibility.Collapsed;
-            
+
             // ボタン有効化制御
             ButtonAddGeoShapeLineFromClickBegin.IsEnabled = true;
             ButtonAddGeoShapeLineFromClickEnd.IsEnabled = false;
@@ -1230,7 +1340,7 @@ namespace Pixtack4
             ButtonAddGeoShapeBezierFromClickEnd.IsEnabled = false;
             ButtonAddGeoShapeBezier.IsEnabled = true;
 
-            if (MyPoints.Count  <= 0) return;
+            if (MyPoints.Count <= 0) return;
             if (isRemoveEndPoint) { MyPoints.RemoveAt(MyPoints.Count - 1); }
             if (MyPoints.Count >= 2)
             {

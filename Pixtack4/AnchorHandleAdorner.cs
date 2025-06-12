@@ -54,6 +54,7 @@ namespace Pixtack4
         //実線を描画
         protected override void OnRender(DrawingContext drawingContext)
         {
+            // [0]to[1], [2]to[3], [5]to[6], [8]to[9], ...
             for (int i = 0; i < MyPoints.Count - 1; i++)
             {
                 if ((i - 1) % 3 != 0)
@@ -139,18 +140,18 @@ namespace Pixtack4
         public readonly List<AnchorHandleThumb> MyAnchorHandleThumbsList = [];//アンカーハンドルThumb
         private readonly Canvas MyCanvas = new();
         private readonly VisualCollection MyVisualCollection;
-        private readonly GeoShape MyTarget;//装飾ターゲット
+        private readonly GeoShape MyTargetGeoShape;//装飾ターゲット
         //private ContextMenu MyContextMenu;
 
         public AnchorHandleAdorner(GeoShape adornedElement) : base(adornedElement)
         {
             MyVisualCollection = new(this) { MyCanvas };
-            MyTarget = adornedElement;
+            MyTargetGeoShape = adornedElement;
 
             //制御線
             MyControlLine = new()
             {
-                MyPoints = MyTarget.MyPoints
+                MyPoints = MyTargetGeoShape.MyPoints
             };
             //制御線はアンカーハンドルより下側に表示したいのでzindexを-1指定
             Panel.SetZIndex(MyControlLine, -1);
@@ -176,7 +177,7 @@ namespace Pixtack4
         private void MySetControlLine()
         {
             //装飾ターゲットがベジェ曲線なら制御線を作成、追加            
-            if (MyTarget.MyShapeType == ShapeType.Bezier)
+            if (MyTargetGeoShape.MyShapeType == ShapeType.Bezier)
             {
                 AddControlLine();
             }
@@ -201,9 +202,9 @@ namespace Pixtack4
 
         private void AddAnchorThumb()
         {
-            for (int i = 0; i < MyTarget.MyPoints.Count; i++)
+            for (int i = 0; i < MyTargetGeoShape.MyPoints.Count; i++)
             {
-                var thumb = MakeAnchorHandleThumb(i, MyTarget.MyPoints[i]);
+                var thumb = MakeAnchorHandleThumb(i, MyTargetGeoShape.MyPoints[i]);
                 MyCanvas.Children.Insert(i, thumb);
                 MyAnchorHandleThumbsList.Insert(i, thumb);
             }
@@ -313,8 +314,8 @@ namespace Pixtack4
             if (sender is AnchorHandleThumb thumb)
             {
                 int id = (int)thumb.Tag;
-                Point poi = MyTarget.MyPoints[id];
-                MyTarget.MyPoints[id] = new Point(poi.X + e.HorizontalChange, poi.Y + e.VerticalChange);
+                Point poi = MyTargetGeoShape.MyPoints[id];
+                MyTargetGeoShape.MyPoints[id] = new Point(poi.X + e.HorizontalChange, poi.Y + e.VerticalChange);
                 thumb.MyLeft += e.HorizontalChange;
                 thumb.MyTop += e.VerticalChange;
                 e.Handled = true;
@@ -347,7 +348,7 @@ namespace Pixtack4
                 for (int i = 0; i < adorner.MyAnchorHandleThumbsList.Count; i++)
                 {
                     var t = adorner.MyAnchorHandleThumbsList[i];
-                    var poi = adorner.MyTarget.MyPoints[i];
+                    var poi = adorner.MyTargetGeoShape.MyPoints[i];
                     t.MyLeft = poi.X - (adorner.MyAnchorHandleSize / 2.0);
                     t.MyTop = poi.Y - (adorner.MyAnchorHandleSize / 2.0);
                 }
@@ -386,9 +387,9 @@ namespace Pixtack4
 
             //全てのPointにRenderTransformを適用したPointCollectionを作成
             PointCollection pc = [];
-            foreach (var item in MyTarget.MyPoints)
+            foreach (var item in MyTargetGeoShape.MyPoints)
             {
-                pc.Add(MyTarget.RenderTransform.Transform(item));
+                pc.Add(MyTargetGeoShape.RenderTransform.Transform(item));
             }
 
             //全てのPointが収まるRectを取得

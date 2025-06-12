@@ -546,12 +546,13 @@
                     <Button x:Name="ButtonAddGeoShapeBezierFromClickEnd"
                             Content="マウスクリックで追加終了(曲線)" IsEnabled="False"
                             Click="Button_Click_AddGeoShapeBezierFromMouseClickEnd"/>
-                    <Button x:Name="ButtonAddGeoShapeMouseFreeHandBegin"
+                    <Button x:Name="ButtonAddGeoShapeMouseFreehandBegin"
                             Content="フリーハンド開始"
-                            Click="Button_Click_ButtonAddGeoShapeFreeHandBegin"/>
+                            Click="Button_Click_ButtonAddGeoShapeFreehandBegin"/>
                     
-                    <Button x:Name="ButtonAddGeoShapeMouseFreeHandEnd"
-                            Content="フリーハンド終了" IsEnabled="False"/>
+                    <Button x:Name="ButtonAddGeoShapeMouseFreehandEnd"
+                            Content="フリーハンド終了" IsEnabled="False"
+                            Click="Button_Click_ButtonAddGeoShapeFreehandEnd"/>
                     
                   </StackPanel>
                 </TabItem>
@@ -946,7 +947,7 @@
             <Grid.Background>
               <SolidColorBrush>
                 <SolidColorBrush.Color>
-                  <Color A="120" R="5" G="5" B="5"/>
+                  <Color A="20" R="5" G="5" B="5"/>
                 </SolidColorBrush.Color>
               </SolidColorBrush>
             </Grid.Background>
@@ -957,7 +958,7 @@
             <Grid.Background>
               <SolidColorBrush>
                 <SolidColorBrush.Color>
-                  <Color A="120" R="5" G="5" B="5"/>
+                  <Color A="20" R="5" G="5" B="5"/>
                 </SolidColorBrush.Color>
               </SolidColorBrush>
             </Grid.Background>
@@ -968,7 +969,7 @@
           </Grid>
           
           
-          <Grid x:Name="MyMainGridCoverFreeHand"  Visibility="Collapsed" Cursor="Cross">
+          <Grid x:Name="MyMainGridCoverFreehand"  Visibility="Collapsed" Cursor="Cross">
             <Grid.Background>
               <SolidColorBrush>
                 <SolidColorBrush.Color>
@@ -976,7 +977,11 @@
                 </SolidColorBrush.Color>
               </SolidColorBrush>
             </Grid.Background>
-            
+            <!--<Polyline x:Name="MyTempFreehandLine"
+                      Stroke="{Binding ElementName=ComboBoxGeoShapeStrokeColor, Path=SelectedValue}"
+                      StrokeThickness="{Binding MyAppData.GeoShapeStrokeThickness}"
+                      StrokeLineJoin="Round"
+                      />-->
           </Grid>
           
         </Grid>
