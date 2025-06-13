@@ -84,6 +84,7 @@ namespace Pixtack4
         private List<Polyline> MyTempFreehandPolylinesList { get; set; } = [];
         private List<PointCollection> MyTempFreehandPointsList { get; set; } = [];
         private bool IsDrawingFreehand;
+        private PointCollection MyTempPointCollectction = [];
 
         public MainWindow()
         {
@@ -321,18 +322,187 @@ namespace Pixtack4
             };
         }
 
-        // フリーハンド描画での区切りをいれる
+        // フリーハンド描画での区切りをいれる、一つの図形としてリストに追加
+        // 元のPointsを保存しつつ、加工する
         private void FreehandDrawingSeparate()
         {
             IsDrawingFreehand = false;
-            if (MyTempFreehandPolyline.Points.Count > 1)
+            PointCollection origin = MyTempFreehandPolyline.Points;
+            if (origin.Count > 1)
             {
                 // 完了したlineのPointsをリストに追加
-                MyTempFreehandPointsList.Add(MyTempFreehandPolyline.Points);
+                MyTempFreehandPointsList.Add(origin);
+                // 加工
+                // 間引き
+                PointCollection pc = ChoiceAnchorPoint(origin, interval: MyAppData.PointChoiceInterval);
+                // 制御点追加
+                pc = AddControlPointsToAnchors(pc);
+                // 曲げ
+                //       制御点の位置を決めるまでの手順
+                // アンカー点から
+                // A.前後方向線の長さを取得
+                // B.方向線の弧度を取得
+                // ABを使って制御点の位置を設定
+
+            }
+        }
+
+        private void Mage(PointCollection allPoints)
+        {
+            for (int i = 0; i < allPoints.Count - 6; i += 3)
+            {
+                Point beginSideAnchor = allPoints[i];
+                Point currentAnchor = allPoints[i + 3];
+                Point endSideAnchor = allPoints[i + 6];
+                // A
+                (double beginSideLength, double endSideLength) = GetDirectionLineLength(MyDistanceType, 0.3, beginSideAnchor, currentAnchor, endSideAnchor);
+                // B
+                (double beginSideRadian, double endSideRadian) = GetDirectionLineRadian(beginSideAnchor, currentAnchor, endSideAnchor);
+                // AB
+                // 始点側の制御点位置決定
+                double x = currentAnchor.X + Math.Cos(beginSideRadian) * beginSideLength;
+                double y = currentAnchor.X + Math.Sin(beginSideRadian) * beginSideLength;
+                allPoints[i + 2] = new Point(x, y);
+                // 終点側の制御点位置決定
+                x = currentAnchor.X + Math.Cos(endSideRadian) * endSideLength;
+                y = currentAnchor.Y + Math.Sin(endSideRadian) * endSideLength;
+                allPoints[i + 4] = new Point(x, y);
             }
         }
 
 
+        /// <summary>
+        /// 現在アンカー点とその前後のアンカー点それぞれの中間弧度に直角な弧度を計算
+        /// </summary>
+        /// <param name="beginAnchor">始点側アンカー点</param>
+        /// <param name="currentAnchor">現在アンカー点</param>
+        /// <param name="endAnchor">終点側アンカー点</param>
+        /// <returns>始点側方向線弧度、終点側方向線弧度</returns>
+        private static (double beginSideRadian, double endSideRadian) GetDirectionLineRadian(Point beginAnchor, Point currentAnchor, Point endAnchor)
+        {
+            //ラジアン(弧度)
+            double beginSideRadian = GetRadian(currentAnchor, beginAnchor);//現在から始点側
+            double endSideRadian = GetRadian(currentAnchor, endAnchor);//現在から終点側
+            double middleRadian = (beginSideRadian + endSideRadian) / 2.0;//中間角度
+
+            //中間角度に直角なのは90度を足した右回りと、90を引いた左回りがある
+            //始点側角度＞終点側角度のときは始点側に90度を足して、終点側は90度引く
+            //逆のときは足し引きも逆になる
+            double bControlRadian, eControlRadian;
+            if (beginSideRadian > endSideRadian)
+            {
+                bControlRadian = middleRadian + (Math.PI / 2.0);
+                eControlRadian = middleRadian - (Math.PI / 2.0);
+            }
+            else
+            {
+                bControlRadian = middleRadian - (Math.PI / 2.0);
+                eControlRadian = middleRadian + (Math.PI / 2.0);
+            }
+
+            return (bControlRadian, eControlRadian);
+        }
+
+
+        /// <summary>
+        /// 2点間線分のラジアン(弧度)を取得
+        /// </summary>
+        /// <param name="begin"></param>
+        /// <param name="end"></param>
+        /// <returns></returns>
+        private static double GetRadian(Point begin, Point end)
+        {
+            return Math.Atan2(end.Y - begin.Y, end.X - begin.X);
+        }
+
+
+        /// <summary>
+        /// 連なる3つのアンカー点の、中間のアンカー点に属する、前後の方向線の長さを返す
+        /// </summary>
+        /// <param name="distType">距離の決め方</param>
+        /// <param name="mage">曲げ具合の指定、0.0から1.0を指定、0.3前後が適当</param>
+        /// <param name="beginSizeAnchor">始点側のアンカー点</param>
+        /// <param name="currentAnchor">中間のアンカー点</param>
+        /// <param name="endSideAnchor">終点側のアンカー点</param>
+        /// <returns></returns>
+        private static (double, double) GetDirectionLineLength(DistanceType distType, double mage, Point beginSizeAnchor, Point currentAnchor, Point endSideAnchor)
+        {
+            if (distType == DistanceType.Zero0距離) { return (0, 0); }
+
+            if (distType == DistanceType.Zero0距離)
+            {
+                return (0, 0);
+            }
+            else if (distType == DistanceType.FrontBack前後間)
+            {
+                double temp = GetDistance(beginSizeAnchor, endSideAnchor) * mage;
+                return (temp, temp);
+            }
+
+            double distBegin = GetDistance(currentAnchor, beginSizeAnchor) * mage;
+            double distEnd = GetDistance(currentAnchor, endSideAnchor) * mage;
+            if (distType == DistanceType.Average平均)
+            {
+                double average = (distBegin + distEnd) / 2.0;
+                return (average, average);
+            }
+            else if (distType == DistanceType.Separate別々)
+            {
+                return (distBegin, distEnd);
+            }
+            else if (distType == DistanceType.Shorter短いほう)
+            {
+                double shorter = distEnd < distBegin ? distEnd : distBegin;
+                return (shorter, shorter);
+            }
+
+            return (0, 0);
+        }
+
+        /// <summary>
+        /// アンカー点だけのPointsに制御点を追加してPointsを返す
+        /// 制御点の座標はアンカー点と同じ
+        /// </summary>
+        /// <param name="anchorPoints"></param>
+        /// <returns></returns>
+        private static PointCollection AddControlPointsToAnchors(PointCollection anchorPoints)
+        {
+            PointCollection pc = [];
+            pc.Add(anchorPoints[0]);// 始点
+            pc.Add(anchorPoints[0]);// 始点の制御点
+            for (int i = 0; i < anchorPoints.Count; i++)
+            {
+                pc.Add(anchorPoints[i]);// 制御点
+                pc.Add(anchorPoints[i]);// アンカー
+                pc.Add(anchorPoints[i]);// 制御点
+            }
+            pc.Add(anchorPoints[^1]);// 終点の制御点
+            pc.Add(anchorPoints[^1]);// 終点
+            return pc;
+        }
+
+
+        //指定間隔で選んだアンカー点を返す
+        private static PointCollection ChoiceAnchorPoint(PointCollection points, int interval)
+        {
+            var selectedPoints = new PointCollection();
+            for (int i = 0; i < points.Count - 1; i += interval)
+            {
+                selectedPoints.Add(points[i]);
+            }
+            selectedPoints.Add(points[points.Count - 1]);//最後の一個は必ず入れる
+
+            //選んだ頂点が3個以上あって、最後の頂点と最後から2番めが近いときは2番めを除去            
+            if (selectedPoints.Count >= 3)
+            {
+                int mod = (points.Count - 2) % interval;
+                if (interval / 2 > mod)
+                {
+                    selectedPoints.RemoveAt(selectedPoints.Count - 2);//除去
+                }
+            }
+            return selectedPoints;
+        }
 
         private void MyInitialize2()
         {
@@ -1144,6 +1314,10 @@ namespace Pixtack4
                 StrokeEndLineCap = PenLineCap.Round,
                 StrokeStartLineCap = PenLineCap.Round,
             };
+            if (ComboBoxGeoShapeStrokeColor.SelectedValue is SolidColorBrush brush)
+            {
+                poliline.Stroke = brush;
+            }
             return poliline;
         }
 

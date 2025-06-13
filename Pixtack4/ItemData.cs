@@ -101,6 +101,11 @@ namespace Pixtack4
     {
         public AppData() { }
 
+        // フリーハンド図形でのPointsの間引き間隔
+        private int _pointChoiceInterval;
+        public int PointChoiceInterval { get => _pointChoiceInterval; set => SetProperty(ref _pointChoiceInterval, value); }
+
+
         // 図形の終端形状
         private HeadType _geoShapeEndHeadType = HeadType.Arrow;
         [DataMember] public HeadType GeoShapeEndHeadType { get => _geoShapeEndHeadType; set => SetProperty(ref _geoShapeEndHeadType, value); }
@@ -360,6 +365,7 @@ namespace Pixtack4
             DependencyProperty.Register(nameof(MyStroke), typeof(Brush), typeof(GeoShapeItemData),
                 new FrameworkPropertyMetadata(Brushes.Red,
                 FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+
 
         //アンカーポイント群
         //通知プロパティだとリアルタイムで動作確認できないので依存関係プロパティにしている

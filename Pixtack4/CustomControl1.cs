@@ -997,7 +997,33 @@ namespace Pixtack4
 
 
 
+    //public class GeoShapeFreehandThumb : KisoThumb
+    //{
+    //    private AdornerLayer MyShepeAdornerLayer { get; set; } = null!;// アンカーハンドル表示用レイヤー
+    //    public AnchorHandleAdorner? MyAnchorHandleAdorner { get; private set; }// アンカーハンドル
+    //    public FreehandGeoShape MyFreehand { get; private set; } = null!;// 図形
+    //    public int MyDragMovePointIndex { get; private set; } = -1;// ハンドルによってドラッグ移動中のPointのIndex
 
+    //    static GeoShapeFreehandThumb()
+    //    {
+    //        DefaultStyleKeyProperty.OverrideMetadata(typeof(GeoShapeFreehandThumb), new FrameworkPropertyMetadata(typeof(GeoShapeFreehandThumb)));
+    //    }
+    //    public GeoShapeFreehandThumb() { }
+
+    //    public override void OnApplyTemplate()
+    //    {
+    //        base.OnApplyTemplate();
+    //        if (GetTemplateChild("freehand") is FreehandGeoShape shape)
+    //        {
+    //            MyFreehand = shape;
+    //            MyShepeAdornerLayer = AdornerLayer.GetAdornerLayer(MyFreehand);
+    //        }
+    //        else
+    //        {
+    //            throw new NullReferenceException("内部図形の取得に失敗");
+    //        }
+    //    }
+    //}
 
 
     /// <summary>
@@ -2246,7 +2272,7 @@ namespace Pixtack4
                 {
                     left = GetIntLocate(group.MyItemData.GridSize, group.MyItemData.MyAddOffsetLeft + focusData.MyLeft);
                     top = GetIntLocate(group.MyItemData.GridSize, group.MyItemData.MyAddOffsetTop + focusData.MyTop);
-                }                
+                }
             }
             return AddThumb(thumb, group, left, top);
         }

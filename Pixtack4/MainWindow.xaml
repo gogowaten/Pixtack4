@@ -973,7 +973,7 @@
             <Grid.Background>
               <SolidColorBrush>
                 <SolidColorBrush.Color>
-                  <Color A="120" R="5" G="5" B="255"/>
+                  <Color A="20" R="5" G="5" B="255"/>
                 </SolidColorBrush.Color>
               </SolidColorBrush>
             </Grid.Background>

@@ -303,9 +303,32 @@
     </Setter>
   </Style>
 
-  <Style TargetType="{x:Type local:FreehandBezier}" BasedOn="{StaticResource kiso}">
-    
-  </Style>
+  <!--<Style TargetType="{x:Type local:GeoShapeFreehandThumb}" BasedOn="{StaticResource kiso}">
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="{x:Type local:GeoShapeFreehandThumb}">
+          <Grid>
+            <Canvas x:Name="PART_Canvas"
+                    Background="{Binding RelativeSource={RelativeSource Mode=TemplatedParent},
+                    Path=MyItemData.MyBackground}">
+              <local:FreehandGeoShape
+                x:Name="freehand"
+                DataContext="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=MyItemData}"
+                Canvas.Left="0" Canvas.Top="0"
+                MyPoints="{Binding GeoShapeItemData.MyPoints, Mode=TwoWay}"
+                Stroke="{Binding GeoShapeItemData.MyStroke}"
+                StrokeThickness="{Binding GeoShapeItemData.MyStrokeThickness}"
+                MyShapeType="{Binding GeoShapeItemData.MyShapeType}"
+                MyHeadBeginType="{Binding GeoShapeItemData.MyGeoShapeHeadBeginCapType}"
+                MyHeadEndType="{Binding GeoShapeItemData.MyGeoShapeHeadEndCapType}"
+                
+                />
+            </Canvas>
+          </Grid>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>-->
 
 
 
