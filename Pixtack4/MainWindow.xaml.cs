@@ -1162,11 +1162,11 @@ namespace Pixtack4
             if (MyRoot.MyFocusThumb is GeoShapeThumb2 geo)
             {
                 int insertIndex = 0;// 求める適切なインデックス
-                double maxAngle = 0.0;// 最大角度
+                double maxAngle = 0.0;// 最大角度、これが180に一番近いものを選択
                 Point migi = GetPointRightClickAtGeoShape(geo);// 右クリック座標
                 PointCollection pc = geo.MyItemData.GeoShapeItemData.MyPoints;
 
-                // Pointが1このときは末尾に追加
+                // Pointが1個のときは末尾に追加して終わり
                 if (pc.Count == 1) { geo.AddPoint(migi); return; }
 
                 // すべてのPointと右クリック座標を中心とする角度を比較
@@ -1175,7 +1175,7 @@ namespace Pixtack4
                     Point front = pc[i];
                     Point rear = pc[i + 1];
 
-                    // abc3点からできる∠abcの角度を取得
+                    // abc3点からできる∠abcの角度を取得、最大角度になるPointのIndexを取得
                     double angle = CalculateAngleABC(front, migi, rear);
                     if (angle > maxAngle)
                     {

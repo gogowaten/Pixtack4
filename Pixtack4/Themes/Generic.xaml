@@ -294,7 +294,6 @@
                 MyHeadEndType="{Binding GeoShapeItemData.MyGeoShapeHeadEndCapType}"
                 RenderTransform="{Binding MyAngle, Converter={StaticResource rotate}}"
                 >
-
               </local:GeoShape>
             </Canvas>
             <Border Style="{StaticResource waku4}"/>
@@ -304,7 +303,9 @@
     </Setter>
   </Style>
 
-
+  <Style TargetType="{x:Type local:FreehandBezier}" BasedOn="{StaticResource kiso}">
+    
+  </Style>
 
 
 
