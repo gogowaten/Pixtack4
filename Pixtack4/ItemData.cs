@@ -101,8 +101,17 @@ namespace Pixtack4
     {
         public AppData() { }
 
+        // フリーハンドでの曲げ具合の指定、0.0～1.0の値、0.0で直線、1.0で最大曲げ、0.3が適当
+        private double _mage = 0.3;
+        public double Mage { get => _mage; set => SetProperty(ref _mage, value); }
+
+
+        // フリーハンドでの方向線の長さの決め方
+        private DirectionLineLengthType _directionLineLengthType = DirectionLineLengthType.Separate別々;
+        public DirectionLineLengthType DirectionLineLengthType { get => _directionLineLengthType; set => SetProperty(ref _directionLineLengthType, value); }
+
         // フリーハンド図形でのPointsの間引き間隔
-        private int _pointChoiceInterval;
+        private int _pointChoiceInterval = 10;
         public int PointChoiceInterval { get => _pointChoiceInterval; set => SetProperty(ref _pointChoiceInterval, value); }
 
 

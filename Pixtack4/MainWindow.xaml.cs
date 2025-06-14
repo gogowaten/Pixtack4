@@ -21,6 +21,16 @@ using System.Xml;
 
 namespace Pixtack4
 {
+    //方向線の長さの決め方の種類
+    public enum DirectionLineLengthType
+    {
+        Zero0距離, // 0距離、曲げない
+        Average平均, // 前後の方向線の長さの平均
+        Separate別々, // 前後の方向線の長さを別々に設定
+        Shorter短いほう, // 前後の方向線の短い方を採用
+        FrontBack前後間 // 前後間を採用
+    }
+
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
@@ -80,11 +90,11 @@ namespace Pixtack4
         private PointCollection MyPoints { get; set; } = new();
 
         // フリーハンドで使う
-        private Polyline MyTempFreehandPolyline { get; set; } = new();
-        private List<Polyline> MyTempFreehandPolylinesList { get; set; } = [];
-        private List<PointCollection> MyTempFreehandPointsList { get; set; } = [];
+        private Polyline MyFreehandPolyline { get; set; } = new();
+        private List<Polyline> MyFreehandPolylinesList { get; set; } = [];
+        private List<PointCollection> MyFreehandOriginPointsList { get; set; } = [];
+        private List<PointCollection> MyFreehandMagePointsList = [];
         private bool IsDrawingFreehand;
-        private PointCollection MyTempPointCollectction = [];
 
         public MainWindow()
         {
@@ -264,15 +274,17 @@ namespace Pixtack4
             };
 
 
+
+
             // フリーハンド開始、始点
             MyMainGridCoverFreehand.MouseLeftButtonDown += (a, b) =>
             {
                 //MyMainGridCoverFreehand.CaptureMouse(); // 有効にするとGrid範囲外でもクリック扱いになる
                 IsDrawingFreehand = true;
-                MyTempFreehandPolyline = MakeFreehandPolyline();// line作成
-                MyTempFreehandPolylinesList.Add(MyTempFreehandPolyline);// lineをリストに追加
-                MyMainGridCoverFreehand.Children.Add(MyTempFreehandPolyline);// lineをGridに追加
-                MyTempFreehandPolyline.Points.Add(b.GetPosition(MyMainGridCoverFreehand));// lineにクリック点を追加
+                MyFreehandPolyline = MakeFreehandPolyline();// line作成
+                MyFreehandPolylinesList.Add(MyFreehandPolyline);// lineをリストに追加
+                MyMainGridCoverFreehand.Children.Add(MyFreehandPolyline);// lineをGridに追加
+                MyFreehandPolyline.Points.Add(GetIntPosition(b, MyMainGridCoverFreehand));// lineにクリック点を追加
                 //MyTempFreehandPointsList.Add(MyTempFreehandPolyline.Points);// 
             };
 
@@ -282,34 +294,40 @@ namespace Pixtack4
                 //アプリのウィンドウがアクティブじゃなくなったら区切り
                 if (this.IsActive == false && IsDrawingFreehand == true)
                 {
-                    FreehandDrawingSeparate(); //マウスで線を引いていたのを止め、区切りをいれる
+                    ProcessMage(); //一つの図形として完成、曲線加工する
                     return;
                 }
 
                 //ドラッグなら座標追加
                 if (b.LeftButton == MouseButtonState.Pressed)
                 {
-                    MyTempFreehandPolyline.Points.Add(b.GetPosition(MyMainGridCoverFreehand));
+                    MyFreehandPolyline.Points.Add(GetIntPosition(b, MyMainGridCoverFreehand)); //クリック位置をlineに追加
                 }
             };
 
-            // フリーハンド、マウスUpで一つのlineを完成、区切りを入れる
+            // フリーハンド、曲線加工する
             MyMainGridCoverFreehand.PreviewMouseLeftButtonUp += (a, b) =>
             {
-                FreehandDrawingSeparate();
+                ProcessMage();
             };
 
+            MyMainGridCoverFreehand.MouseLeave += (a, b) =>
+            {
+                if (IsDrawingFreehand) { ProcessMage(); }
+                
+            };
+            
             // フリーハンド、右クリックで直前のlineを削除
             MyMainGridCoverFreehand.MouseRightButtonDown += (a, b) =>
             {
-                if (MyTempFreehandPointsList.Count > 0)
-                {
-                    if (MyTempFreehandPointsList.Remove(MyTempFreehandPointsList[^1]))
-                    {
-                        Polyline line = MyTempFreehandPolylinesList[^1];
-                        MyMainGridCoverFreehand.Children.Remove(line);
-                        MyTempFreehandPolylinesList.Remove(line);
-                    }
+                if (MyFreehandOriginPointsList.Count > 0)
+                {   
+                    _ = MyFreehandMagePointsList.Remove(MyFreehandMagePointsList[^1]);
+                    _ = MyFreehandOriginPointsList.Remove(MyFreehandOriginPointsList[^1]);
+                    Polyline line = MyFreehandPolylinesList[^1];
+                    MyMainGridCoverFreehand.Children.Remove(line);
+                    MyFreehandPolylinesList.Remove(line);
+
                 }
             };
 
@@ -324,30 +342,43 @@ namespace Pixtack4
 
         // フリーハンド描画での区切りをいれる、一つの図形としてリストに追加
         // 元のPointsを保存しつつ、加工する
-        private void FreehandDrawingSeparate()
+        private void ProcessMage()
         {
             IsDrawingFreehand = false;
-            PointCollection origin = MyTempFreehandPolyline.Points;
-            if (origin.Count > 1)
+            PointCollection origin = MyFreehandPolyline.Points;
+            if (origin.Count >= 3)
             {
                 // 完了したlineのPointsをリストに追加
-                MyTempFreehandPointsList.Add(origin);
+                MyFreehandOriginPointsList.Add(origin);
                 // 加工
                 // 間引き
-                PointCollection pc = ChoiceAnchorPoint(origin, interval: MyAppData.PointChoiceInterval);
+                //MyAppData.PointChoiceInterval = 30;
+                PointCollection allPoints = ChoiceAnchorPoint(origin, interval: MyAppData.PointChoiceInterval);
                 // 制御点追加
-                pc = AddControlPointsToAnchors(pc);
+                allPoints = AddControlPointsToAnchors(allPoints);
                 // 曲げ
                 //       制御点の位置を決めるまでの手順
                 // アンカー点から
                 // A.前後方向線の長さを取得
                 // B.方向線の弧度を取得
                 // ABを使って制御点の位置を設定
+                //MyAppData.Mage = 0.3;
+                SetControlPointLocate(allPoints, MyAppData.DirectionLineLengthType, MyAppData.Mage);
 
+                MyFreehandPolyline.Points = allPoints; // 加工したPointsをlineに設定
+                MyFreehandMagePointsList.Add(allPoints);
             }
+
         }
 
-        private void Mage(PointCollection allPoints)
+
+        /// <summary>
+        /// 制御点の座標を決める
+        /// </summary>
+        /// <param name="allPoints"></param>
+        /// <param name="lengthType"></param>
+        /// <param name="mage"></param>
+        private static void SetControlPointLocate(PointCollection allPoints, DirectionLineLengthType lengthType, double mage)
         {
             for (int i = 0; i < allPoints.Count - 6; i += 3)
             {
@@ -355,13 +386,13 @@ namespace Pixtack4
                 Point currentAnchor = allPoints[i + 3];
                 Point endSideAnchor = allPoints[i + 6];
                 // A
-                (double beginSideLength, double endSideLength) = GetDirectionLineLength(MyDistanceType, 0.3, beginSideAnchor, currentAnchor, endSideAnchor);
+                (double beginSideLength, double endSideLength) = GetDirectionLineLength(lengthType, mage, beginSideAnchor, currentAnchor, endSideAnchor);
                 // B
                 (double beginSideRadian, double endSideRadian) = GetDirectionLineRadian(beginSideAnchor, currentAnchor, endSideAnchor);
                 // AB
                 // 始点側の制御点位置決定
                 double x = currentAnchor.X + Math.Cos(beginSideRadian) * beginSideLength;
-                double y = currentAnchor.X + Math.Sin(beginSideRadian) * beginSideLength;
+                double y = currentAnchor.Y + Math.Sin(beginSideRadian) * beginSideLength;
                 allPoints[i + 2] = new Point(x, y);
                 // 終点側の制御点位置決定
                 x = currentAnchor.X + Math.Cos(endSideRadian) * endSideLength;
@@ -419,21 +450,19 @@ namespace Pixtack4
         /// <summary>
         /// 連なる3つのアンカー点の、中間のアンカー点に属する、前後の方向線の長さを返す
         /// </summary>
-        /// <param name="distType">距離の決め方</param>
+        /// <param name="lengthType">距離の決め方</param>
         /// <param name="mage">曲げ具合の指定、0.0から1.0を指定、0.3前後が適当</param>
         /// <param name="beginSizeAnchor">始点側のアンカー点</param>
         /// <param name="currentAnchor">中間のアンカー点</param>
         /// <param name="endSideAnchor">終点側のアンカー点</param>
         /// <returns></returns>
-        private static (double, double) GetDirectionLineLength(DistanceType distType, double mage, Point beginSizeAnchor, Point currentAnchor, Point endSideAnchor)
+        private static (double, double) GetDirectionLineLength(DirectionLineLengthType lengthType, double mage, Point beginSizeAnchor, Point currentAnchor, Point endSideAnchor)
         {
-            if (distType == DistanceType.Zero0距離) { return (0, 0); }
-
-            if (distType == DistanceType.Zero0距離)
+            if (lengthType == DirectionLineLengthType.Zero0距離)
             {
                 return (0, 0);
             }
-            else if (distType == DistanceType.FrontBack前後間)
+            else if (lengthType == DirectionLineLengthType.FrontBack前後間)
             {
                 double temp = GetDistance(beginSizeAnchor, endSideAnchor) * mage;
                 return (temp, temp);
@@ -441,16 +470,16 @@ namespace Pixtack4
 
             double distBegin = GetDistance(currentAnchor, beginSizeAnchor) * mage;
             double distEnd = GetDistance(currentAnchor, endSideAnchor) * mage;
-            if (distType == DistanceType.Average平均)
+            if (lengthType == DirectionLineLengthType.Average平均)
             {
                 double average = (distBegin + distEnd) / 2.0;
                 return (average, average);
             }
-            else if (distType == DistanceType.Separate別々)
+            else if (lengthType == DirectionLineLengthType.Separate別々)
             {
                 return (distBegin, distEnd);
             }
-            else if (distType == DistanceType.Shorter短いほう)
+            else if (lengthType == DirectionLineLengthType.Shorter短いほう)
             {
                 double shorter = distEnd < distBegin ? distEnd : distBegin;
                 return (shorter, shorter);
@@ -470,7 +499,7 @@ namespace Pixtack4
             PointCollection pc = [];
             pc.Add(anchorPoints[0]);// 始点
             pc.Add(anchorPoints[0]);// 始点の制御点
-            for (int i = 0; i < anchorPoints.Count; i++)
+            for (int i = 1; i < anchorPoints.Count - 1; i++)
             {
                 pc.Add(anchorPoints[i]);// 制御点
                 pc.Add(anchorPoints[i]);// アンカー
@@ -485,12 +514,13 @@ namespace Pixtack4
         //指定間隔で選んだアンカー点を返す
         private static PointCollection ChoiceAnchorPoint(PointCollection points, int interval)
         {
+            if (interval < 1) { interval = 1; }//間隔は1以上
             var selectedPoints = new PointCollection();
             for (int i = 0; i < points.Count - 1; i += interval)
             {
                 selectedPoints.Add(points[i]);
             }
-            selectedPoints.Add(points[points.Count - 1]);//最後の一個は必ず入れる
+            selectedPoints.Add(points[^1]);//最後の一個は必ず入れる
 
             //選んだ頂点が3個以上あって、最後の頂点と最後から2番めが近いときは2番めを除去            
             if (selectedPoints.Count >= 3)
@@ -995,7 +1025,7 @@ namespace Pixtack4
             ButtonAddGeoShapeMouseFreehandBegin.IsEnabled = false;
             ButtonAddGeoShapeMouseFreehandEnd.IsEnabled = true;// 終了ボタンだけ有効化
 
-            for (int i = 0; i < MyTempFreehandPointsList.Count; i++)
+            for (int i = 0; i < MyFreehandOriginPointsList.Count; i++)
             {
 
             }

@@ -278,7 +278,7 @@ namespace Pixtack4
             PointCollection pc = [];
             pc.Add(anchorPoints[0]);// 始点
             pc.Add(anchorPoints[0]);// 始点の制御点
-            for (int i = 0; i < anchorPoints.Count; i++)
+            for (int i = 1; i < anchorPoints.Count; i++)
             {
                 pc.Add(anchorPoints[i]);// 制御点
                 pc.Add(anchorPoints[i]);// アンカー
