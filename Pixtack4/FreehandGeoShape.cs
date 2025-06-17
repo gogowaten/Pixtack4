@@ -358,17 +358,17 @@ namespace Pixtack4
 
 
 
-        //2点間距離を取得
-        private static double GetDistance(Point p1, Point p2)
-        {
-            return Math.Sqrt(Math.Pow(p2.X - p1.X, 2.0) + Math.Pow(p2.Y - p1.Y, 2.0));
-        }
+        ////2点間距離を取得
+        //private static double GetDistance(Point p1, Point p2)
+        //{
+        //    return Math.Sqrt(Math.Pow(p2.X - p1.X, 2.0) + Math.Pow(p2.Y - p1.Y, 2.0));
+        //}
 
-        //2点間線分のラジアン(弧度)を取得
-        private static double GetRadianFrom2Points(Point begin, Point end)
-        {
-            return Math.Atan2(end.Y - begin.Y, end.X - begin.X);
-        }
+        ////2点間線分のラジアン(弧度)を取得
+        //private static double GetRadianFrom2Points(Point begin, Point end)
+        //{
+        //    return Math.Atan2(end.Y - begin.Y, end.X - begin.X);
+        //}
     }
 
 }

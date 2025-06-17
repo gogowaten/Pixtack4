@@ -19,8 +19,10 @@ namespace Pixtack4
 {
     public class FreehandGrid : Grid
     {
-        public List<PPolyline> MyListOfPPolyline { get; set; } = [];
-        public Polyline MyPolyline { get; set; } = null!;
+        public List<PGeoShape> MyListOfPGeoShape { get; set; } = [];
+        //public List<PPolyline> MyListOfPPolyline { get; set; } = [];
+        public Polyline MyDragDrawShape { get; set; } = null!;
+        //public Polyline MyPolyline { get; set; } = null!;
         private bool IsDrawing;
 
         public FreehandGrid()
@@ -34,10 +36,10 @@ namespace Pixtack4
             Background = new SolidColorBrush(Color.FromArgb(20, 0, 0, 0));
 
 
-            MyPolyline = MakePolyline();
-            SetZIndex(MyPolyline, 1);
-            Children.Add(MyPolyline);
-            MyPolyline.Visibility = Visibility.Collapsed;
+            MyDragDrawShape = MakePolyline();
+            SetZIndex(MyDragDrawShape, 1);
+            Children.Add(MyDragDrawShape);
+            MyDragDrawShape.Visibility = Visibility.Collapsed;
         }
 
 
@@ -45,11 +47,11 @@ namespace Pixtack4
         public void DrawClear()
         {
             if (IsDrawing) { DrawEnd(); }
-            while (MyListOfPPolyline.Count > 0)
+            while (MyListOfPGeoShape.Count > 0)
             {
-                var temp = MyListOfPPolyline[^1];
-                Children.Remove(temp.MyPolyline);
-                _ = MyListOfPPolyline.Remove(temp);
+                var temp = MyListOfPGeoShape[^1];
+                Children.Remove(temp.MyGeoShape);
+                _ = MyListOfPGeoShape.Remove(temp);
             }
         }
 
@@ -57,11 +59,11 @@ namespace Pixtack4
         // 最後に追加した図形を削除
         private void RemoveLastDraw()
         {
-            if (!IsDrawing && MyListOfPPolyline.Count > 0)
+            if (!IsDrawing && MyListOfPGeoShape.Count > 0)
             {
-                var temp = MyListOfPPolyline[^1];// リストの末尾の要素を
-                Children.Remove(temp.MyPolyline);// 子要素群から削除
-                _ = MyListOfPPolyline.Remove(temp);// リストからも削除
+                var temp = MyListOfPGeoShape[^1];// リストの末尾の要素を
+                Children.Remove(temp.MyGeoShape);// 子要素群から削除
+                _ = MyListOfPGeoShape.Remove(temp);// リストからも削除
             }
         }
 
@@ -71,9 +73,9 @@ namespace Pixtack4
         private void DrawBegin(MouseButtonEventArgs e)
         {
             IsDrawing = true;
-            MyPolyline.Visibility = Visibility.Visible;
-            MyPolyline.Points.Clear();
-            MyPolyline.Points.Add(e.GetPosition(this));
+            MyDragDrawShape.Visibility = Visibility.Visible;
+            MyDragDrawShape.Points.Clear();
+            MyDragDrawShape.Points.Add(e.GetPosition(this));
         }
 
         // 描画
@@ -90,7 +92,7 @@ namespace Pixtack4
                 // 頂点追加
                 else
                 {
-                    MyPolyline.Points.Add(ima);
+                    MyDragDrawShape.Points.Add(ima);
                 }
             }
         }
@@ -98,36 +100,39 @@ namespace Pixtack4
         // 描画完了
         private void DrawEnd()
         {
-            if (IsDrawing && MyPolyline.Points.Count > 0)
+            if (IsDrawing && MyDragDrawShape.Points.Count > 0)
             {
                 IsDrawing = false;
-                PPolyline pp = new();
-                MyListOfPPolyline.Add(pp);
-                pp.MyOriginPoints = MyPolyline.Points.Clone();
+                PGeoShape pp = new();
+                MyListOfPGeoShape.Add(pp);
+                pp.MyOriginPoints = MyDragDrawShape.Points.Clone();
 
-                Children.Add(pp.MyPolyline);
+                Children.Add(pp.MyGeoShape);
 
                 MyBind(pp);
             }
 
             IsDrawing = false;
-            MyPolyline.Visibility = Visibility.Collapsed;
-            MyPolyline.Points.Clear();
+            MyDragDrawShape.Visibility = Visibility.Collapsed;
+            MyDragDrawShape.Points.Clear();
 
-            void MyBind(PPolyline pp)
+            void MyBind(PGeoShape pp)
             {
                 var mb = new MultiBinding() { Converter = new MyConvMage() };
-                mb.Bindings.Add(new Binding() { Source = pp, Path = new PropertyPath(PPolyline.MyOriginPointsProperty) });
+                mb.Bindings.Add(new Binding() { Source = pp, Path = new PropertyPath(PGeoShape.MyOriginPointsProperty) });
                 mb.Bindings.Add(new Binding() { Source = this, Path = new PropertyPath(MyIntervalProperty) });
-                BindingOperations.SetBinding(pp, PPolyline.MyPointsProperty, mb);
+                mb.Bindings.Add(new Binding() { Source = this, Path = new PropertyPath(MyDirectionLineLengthTypeProperty) });
+                mb.Bindings.Add(new Binding() { Source = this, Path = new PropertyPath(MyMageProperty) });
+                BindingOperations.SetBinding(pp, PGeoShape.MyPointsProperty, mb);
 
-                BindingOperations.SetBinding(pp.MyPolyline, Shape.StrokeThicknessProperty, new Binding() { Source = this, Path = new PropertyPath(MyStrokeThicknessProperty) });
-                BindingOperations.SetBinding(pp.MyPolyline, Shape.StrokeProperty, new Binding() { Source = this, Path = new PropertyPath(MyStrokeProperty) });
+                BindingOperations.SetBinding(pp.MyGeoShape, Shape.StrokeThicknessProperty, new Binding() { Source = this, Path = new PropertyPath(MyStrokeThicknessProperty) });
+                BindingOperations.SetBinding(pp.MyGeoShape, Shape.StrokeProperty, new Binding() { Source = this, Path = new PropertyPath(MyStrokeProperty) });
 
             }
         }
 
         #endregion 描画
+
 
         private Polyline MakePolyline()
         {
@@ -140,8 +145,6 @@ namespace Pixtack4
             };
 
             polyline.SetBinding(Shape.StrokeThicknessProperty, new Binding() { Source = this, Path = new PropertyPath(MyStrokeThicknessProperty) });
-
-
             return polyline;
         }
 
@@ -152,6 +155,33 @@ namespace Pixtack4
 
         #region 依存関係プロパティ
 
+        //public GeoShape MyGeoShape
+        //{
+        //    get { return (GeoShape)GetValue(MyGeoShapeProperty); }
+        //    set { SetValue(MyGeoShapeProperty, value); }
+        //}
+        //public static readonly DependencyProperty MyGeoShapeProperty =
+        //    DependencyProperty.Register(nameof(MyGeoShape), typeof(GeoShape), typeof(FreehandGrid), new PropertyMetadata(null));
+
+
+        // ベジェ曲線の曲げの強さ加減
+        public double MyMage
+        {
+            get { return (double)GetValue(MyMageProperty); }
+            set { SetValue(MyMageProperty, value); }
+        }
+        public static readonly DependencyProperty MyMageProperty =
+            DependencyProperty.Register(nameof(MyMage), typeof(double), typeof(FreehandGrid), new PropertyMetadata(0.3));
+
+
+        // 方向線の長さType
+        public DirectionLineLengthType MyDirectionLineLengthType
+        {
+            get { return (DirectionLineLengthType)GetValue(MyDirectionLineLengthTypeProperty); }
+            set { SetValue(MyDirectionLineLengthTypeProperty, value); }
+        }
+        public static readonly DependencyProperty MyDirectionLineLengthTypeProperty =
+            DependencyProperty.Register(nameof(MyDirectionLineLengthType), typeof(DirectionLineLengthType), typeof(FreehandGrid), new PropertyMetadata(DirectionLineLengthType.Separate別々));
 
 
         // 頂点間隔
@@ -202,6 +232,7 @@ namespace Pixtack4
 
             MyGeoShape = new()
             {
+                MyShapeType = ShapeType.Bezier,
                 Stroke = Brushes.DodgerBlue,
                 StrokeThickness = 20.0,
                 StrokeStartLineCap = PenLineCap.Round,
@@ -214,7 +245,7 @@ namespace Pixtack4
 
         private void MyBind()
         {
-            MyGeoShape.SetBinding(Polyline.PointsProperty, new Binding() { Source = this, Path = new PropertyPath(MyPointsProperty) });
+            MyGeoShape.SetBinding(GeoShape.MyPointsProperty, new Binding() { Source = this, Path = new PropertyPath(MyPointsProperty) });
         }
 
 
@@ -224,7 +255,7 @@ namespace Pixtack4
             set { SetValue(MyPointsProperty, value); }
         }
         public static readonly DependencyProperty MyPointsProperty =
-            DependencyProperty.Register(nameof(MyPoints), typeof(PointCollection), typeof(PPolyline), new PropertyMetadata(null));
+            DependencyProperty.Register(nameof(MyPoints), typeof(PointCollection), typeof(PGeoShape), new PropertyMetadata(null));
 
         public PointCollection MyOriginPoints
         {
@@ -232,58 +263,58 @@ namespace Pixtack4
             set { SetValue(MyOriginPointsProperty, value); }
         }
         public static readonly DependencyProperty MyOriginPointsProperty =
-            DependencyProperty.Register(nameof(MyOriginPoints), typeof(PointCollection), typeof(PPolyline), new PropertyMetadata(null));
+            DependencyProperty.Register(nameof(MyOriginPoints), typeof(PointCollection), typeof(PGeoShape), new PropertyMetadata(null));
 
     }
 
 
 
-    /// <summary>
-    /// GeoShapeと2つのPointCollectionを持つクラス
-    /// </summary>
-    public class PPolyline : DependencyObject
-    {
-        public Polyline MyPolyline { get; set; }
+    ///// <summary>
+    ///// GeoShapeと2つのPointCollectionを持つクラス
+    ///// </summary>
+    //public class PPolyline : DependencyObject
+    //{
+    //    public Polyline MyPolyline { get; set; }
 
-        public PPolyline()
-        {
+    //    public PPolyline()
+    //    {
 
-            MyPolyline = new()
-            {
-                Stroke = Brushes.DodgerBlue,
-                StrokeThickness = 20.0,
-                StrokeStartLineCap = PenLineCap.Round,
-                StrokeEndLineCap = PenLineCap.Round,
-                StrokeLineJoin = PenLineJoin.Round,
-            };
-            MyBind();
+    //        MyPolyline = new()
+    //        {
+    //            Stroke = Brushes.DodgerBlue,
+    //            StrokeThickness = 20.0,
+    //            StrokeStartLineCap = PenLineCap.Round,
+    //            StrokeEndLineCap = PenLineCap.Round,
+    //            StrokeLineJoin = PenLineJoin.Round,
+    //        };
+    //        MyBind();
 
-        }
+    //    }
 
-        private void MyBind()
-        {
-            MyPolyline.SetBinding(Polyline.PointsProperty, new Binding() { Source = this, Path = new PropertyPath(MyPointsProperty) });
-        }
-
-
-        public PointCollection MyPoints
-        {
-            get { return (PointCollection)GetValue(MyPointsProperty); }
-            set { SetValue(MyPointsProperty, value); }
-        }
-        public static readonly DependencyProperty MyPointsProperty =
-            DependencyProperty.Register(nameof(MyPoints), typeof(PointCollection), typeof(PPolyline), new PropertyMetadata(null));
-
-        public PointCollection MyOriginPoints
-        {
-            get { return (PointCollection)GetValue(MyOriginPointsProperty); }
-            set { SetValue(MyOriginPointsProperty, value); }
-        }
-        public static readonly DependencyProperty MyOriginPointsProperty =
-            DependencyProperty.Register(nameof(MyOriginPoints), typeof(PointCollection), typeof(PPolyline), new PropertyMetadata(null));
+    //    private void MyBind()
+    //    {
+    //        MyPolyline.SetBinding(Polyline.PointsProperty, new Binding() { Source = this, Path = new PropertyPath(MyPointsProperty) });
+    //    }
 
 
-    }
+    //    public PointCollection MyPoints
+    //    {
+    //        get { return (PointCollection)GetValue(MyPointsProperty); }
+    //        set { SetValue(MyPointsProperty, value); }
+    //    }
+    //    public static readonly DependencyProperty MyPointsProperty =
+    //        DependencyProperty.Register(nameof(MyPoints), typeof(PointCollection), typeof(PPolyline), new PropertyMetadata(null));
+
+    //    public PointCollection MyOriginPoints
+    //    {
+    //        get { return (PointCollection)GetValue(MyOriginPointsProperty); }
+    //        set { SetValue(MyOriginPointsProperty, value); }
+    //    }
+    //    public static readonly DependencyProperty MyOriginPointsProperty =
+    //        DependencyProperty.Register(nameof(MyOriginPoints), typeof(PointCollection), typeof(PPolyline), new PropertyMetadata(null));
+
+
+    //}
 
 
 
@@ -297,7 +328,16 @@ namespace Pixtack4
         {
             var origin = (PointCollection)values[0];
             var interval = (int)values[1];
-            return ChoiceAnchorPoint(origin, interval);
+            var direction = (DirectionLineLengthType)values[2];
+            var mage = (double)values[3];
+
+            // 間引き
+            PointCollection pc = GeoShape.MakeIntervalPointCollection(origin, interval);
+            // 制御点追加
+            PointCollection ppc = GeoShape.MakeControlPointCollectionFromAnchors(pc);
+            // 曲げ加工
+            GeoShape.SetControlPointLocate(ppc, direction, mage);
+            return ppc;
         }
 
         public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
@@ -306,35 +346,7 @@ namespace Pixtack4
         }
 
 
-        /// <summary>
-        /// 元のPointCollectionから指定間隔で選んだPointCollectionを新たに作成して返す
-        /// </summary>
-        /// <param name="points"></param>
-        /// <param name="interval"></param>
-        /// <returns></returns>
-        private static PointCollection ChoiceAnchorPoint(PointCollection points, int interval)
-        {
-            var selectedPoints = new PointCollection();
-            if (points.Count == 0) { return selectedPoints; }
 
-            if (interval < 1) { interval = 1; }//間隔は1以上
-            for (int i = 0; i < points.Count - 1; i += interval)
-            {
-                selectedPoints.Add(points[i]);
-            }
-            selectedPoints.Add(points[^1]);//最後の一個は必ず入れる
-
-            //選んだ頂点が3個以上あって、最後の頂点と最後から2番めが近いときは2番めを除去            
-            if (selectedPoints.Count >= 3)
-            {
-                int mod = (points.Count - 2) % interval;
-                if (interval / 2 > mod)
-                {
-                    selectedPoints.RemoveAt(selectedPoints.Count - 2);//除去
-                }
-            }
-            return selectedPoints;
-        }
     }
 
 
