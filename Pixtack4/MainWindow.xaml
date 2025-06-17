@@ -549,11 +549,15 @@
                     <Button x:Name="ButtonAddGeoShapeMouseFreehandBegin"
                             Content="フリーハンド開始"
                             Click="Button_Click_ButtonAddGeoShapeFreehandBegin"/>
-                    
                     <Button x:Name="ButtonAddGeoShapeMouseFreehandEnd"
                             Content="フリーハンド終了" IsEnabled="False"
                             Click="Button_Click_ButtonAddGeoShapeFreehandEnd"/>
-                    
+                    <UniformGrid Columns="2" Margin="4">
+                      <TextBlock Text="{Binding MyAppData.PointChoiceInterval, StringFormat=Interval {0:0}}" HorizontalAlignment="Center"/>
+                      <Slider Minimum="1" Maximum="50" TickFrequency="1" IsSnapToTickEnabled="True"
+                            Value="{Binding MyAppData.PointChoiceInterval}"/>
+                    </UniformGrid>
+
                   </StackPanel>
                 </TabItem>
                 <TabItem Header="その他">
@@ -562,7 +566,7 @@
               </TabControl>
             </TabItem>
             <TabItem Header="特殊" Style="{StaticResource verticalTab}">
-              
+
             </TabItem>
           </TabControl>
         </Expander>
@@ -941,7 +945,7 @@
             </TextBlock>
           </Canvas>-->
           </ScrollViewer>
-          
+
           <!--マウスクリックで頂点追加用グリッド-->
           <Grid x:Name="MyMainGridCover"  Visibility="Collapsed" Cursor="Cross">
             <Grid.Background>
@@ -953,7 +957,7 @@
             </Grid.Background>
             <Polyline x:Name="MyTempPolyline" Stroke="{Binding ElementName=ComboBoxGeoShapeStrokeColor, Path=SelectedValue}" StrokeThickness="{Binding MyAppData.GeoShapeStrokeThickness}" Points="0,0,100,100"/>
           </Grid>
-          
+
           <Grid x:Name="MyMainGridCoverBezier"  Visibility="Collapsed" Cursor="Cross">
             <Grid.Background>
               <SolidColorBrush>
@@ -967,8 +971,8 @@
                             StrokeThickness="{Binding MyAppData.GeoShapeStrokeThickness}"
                             MyHeadEndType="{Binding MyAppData.GeoShapeEndHeadType}"/>
           </Grid>
-          
-          
+
+
           <Grid x:Name="MyMainGridCoverFreehand"  Visibility="Collapsed" Cursor="Cross">
             <Grid.Background>
               <SolidColorBrush>
@@ -983,7 +987,13 @@
                       StrokeLineJoin="Round"
                       />-->
           </Grid>
-          
+
+          <local:FreehandGrid
+            x:Name="MyFreehandGrid" Visibility="Collapsed"
+            MyInterval="{Binding MyAppData.PointChoiceInterval}"
+            MyStroke="{Binding ElementName=ComboBoxGeoShapeStrokeColor, Path=SelectedValue}"
+            MyStrokeThickness="{Binding MyAppData.GeoShapeStrokeThickness}"/>
+
         </Grid>
       </DockPanel>
       <!--中間ここまで-->

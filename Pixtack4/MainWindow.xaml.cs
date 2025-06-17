@@ -213,47 +213,38 @@ namespace Pixtack4
                 MyRightClickDownPoint = b.GetPosition(MyMainGridPanel);
             };
 
+            // 入力用テキストボックスクリック時、テキスト全選択
+            MyTextBoxAddText.PreviewMouseLeftButtonDown += (a, b) =>
+            {
+                MyTextBoxAddText.Focus();
+                b.Handled = true;
+            };
+
+
+
             // マウスクリックでCanvasに直線を描画その2、Polyline、WPFとC# - 午後わてんのブログ
             // https://gogowaten.hatenablog.com/entry/15540488
             // クリックで図形追加用、頂点追加
-            MyMainGridCover.PreviewMouseLeftButtonDown += (a, b) =>
-            {
-                var po = GetIntPosition(b, MyMainGridCover);
-                if (MyPoints.Count == 0) { MyPoints.Add(po); }
-                MyPoints.Add(po);
-            };
+            MyMainGridCover.PreviewMouseLeftButtonDown += (s, e) => { AddClickPoint(MyMainGridCover, MyPoints, e); };
 
             // クリックで図形追加用、右クリックで終了
-            MyMainGridCover.PreviewMouseRightButtonDown += (a, b) =>
-            {
-                AddGeoShapeFromMouseClickEnd();
-            };
+            MyMainGridCover.PreviewMouseRightButtonDown += (a, b) => { AddGeoShapeFromMouseClickEnd(); };
 
-            // 追加中
-            MyMainGridCover.MouseMove += (a, b) =>
-            {
-                if (MyPoints.Count > 0)
-                {
-                    var po = GetIntPosition(b, MyMainGridCover);
-                    int i = MyPoints.Count - 1;
-                    MyPoints[i] = po;
-                }
+            // マウス移動時
+            MyMainGridCover.MouseMove += (s, e) => { LastPointLoacteForPolyline(MyMainGridCover, MyPoints, e); };
 
-            };
+
 
             // ベジェ曲線、クリックでアンカー点追加
-            MyMainGridCoverBezier.PreviewMouseLeftButtonDown += (a, b) =>
+            MyMainGridCoverBezier.PreviewMouseLeftButtonDown += (s, e) =>
             {
-                var po = GetIntPosition(b, MyMainGridCoverBezier);
-                if (MyPoints.Count == 0)
-                {
-                    MyPoints.Add(po); MyPoints.Add(po);
-                    MyPoints.Add(po); MyPoints.Add(po);
-                }
-                else
-                {
-                    MyPoints.Add(po); MyPoints.Add(po); MyPoints.Add(po);
-                }
+                AddClickPointForBezier(MyMainGridCoverBezier, MyPoints, e);
+            };
+
+            // ベジェ曲線、マウス移動時
+            MyMainGridCoverBezier.MouseMove += (s, e) =>
+            {
+                LastPointLocateForBezier(MyMainGridCoverBezier, MyPoints, e, 0.3);
             };
 
             // ベジェ曲線、右クリックで終了
@@ -261,18 +252,6 @@ namespace Pixtack4
             {
                 AddGeoShapeBezierFromMouseClickEnd(MyPoints, 0.3);
             };
-
-            // ベジェ曲線、マウス移動時
-            MyMainGridCoverBezier.MouseMove += (a, b) =>
-            {
-                if (MyPoints.Count > 0)
-                {
-                    Point ima = GetIntPosition(b, MyMainGridCoverBezier);
-                    MyPoints[^1] = ima;
-                    MouseMoveBezier(MyPoints, ima, 0.3);
-                }
-            };
-
 
 
 
@@ -314,14 +293,14 @@ namespace Pixtack4
             MyMainGridCoverFreehand.MouseLeave += (a, b) =>
             {
                 if (IsDrawingFreehand) { ProcessMage(); }
-                
+
             };
-            
+
             // フリーハンド、右クリックで直前のlineを削除
             MyMainGridCoverFreehand.MouseRightButtonDown += (a, b) =>
             {
                 if (MyFreehandOriginPointsList.Count > 0)
-                {   
+                {
                     _ = MyFreehandMagePointsList.Remove(MyFreehandMagePointsList[^1]);
                     _ = MyFreehandOriginPointsList.Remove(MyFreehandOriginPointsList[^1]);
                     Polyline line = MyFreehandPolylinesList[^1];
@@ -331,13 +310,9 @@ namespace Pixtack4
                 }
             };
 
+            // フリーハンド開始
+            
 
-            // 入力用テキストボックスクリック時、テキスト全選択
-            MyTextBoxAddText.PreviewMouseLeftButtonDown += (a, b) =>
-            {
-                MyTextBoxAddText.Focus();
-                b.Handled = true;
-            };
         }
 
         // フリーハンド描画での区切りをいれる、一つの図形としてリストに追加
@@ -989,7 +964,10 @@ namespace Pixtack4
         {
             // フリーハンド終了
             MyScrollViewer.IsEnabled = true;
-            MyMainGridCoverFreehand.Visibility = Visibility.Collapsed;
+            //MyMainGridCoverFreehand.Visibility = Visibility.Collapsed;
+            MyFreehandGrid.Visibility = Visibility.Collapsed;
+            MyFreehandGrid.DrawClear();
+
 
             // ボタン有効化制御
             ButtonAddGeoShapeLineFromClickBegin.IsEnabled = true;
@@ -1011,9 +989,10 @@ namespace Pixtack4
 
         private void AddGeoShapeFreehandBegin()
         {
-            // フリーハンド開始
+            //// フリーハンド開始
             MyScrollViewer.IsEnabled = false;
-            MyMainGridCoverFreehand.Visibility = Visibility.Visible;
+            //MyMainGridCoverFreehand.Visibility = Visibility.Visible;
+            MyFreehandGrid.Visibility = Visibility.Visible;
 
             // ボタン有効化制御
             ButtonAddGeoShapeLineFromClickBegin.IsEnabled = false;
@@ -1025,10 +1004,6 @@ namespace Pixtack4
             ButtonAddGeoShapeMouseFreehandBegin.IsEnabled = false;
             ButtonAddGeoShapeMouseFreehandEnd.IsEnabled = true;// 終了ボタンだけ有効化
 
-            for (int i = 0; i < MyFreehandOriginPointsList.Count; i++)
-            {
-
-            }
         }
 
 
@@ -1329,6 +1304,63 @@ namespace Pixtack4
 
         #region メソッド
 
+        #region ドラッグ移動で図形描画
+
+        #region ベジェ曲線
+
+        private void LastPointLocateForBezier(Panel panel, PointCollection pc, MouseEventArgs e, double mage)
+        {
+            if (pc.Count > 0)
+            {
+                Point ima = GetIntPosition(e, panel);
+                pc[^1] = ima;
+                MouseMoveBezier(pc, ima, mage);
+            }
+        }
+
+        private void AddClickPointForBezier(Panel panel, PointCollection pc, MouseButtonEventArgs e)
+        {
+            var po = GetIntPosition(e, panel);
+            if (pc.Count == 0) { pc.Add(po); }
+            pc.Add(po); pc.Add(po); pc.Add(po);
+        }
+
+        #endregion ベジェ曲線
+
+        #region 直線
+
+        /// <summary>
+        /// PointCollectionの最後のポイントをマウスに合わせる
+        /// </summary>
+        /// <param name="panel"></param>
+        /// <param name="pc"></param>
+        /// <param name="e"></param>
+        private void LastPointLoacteForPolyline(Panel panel, PointCollection pc, MouseEventArgs e)
+        {
+            if (pc.Count > 0)
+            {
+                var po = GetIntPosition(e, panel);
+                int i = pc.Count - 1;
+                pc[i] = po;
+            }
+        }
+
+        /// <summary>
+        /// クリック位置をPointCollectionに追加、クリックでPolyline用
+        /// </summary>
+        /// <param name="pc"></param>
+        /// <param name="e"></param>
+        private void AddClickPoint(Panel panel, PointCollection pc, MouseEventArgs e)
+        {
+            // クリックで図形追加用、頂点追加
+            var po = GetIntPosition(e, panel);
+            if (pc.Count == 0) { pc.Add(po); }
+            pc.Add(po);
+        }
+        #endregion 直線
+
+
+        #endregion ドラッグ移動で図形描画
 
         #region GeoShapeItem関連
 
