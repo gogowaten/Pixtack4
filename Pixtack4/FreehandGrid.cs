@@ -221,8 +221,11 @@ namespace Pixtack4
 
 
 
-
-
+    /// <summary>
+    /// 幾何学的図形とそれに関連付けられた点をカプセル化する依存オブジェクトを表します。
+    /// </summary>
+    /// <remarks><see cref="PGeoShape"/> クラスは、<see cref="GeoShape"/> オブジェクトのラッパーを提供し、点のコレクションをバインドして図形の幾何学的形状を定義できるようにします。また、図形の点と原点を管理するための依存プロパティをサポートし、動的な更新とデータバインディングを可能にします。</remarks>
+    ///
     public class PGeoShape : DependencyObject
     {
         public GeoShape MyGeoShape { get; set; }

@@ -512,7 +512,10 @@
               <TabControl BorderThickness="0">
                 <TabItem Header="基本">
                   <StackPanel Margin="4">
-                    <TextBlock Text="色"/>
+                    <UniformGrid Columns="2">
+                      <TextBlock Text="色" HorizontalAlignment="Center"/>
+                      <Rectangle Fill="{Binding MyAppData.GeoShapeStroke}"/>
+                    </UniformGrid>
                     <ComboBox x:Name="ComboBoxGeoShapeStrokeColor" SelectedValuePath="Value">
                       <ComboBox.ItemTemplate>
                         <DataTemplate>
@@ -981,11 +984,13 @@
                 </SolidColorBrush.Color>
               </SolidColorBrush>
             </Grid.Background>
-            --><!--<Polyline x:Name="MyTempFreehandLine"
+            -->
+          <!--<Polyline x:Name="MyTempFreehandLine"
                       Stroke="{Binding ElementName=ComboBoxGeoShapeStrokeColor, Path=SelectedValue}"
                       StrokeThickness="{Binding MyAppData.GeoShapeStrokeThickness}"
                       StrokeLineJoin="Round"
-                      />--><!--
+                      />-->
+          <!--
           </Grid>-->
 
           <local:FreehandGrid

@@ -99,7 +99,11 @@ namespace Pixtack4
     /// </summary>
     public class AppData : ItemDataKiso
     {
-        public AppData() { }
+        public AppData()
+        {
+            //MyInitBind();
+        }
+
 
         // フリーハンドでの曲げ具合の指定、0.0～1.0の値、0.0で直線、1.0で最大曲げ、0.3が適当
         private double _mage = 0.3;
@@ -119,6 +123,26 @@ namespace Pixtack4
         private HeadType _geoShapeEndHeadType = HeadType.Arrow;
         [DataMember] public HeadType GeoShapeEndHeadType { get => _geoShapeEndHeadType; set => SetProperty(ref _geoShapeEndHeadType, value); }
 
+        // 図形の線の色
+        private byte _geoShapeStrokeA;
+        [DataMember] public byte GeoShapeStrokeA { get => _geoShapeStrokeA; set => SetProperty(ref _geoShapeStrokeA, value); }
+        private byte _geoShapeStrokeR;
+        [DataMember] public byte GeoShapeStrokeR { get => _geoShapeStrokeR; set => SetProperty(ref _geoShapeStrokeR, value); }
+        private byte _geoShapeStrokeG;
+        [DataMember] public byte GeoShapeStrokeG { get => _geoShapeStrokeG; set => SetProperty(ref _geoShapeStrokeG, value); }
+        private byte _geoShapeStrokeB;
+        [DataMember] public byte GeoShapeStrokeB { get => _geoShapeStrokeB; set => SetProperty(ref _geoShapeStrokeB, value); }
+
+        [IgnoreDataMember]
+        public Brush GeoShapeStroke
+        {
+            get { return (Brush)GetValue(GeoShapeStrokeProperty); }
+            set { SetValue(GeoShapeStrokeProperty, value); }
+        }
+        public static readonly DependencyProperty GeoShapeStrokeProperty =
+            DependencyProperty.Register(nameof(GeoShapeStroke), typeof(Brush), typeof(GeoShapeItemData),
+                new FrameworkPropertyMetadata(Brushes.ForestGreen,
+                FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
         // 図形の線の太さ
         private double _geoShapeStrokeThickness = 20.0;
@@ -183,6 +207,18 @@ namespace Pixtack4
         //今開いているファイルのパス
         private string _currentOpenFilePath = string.Empty;
         [DataMember] public string CurrentOpenFilePath { get => _currentOpenFilePath; set => SetProperty(ref _currentOpenFilePath, value); }
+
+        private void MyInitBind()
+        {
+            //直線図形の色
+            MultiBinding mb;
+            mb = new() { Converter = new MyConverterARGBtoSolidBrush() };
+            mb.Bindings.Add(new Binding(nameof(GeoShapeStrokeA)) { Source = this });
+            mb.Bindings.Add(new Binding(nameof(GeoShapeStrokeR)) { Source = this });
+            mb.Bindings.Add(new Binding(nameof(GeoShapeStrokeG)) { Source = this });
+            mb.Bindings.Add(new Binding(nameof(GeoShapeStrokeB)) { Source = this });
+            _ = BindingOperations.SetBinding(this, GeoShapeStrokeProperty, mb);
+        }
 
     }
 
@@ -397,8 +433,8 @@ namespace Pixtack4
             mb.Bindings.Add(new Binding(nameof(MyStrokeG)) { Source = this });
             mb.Bindings.Add(new Binding(nameof(MyStrokeB)) { Source = this });
             _ = BindingOperations.SetBinding(this, MyStrokeProperty, mb);
-
         }
+
     }
 
     /// <summary>

@@ -997,33 +997,6 @@ namespace Pixtack4
 
 
 
-    //public class GeoShapeFreehandThumb : KisoThumb
-    //{
-    //    private AdornerLayer MyShepeAdornerLayer { get; set; } = null!;// アンカーハンドル表示用レイヤー
-    //    public AnchorHandleAdorner? MyAnchorHandleAdorner { get; private set; }// アンカーハンドル
-    //    public FreehandGeoShape MyFreehand { get; private set; } = null!;// 図形
-    //    public int MyDragMovePointIndex { get; private set; } = -1;// ハンドルによってドラッグ移動中のPointのIndex
-
-    //    static GeoShapeFreehandThumb()
-    //    {
-    //        DefaultStyleKeyProperty.OverrideMetadata(typeof(GeoShapeFreehandThumb), new FrameworkPropertyMetadata(typeof(GeoShapeFreehandThumb)));
-    //    }
-    //    public GeoShapeFreehandThumb() { }
-
-    //    public override void OnApplyTemplate()
-    //    {
-    //        base.OnApplyTemplate();
-    //        if (GetTemplateChild("freehand") is FreehandGeoShape shape)
-    //        {
-    //            MyFreehand = shape;
-    //            MyShepeAdornerLayer = AdornerLayer.GetAdornerLayer(MyFreehand);
-    //        }
-    //        else
-    //        {
-    //            throw new NullReferenceException("内部図形の取得に失敗");
-    //        }
-    //    }
-    //}
 
 
     /// <summary>
@@ -1345,7 +1318,6 @@ namespace Pixtack4
         {
 
             if (GetTemplateChild("element") is ItemsControl ic)
-            //if (GetTemplateChild("PART_ItemsControl") is ItemsControl ic)
             {
                 MyExCanvas = GetExCanvas(ic);
 
@@ -1359,21 +1331,6 @@ namespace Pixtack4
                 mb.Bindings.Add(new Binding() { Source = ic, Path = new PropertyPath(RenderTransformProperty) });
                 SetBinding(MyInsideElementBoundsProperty, mb);
 
-                //ItemsControlのサイズはExCanvasのサイズにバインド
-                //ExCanvasのサイズは子要素群のUnionRectにバインド
-                //InsideElementBoundsプロパティはExCanvasのサイズとItemsControlのRenderTransformから算出
-                //GroupThumbのサイズはInsideElementBoundsにバインド
-                //これを
-                //GroupThumbのサイズは子要素群のRenderTransformBoundsに合わせたい
-                //ってことはInsideElementBoundsを子要素群のRenderTransformBoundsにすればいい
-                //ってことはInsideElementBoundsの算出は子要素群と回転しているItemsControlのRenderTransformを使う？
-
-                //var mb = new MultiBinding() { Converter = new MyConvRenderTransformBounds() };
-                //mb.Bindings.Add(new Binding() { Source = ic, Path = new PropertyPath(RenderTransformProperty) });
-                //mb.Bindings.Add(new Binding() { Source = this, Path = new PropertyPath(MyThumbsProperty) });
-                //mb.Bindings.Add(new Binding() { Source = MyExCanvas, Path = new PropertyPath(ActualWidthProperty) });
-                //mb.Bindings.Add(new Binding() { Source = MyExCanvas, Path = new PropertyPath(ActualHeightProperty) });
-                //SetBinding(MyInsideElementBoundsProperty, mb);
 
 
             }
@@ -1382,7 +1339,6 @@ namespace Pixtack4
             //何故かこれをしないとXAMLでのThumbのZがすべて0になる
             FixForXamlItemThumbs();
 
-            //BindingOperations.SetBinding(MyItemData, ItemData.MyThumbsItemData2Property, new Binding() { Source = this, Path = new PropertyPath(MyThumbsProperty) ,Converter = new MyConverterItemData()});
         }
 
         /// <summary>
@@ -1403,13 +1359,6 @@ namespace Pixtack4
 
         #region イベントハンドラ
 
-        //private void AddItemsData()
-        //{
-        //    for (int i = 0; i < MyThumbs.Count; i++)
-        //    {
-        //        MyItemData.MyThumbsItemData.Add(MyThumbs[i].MyItemData);
-        //    }
-        //}
         /// <summary>
         /// 子要素の追加時
         /// 子要素に親要素(自身)を登録

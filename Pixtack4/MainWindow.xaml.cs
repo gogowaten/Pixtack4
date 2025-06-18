@@ -21,7 +21,7 @@ using System.Xml;
 
 namespace Pixtack4
 {
-   
+
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -802,7 +802,10 @@ namespace Pixtack4
         {
             // フリーハンド終了
             MyScrollViewer.IsEnabled = true;
-            //MyMainGridCoverFreehand.Visibility = Visibility.Collapsed;
+
+            // グループとして追加、1個だけのときはGeoShapeItem作成追加
+            AddFreehandShape(MyFreehandGrid.MyListOfPGeoShape);
+
             MyFreehandGrid.Visibility = Visibility.Collapsed;
             MyFreehandGrid.DrawClear();
 
@@ -816,8 +819,6 @@ namespace Pixtack4
             ButtonAddGeoShapeBezier.IsEnabled = true;
             ButtonAddGeoShapeMouseFreehandBegin.IsEnabled = true;
             ButtonAddGeoShapeMouseFreehandEnd.IsEnabled = false;
-
-
         }
 
         private void Button_Click_ButtonAddGeoShapeFreehandBegin(object sender, RoutedEventArgs e)
@@ -1334,6 +1335,54 @@ namespace Pixtack4
 
         #region Item追加
 
+        // フリーハンドでの図形を追加
+        private void AddFreehandShape(List<PGeoShape> geoShapeList)
+        {
+
+            ItemData groupData = new ItemData(ThumbType.Group);
+            GroupThumb group = new(groupData);
+
+            // GeoShape全体の左上座標
+            double x = double.MaxValue; double y = double.MaxValue;
+            for (int i = 0; i < geoShapeList.Count; i++)
+            {
+                var item = geoShapeList[i];
+                var (left, top) = GetTopLeftFromPoints(item.MyPoints);
+                if (x > left) { x = left; }
+                if (y > top) { y = top; }
+            }
+
+            // 全体を左上に寄せる
+            for (int i = 0; i < geoShapeList.Count; i++)
+            {
+
+            }
+
+
+            for (int i = 0; i < geoShapeList.Count; i++)
+            {
+                var item = geoShapeList[i];            
+                // GeoShapeItemのData作成
+                GeoShapeItemData shapeItemData = new()
+                {
+                    MyShapeType = ShapeType.Bezier,
+                    MyPoints = geoShapeList[i].MyPoints.Clone(),
+                    MyStroke = (Brush)ComboBoxGeoShapeStrokeColor.SelectedValue,
+                    MyStrokeThickness = MyAppData.GeoShapeStrokeThickness,
+                };
+
+                // ItemData作成
+                ItemData geoData = new(ThumbType.GeoShape)
+                {
+                    GeoShapeItemData = shapeItemData
+                };
+
+                GeoShapeThumb2 geoshapeitem = new(geoData);
+                group.MyThumbs.Add(geoshapeitem);
+            }
+            MyRoot.AddThumb(group, MyRoot.MyActiveGroupThumb);
+        }
+
 
         // 曲線図形新規追加開始、クリックで頂点追加
         private void AddGeoShapeBezierFromMouseClickBegin()
@@ -1370,7 +1419,6 @@ namespace Pixtack4
 
             if (MyPoints.Count >= 4)
             {
-
                 ItemData data = MakeGeoShapeLineItemData(MyPoints, ShapeType.Bezier);
                 _ = MyRoot.AddNewThumbFromItemData(data, MyRoot.MyActiveGroupThumb, true);
             }
@@ -1447,7 +1495,7 @@ namespace Pixtack4
 
 
         /// <summary>
-        /// 直線図形のItemDataを作成
+        /// 線図形のItemDataを作成
         /// </summary>
         /// <param name="pc"></param>
         /// <returns></returns>
