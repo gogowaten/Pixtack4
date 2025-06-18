@@ -21,15 +21,7 @@ using System.Xml;
 
 namespace Pixtack4
 {
-    //方向線の長さの決め方の種類
-    public enum DirectionLineLengthType
-    {
-        Zero0距離, // 0距離、曲げない
-        Average平均, // 前後の方向線の長さの平均
-        Separate別々, // 前後の方向線の長さを別々に設定
-        Shorter短いほう, // 前後の方向線の短い方を採用
-        FrontBack前後間 // 前後間を採用
-    }
+   
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -94,7 +86,7 @@ namespace Pixtack4
         private List<Polyline> MyFreehandPolylinesList { get; set; } = [];
         private List<PointCollection> MyFreehandOriginPointsList { get; set; } = [];
         private List<PointCollection> MyFreehandMagePointsList = [];
-        private bool IsDrawingFreehand;
+        //private bool IsDrawingFreehand;
 
         public MainWindow()
         {
@@ -255,96 +247,96 @@ namespace Pixtack4
 
 
 
-            // フリーハンド開始、始点
-            MyMainGridCoverFreehand.MouseLeftButtonDown += (a, b) =>
-            {
-                //MyMainGridCoverFreehand.CaptureMouse(); // 有効にするとGrid範囲外でもクリック扱いになる
-                IsDrawingFreehand = true;
-                MyFreehandPolyline = MakeFreehandPolyline();// line作成
-                MyFreehandPolylinesList.Add(MyFreehandPolyline);// lineをリストに追加
-                MyMainGridCoverFreehand.Children.Add(MyFreehandPolyline);// lineをGridに追加
-                MyFreehandPolyline.Points.Add(GetIntPosition(b, MyMainGridCoverFreehand));// lineにクリック点を追加
-                //MyTempFreehandPointsList.Add(MyTempFreehandPolyline.Points);// 
-            };
+            //// フリーハンド開始、始点
+            //MyMainGridCoverFreehand.MouseLeftButtonDown += (a, b) =>
+            //{
+            //    //MyMainGridCoverFreehand.CaptureMouse(); // 有効にするとGrid範囲外でもクリック扱いになる
+            //    IsDrawingFreehand = true;
+            //    MyFreehandPolyline = MakeFreehandPolyline();// line作成
+            //    MyFreehandPolylinesList.Add(MyFreehandPolyline);// lineをリストに追加
+            //    MyMainGridCoverFreehand.Children.Add(MyFreehandPolyline);// lineをGridに追加
+            //    MyFreehandPolyline.Points.Add(GetIntPosition(b, MyMainGridCoverFreehand));// lineにクリック点を追加
+            //    //MyTempFreehandPointsList.Add(MyTempFreehandPolyline.Points);// 
+            //};
 
-            // フリーハンド、ドラッグ移動中はPointを追加し続ける
-            MyMainGridCoverFreehand.MouseMove += (a, b) =>
-            {
-                //アプリのウィンドウがアクティブじゃなくなったら区切り
-                if (this.IsActive == false && IsDrawingFreehand == true)
-                {
-                    ProcessMage(); //一つの図形として完成、曲線加工する
-                    return;
-                }
+            //// フリーハンド、ドラッグ移動中はPointを追加し続ける
+            //MyMainGridCoverFreehand.MouseMove += (a, b) =>
+            //{
+            //    //アプリのウィンドウがアクティブじゃなくなったら区切り
+            //    if (this.IsActive == false && IsDrawingFreehand == true)
+            //    {
+            //        ProcessMage(); //一つの図形として完成、曲線加工する
+            //        return;
+            //    }
 
-                //ドラッグなら座標追加
-                if (b.LeftButton == MouseButtonState.Pressed)
-                {
-                    MyFreehandPolyline.Points.Add(GetIntPosition(b, MyMainGridCoverFreehand)); //クリック位置をlineに追加
-                }
-            };
+            //    //ドラッグなら座標追加
+            //    if (b.LeftButton == MouseButtonState.Pressed)
+            //    {
+            //        MyFreehandPolyline.Points.Add(GetIntPosition(b, MyMainGridCoverFreehand)); //クリック位置をlineに追加
+            //    }
+            //};
 
-            // フリーハンド、曲線加工する
-            MyMainGridCoverFreehand.PreviewMouseLeftButtonUp += (a, b) =>
-            {
-                ProcessMage();
-            };
+            //// フリーハンド、曲線加工する
+            //MyMainGridCoverFreehand.PreviewMouseLeftButtonUp += (a, b) =>
+            //{
+            //    ProcessMage();
+            //};
 
-            MyMainGridCoverFreehand.MouseLeave += (a, b) =>
-            {
-                if (IsDrawingFreehand) { ProcessMage(); }
+            //MyMainGridCoverFreehand.MouseLeave += (a, b) =>
+            //{
+            //    if (IsDrawingFreehand) { ProcessMage(); }
 
-            };
+            //};
 
-            // フリーハンド、右クリックで直前のlineを削除
-            MyMainGridCoverFreehand.MouseRightButtonDown += (a, b) =>
-            {
-                if (MyFreehandOriginPointsList.Count > 0)
-                {
-                    _ = MyFreehandMagePointsList.Remove(MyFreehandMagePointsList[^1]);
-                    _ = MyFreehandOriginPointsList.Remove(MyFreehandOriginPointsList[^1]);
-                    Polyline line = MyFreehandPolylinesList[^1];
-                    MyMainGridCoverFreehand.Children.Remove(line);
-                    MyFreehandPolylinesList.Remove(line);
+            //// フリーハンド、右クリックで直前のlineを削除
+            //MyMainGridCoverFreehand.MouseRightButtonDown += (a, b) =>
+            //{
+            //    if (MyFreehandOriginPointsList.Count > 0)
+            //    {
+            //        _ = MyFreehandMagePointsList.Remove(MyFreehandMagePointsList[^1]);
+            //        _ = MyFreehandOriginPointsList.Remove(MyFreehandOriginPointsList[^1]);
+            //        Polyline line = MyFreehandPolylinesList[^1];
+            //        MyMainGridCoverFreehand.Children.Remove(line);
+            //        MyFreehandPolylinesList.Remove(line);
 
-                }
-            };
+            //    }
+            //};
 
             // フリーハンド開始
 
 
         }
 
-        // フリーハンド描画での区切りをいれる、一つの図形としてリストに追加
-        // 元のPointsを保存しつつ、加工する
-        private void ProcessMage()
-        {
-            IsDrawingFreehand = false;
-            PointCollection origin = MyFreehandPolyline.Points;
-            if (origin.Count >= 3)
-            {
-                // 完了したlineのPointsをリストに追加
-                MyFreehandOriginPointsList.Add(origin);
-                // 加工
-                // 間引き
-                //MyAppData.PointChoiceInterval = 30;
-                PointCollection allPoints = GeoShape.MakeIntervalPointCollection(origin, interval: MyAppData.PointChoiceInterval);
-                // 制御点追加
-                allPoints = GeoShape.MakeControlPointCollectionFromAnchors(allPoints);
-                // 曲げ
-                //       制御点の位置を決めるまでの手順
-                // アンカー点から
-                // A.前後方向線の長さを取得
-                // B.方向線の弧度を取得
-                // ABを使って制御点の位置を設定
-                //MyAppData.Mage = 0.3;
-                GeoShape.SetControlPointLocate(allPoints, MyAppData.DirectionLineLengthType, MyAppData.Mage);
+        //// フリーハンド描画での区切りをいれる、一つの図形としてリストに追加
+        //// 元のPointsを保存しつつ、加工する
+        //private void ProcessMage()
+        //{
+        //    IsDrawingFreehand = false;
+        //    PointCollection origin = MyFreehandPolyline.Points;
+        //    if (origin.Count >= 3)
+        //    {
+        //        // 完了したlineのPointsをリストに追加
+        //        MyFreehandOriginPointsList.Add(origin);
+        //        // 加工
+        //        // 間引き
+        //        //MyAppData.PointChoiceInterval = 30;
+        //        PointCollection allPoints = GeoShape.MakeIntervalPointCollection(origin, interval: MyAppData.PointChoiceInterval);
+        //        // 制御点追加
+        //        allPoints = GeoShape.MakeControlPointCollectionFromAnchors(allPoints);
+        //        // 曲げ
+        //        //       制御点の位置を決めるまでの手順
+        //        // アンカー点から
+        //        // A.前後方向線の長さを取得
+        //        // B.方向線の弧度を取得
+        //        // ABを使って制御点の位置を設定
+        //        //MyAppData.Mage = 0.3;
+        //        GeoShape.SetControlPointLocate(allPoints, MyAppData.DirectionLineLengthType, MyAppData.Mage);
 
-                MyFreehandPolyline.Points = allPoints; // 加工したPointsをlineに設定
-                MyFreehandMagePointsList.Add(allPoints);
-            }
+        //        MyFreehandPolyline.Points = allPoints; // 加工したPointsをlineに設定
+        //        MyFreehandMagePointsList.Add(allPoints);
+        //    }
 
-        }
+        //}
 
 
 

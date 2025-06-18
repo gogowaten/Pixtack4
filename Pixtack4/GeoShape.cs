@@ -19,6 +19,16 @@ namespace Pixtack4
 {
     public enum HeadType { None = 0, Arrow, }
     public enum ShapeType { Line = 0, Bezier, }
+    
+    // ベジェ曲線の方向線の長さの決め方の種類
+    public enum DirectionLineLengthType
+    {
+        Zero0距離, // 0距離、曲げない
+        Average平均, // 前後の方向線の長さの平均
+        Separate別々, // 前後の方向線の長さを別々に設定
+        Shorter短いほう, // 前後の方向線の短い方を採用
+        FrontBack前後間 // 前後間を採用
+    }
 
     public class GeoShape : Shape
     {
@@ -515,12 +525,31 @@ namespace Pixtack4
 
 
         //2点間距離を取得
+        /// <summary>
+        /// Calculates the Euclidean distance between two points.
+        /// </summary>
+        /// <param name="p1">The first point.</param>
+        /// <param name="p2">The second point.</param>
+        /// <returns>The Euclidean distance between <paramref name="p1"/> and <paramref name="p2"/>.</returns>
         public static double GetDistance(Point p1, Point p2)
         {
             return Math.Sqrt(Math.Pow(p2.X - p1.X, 2.0) + Math.Pow(p2.Y - p1.Y, 2.0));
         }
 
+
         //前後のアンカー点それぞれの距離
+        /// <summary>
+        /// Calculates the distances between the current point and two anchor points.
+        /// </summary>
+        /// <remarks>This method is useful for determining the relative positioning of a point between two
+        /// anchor points.</remarks>
+        /// <param name="beginP">The starting anchor point.</param>
+        /// <param name="currentP">The current point from which distances are calculated.</param>
+        /// <param name="endP">The ending anchor point.</param>
+        /// <returns>A tuple containing two distances:  <list type="bullet"> <item><description><c>begin</c>: The distance
+        /// between <paramref name="currentP"/> and <paramref name="beginP"/>.</description></item>
+        /// <item><description><c>end</c>: The distance between <paramref name="currentP"/> and <paramref
+        /// name="endP"/>.</description></item> </list></returns>
         public static (double begin, double end) DistanceSeparate(Point beginP, Point currentP, Point endP)
         {
             double bSide = GetDistance(currentP, beginP);

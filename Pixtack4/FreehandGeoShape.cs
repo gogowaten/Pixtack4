@@ -130,37 +130,37 @@ namespace Pixtack4
 
 
 
-        /// <summary>
-        /// 現在アンカー点とその前後のアンカー点それぞれの中間弧度に直角な弧度を計算
-        /// </summary>
-        /// <param name="beginAnchor">始点側アンカー点</param>
-        /// <param name="currentAnchor">現在アンカー点</param>
-        /// <param name="endAnchor">終点側アンカー点</param>
-        /// <returns>始点側方向線弧度、終点側方向線弧度</returns>
-        private static (double beginSideRadian, double endSideRadian) GetDirectionLineRadian(Point beginAnchor, Point currentAnchor, Point endAnchor)
-        {
-            //ラジアン(弧度)
-            double beginSideRadian = GetRadianFrom2Points(currentAnchor, beginAnchor);//現在から始点側
-            double endSideRadian = GetRadianFrom2Points(currentAnchor, endAnchor);//現在から終点側
-            double middleRadian = (beginSideRadian + endSideRadian) / 2.0;//中間角度
+        ///// <summary>
+        ///// 現在アンカー点とその前後のアンカー点それぞれの中間弧度に直角な弧度を計算
+        ///// </summary>
+        ///// <param name="beginAnchor">始点側アンカー点</param>
+        ///// <param name="currentAnchor">現在アンカー点</param>
+        ///// <param name="endAnchor">終点側アンカー点</param>
+        ///// <returns>始点側方向線弧度、終点側方向線弧度</returns>
+        //private static (double beginSideRadian, double endSideRadian) GetDirectionLineRadian(Point beginAnchor, Point currentAnchor, Point endAnchor)
+        //{
+        //    //ラジアン(弧度)
+        //    double beginSideRadian = GetRadianFrom2Points(currentAnchor, beginAnchor);//現在から始点側
+        //    double endSideRadian = GetRadianFrom2Points(currentAnchor, endAnchor);//現在から終点側
+        //    double middleRadian = (beginSideRadian + endSideRadian) / 2.0;//中間角度
 
-            //中間角度に直角なのは90度を足した右回りと、90を引いた左回りがある
-            //始点側角度＞終点側角度のときは始点側に90度を足して、終点側は90度引く
-            //逆のときは足し引きも逆になる
-            double bControlRadian, eControlRadian;
-            if (beginSideRadian > endSideRadian)
-            {
-                bControlRadian = middleRadian + (Math.PI / 2.0);
-                eControlRadian = middleRadian - (Math.PI / 2.0);
-            }
-            else
-            {
-                bControlRadian = middleRadian - (Math.PI / 2.0);
-                eControlRadian = middleRadian + (Math.PI / 2.0);
-            }
+        //    //中間角度に直角なのは90度を足した右回りと、90を引いた左回りがある
+        //    //始点側角度＞終点側角度のときは始点側に90度を足して、終点側は90度引く
+        //    //逆のときは足し引きも逆になる
+        //    double bControlRadian, eControlRadian;
+        //    if (beginSideRadian > endSideRadian)
+        //    {
+        //        bControlRadian = middleRadian + (Math.PI / 2.0);
+        //        eControlRadian = middleRadian - (Math.PI / 2.0);
+        //    }
+        //    else
+        //    {
+        //        bControlRadian = middleRadian - (Math.PI / 2.0);
+        //        eControlRadian = middleRadian + (Math.PI / 2.0);
+        //    }
 
-            return (bControlRadian, eControlRadian);
-        }
+        //    return (bControlRadian, eControlRadian);
+        //}
 
         ////ベジェ曲線PathからSegmentのPointsを取得
         //private PointCollection GetPolyBezierSegmentPoints(Path bezierPath)

@@ -973,7 +973,7 @@
           </Grid>
 
 
-          <Grid x:Name="MyMainGridCoverFreehand"  Visibility="Collapsed" Cursor="Cross">
+          <!--<Grid x:Name="MyMainGridCoverFreehand"  Visibility="Collapsed" Cursor="Cross">
             <Grid.Background>
               <SolidColorBrush>
                 <SolidColorBrush.Color>
@@ -981,12 +981,12 @@
                 </SolidColorBrush.Color>
               </SolidColorBrush>
             </Grid.Background>
-            <!--<Polyline x:Name="MyTempFreehandLine"
+            --><!--<Polyline x:Name="MyTempFreehandLine"
                       Stroke="{Binding ElementName=ComboBoxGeoShapeStrokeColor, Path=SelectedValue}"
                       StrokeThickness="{Binding MyAppData.GeoShapeStrokeThickness}"
                       StrokeLineJoin="Round"
-                      />-->
-          </Grid>
+                      />--><!--
+          </Grid>-->
 
           <local:FreehandGrid
             x:Name="MyFreehandGrid" Visibility="Collapsed"
