@@ -115,7 +115,7 @@ namespace Pixtack4
         public DirectionLineLengthType DirectionLineLengthType { get => _directionLineLengthType; set => SetProperty(ref _directionLineLengthType, value); }
 
         // フリーハンド図形でのPointsの間引き間隔
-        private int _pointChoiceInterval = 10;
+        private int _pointChoiceInterval = 30;
         public int PointChoiceInterval { get => _pointChoiceInterval; set => SetProperty(ref _pointChoiceInterval, value); }
 
 
@@ -149,7 +149,7 @@ namespace Pixtack4
         [DataMember] public double GeoShapeStrokeThickness { get => _geoShapeStrokeThickness; set => SetProperty(ref _geoShapeStrokeThickness, value); }
 
         //図形のアンカーハンドルのサイズ
-        private double _geoShapeHandleSize = 30.0;
+        private double _geoShapeHandleSize = 10.0;
         [DataMember] public double GeoShapeHandleSize { get => _geoShapeHandleSize; set => SetProperty(ref _geoShapeHandleSize, value); }
 
 

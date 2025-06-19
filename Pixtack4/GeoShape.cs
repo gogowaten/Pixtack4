@@ -17,9 +17,9 @@ using System.Security.Cryptography.Xml;
 
 namespace Pixtack4
 {
-    public enum HeadType { None = 0, Arrow, }
+    public enum HeadType { None = 0, Arrow, Round }
     public enum ShapeType { Line = 0, Bezier, }
-    
+
     // ベジェ曲線の方向線の長さの決め方の種類
     public enum DirectionLineLengthType
     {
@@ -35,14 +35,17 @@ namespace Pixtack4
         public GeoShape()
         {
             MyInitializeBind();
-
+            //StrokeEndLineCap = PenLineCap.Square;
+            //StrokeEndLineCap = PenLineCap.Round;
+            //StrokeEndLineCap = PenLineCap.Triangle;
+            //StrokeEndLineCap = PenLineCap.Flat;
         }
 
         #region 初期処理
 
         private void MyInitializeBind()
         {
-            
+
             //Pointsの先頭を外したPointCollection
             _ = SetBinding(MySegmentPointsProperty, new Binding() { Source = this, Path = new PropertyPath(MyPointsProperty), Mode = BindingMode.OneWay, Converter = new MyConverterSegmentPoints() });
 
@@ -87,6 +90,9 @@ namespace Pixtack4
                         case HeadType.Arrow:
                             begin = DrawArrow(context, begin, MyPoints[1]);
                             break;
+                        case HeadType.Round:
+                            StrokeStartLineCap = PenLineCap.Round;
+                            break;
                         default:
                             break;
                     }
@@ -97,6 +103,9 @@ namespace Pixtack4
                             break;
                         case HeadType.Arrow:
                             end = DrawArrow(context, end, MyPoints[^2]);
+                            break;
+                        case HeadType.Round:
+                            StrokeEndLineCap = PenLineCap.Round;
                             break;
                         default:
                             break;
@@ -404,12 +413,12 @@ namespace Pixtack4
         #region パフリックメソッド
 
 
-        //        // 曲げ
-        //        //       制御点の位置を決めるまでの手順
-        //        // アンカー点から
-        //        // A.前後方向線の長さを取得
-        //        // B.方向線の弧度を取得
-        //        // ABを使って制御点の位置を設定
+        // 曲げ
+        //       制御点の位置を決めるまでの手順
+        // アンカー点から
+        // A.前後方向線の長さを取得
+        // B.方向線の弧度を取得
+        // ABを使って制御点の位置を設定
         /// <summary>
         /// 制御点の座標を決める
         /// </summary>
@@ -437,6 +446,30 @@ namespace Pixtack4
                 y = currentAnchor.Y + Math.Sin(endSideRadian) * endSideLength;
                 allPoints[i + 4] = new Point(x, y);
             }
+            // 始点側の制御点位置決定
+            // 終点側の制御点位置決定
+            SetControlPointLocateFroSide(allPoints, mage);
+        }
+
+        /// <summary>
+        /// ベジェ曲線の始点側と終点側の制御点の座標を設定
+        /// </summary>
+        /// <param name="allPoints"></param>
+        /// <param name="mage"></param>
+        public static void SetControlPointLocateFroSide(PointCollection allPoints, double mage)
+        {
+            Point anchor = allPoints[0];
+            Point ctrl = allPoints[2];
+            allPoints[1] = new Point(
+                allPoints[1].X + (ctrl.X - anchor.X) * mage,
+                allPoints[1].Y + (ctrl.Y - anchor.Y) * mage);
+
+            anchor = allPoints[^1];
+            ctrl = allPoints[^3];
+            allPoints[^2] = new Point(
+                allPoints[^2].X + (ctrl.X - anchor.X) * mage,
+                allPoints[^2].Y + (ctrl.Y - anchor.Y) * mage);
+
         }
 
 
@@ -584,7 +617,7 @@ namespace Pixtack4
         public static PointCollection MakeIntervalPointCollection(PointCollection points, int interval)
         {
             if (interval < 1) { interval = 1; }//間隔は1以上
-            var selectedPoints = new PointCollection();
+            PointCollection selectedPoints = [];
             for (int i = 0; i < points.Count - 1; i += interval)
             {
                 selectedPoints.Add(points[i]);
@@ -594,11 +627,23 @@ namespace Pixtack4
             //選んだ頂点が3個以上あって、最後の頂点と最後から2番めが近いときは2番めを除去            
             if (selectedPoints.Count >= 3)
             {
-                int mod = (points.Count - 2) % interval;
-                if (interval / 2 > mod)
+                // 平均距離
+                double fullSpan = 0;
+                for (int i = 0; i < selectedPoints.Count - 1; i++)
                 {
-                    selectedPoints.RemoveAt(selectedPoints.Count - 2);//除去
+                    fullSpan += GetDistance(selectedPoints[i], selectedPoints[i + 1]);
                 }
+                double averageLiength = fullSpan / (selectedPoints.Count - 1);
+                double lastSpan = GetDistance(selectedPoints[^2], selectedPoints[^1]);
+                if (lastSpan < averageLiength)
+                {
+                    _ = selectedPoints.Remove(selectedPoints[^2]);//除去}
+                }
+                //int mod = (points.Count - 2) % interval;
+                //if (interval / 2 > mod)
+                //{
+                //    selectedPoints.RemoveAt(selectedPoints.Count - 2);//除去
+                //}
             }
             return selectedPoints;
         }

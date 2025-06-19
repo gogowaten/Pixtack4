@@ -158,12 +158,10 @@
           </MenuItem>
 
           <MenuItem Header="まだ">
-            <MenuItem Header="文字追加" IsEnabled="False"/>
-            <MenuItem Header="図形追加" IsEnabled="False"/>
-            <MenuItem Header="フリーハンド図形" IsEnabled="False"/>
             <MenuItem Header="クリップボード監視" IsEnabled="False"/>
             <MenuItem Header="Focusの上下Item表示" IsEnabled="False"/>
             <MenuItem Header="NumericUpDown" IsEnabled="False"/>
+            <MenuItem Header="カラーピッカー" IsEnabled="False"/>
 
           </MenuItem>
         </Menu>
@@ -508,7 +506,7 @@
                 </TabItem>
               </TabControl>
             </TabItem>
-            <TabItem Header="矢印" Style="{StaticResource verticalTab}">
+            <TabItem Header="線図形" Style="{StaticResource verticalTab}">
               <TabControl BorderThickness="0">
                 <TabItem Header="基本">
                   <StackPanel Margin="4">
@@ -527,12 +525,12 @@
                       </ComboBox.ItemTemplate>
                     </ComboBox>
                     <UniformGrid Columns="2" Margin="4">
-                      <TextBlock Text="終端形状" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                      <TextBlock Text="終端形状" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="10,0"/>
                       <ComboBox x:Name="ComboBoxGeoShapeEndCapType"
                                 SelectedValue="{Binding MyAppData.GeoShapeEndHeadType}"/>
                     </UniformGrid>
                     <UniformGrid Columns="2" Margin="4">
-                      <TextBlock Text="{Binding ElementName=SliderGeoShapeStrokeThickness, Path=Value, StringFormat=線幅 {0:0}}" HorizontalAlignment="Center"/>
+                      <TextBlock Text="{Binding ElementName=SliderGeoShapeStrokeThickness, Path=Value, StringFormat=線幅 {0:0}}" HorizontalAlignment="Right" Margin="10,0"/>
                       <Slider x:Name="SliderGeoShapeStrokeThickness" Minimum="1" Maximum="50" Value="{Binding MyAppData.GeoShapeStrokeThickness}" TickFrequency="1" IsSnapToTickEnabled="True"/>
                     </UniformGrid>
                     <Button x:Name="ButtonAddGeoShapeLine" Content="直線追加" Click="Button_Click_AddGeoShapeLineItem"/>
@@ -795,7 +793,7 @@
                   <TextBlock Text="{Binding FontComboBoxSelectedIndex, StringFormat=FontComboBoxSelectedIndex {0:0}}"/>
                   <TextBlock Text="{Binding FontWeightComboBoxSelectedIndex, StringFormat=FontWeightComboBoxSelectedIndex {0:0}}"/>
                   <TextBlock Text="{Binding GeoShapeHandleSize, StringFormat=GeoShapeHandleSize {0:0}}"/>
-                  <Slider Minimum="10" Maximum="100" Value="{Binding GeoShapeHandleSize}" TickFrequency="1.0" IsSnapToTickEnabled="True"/>
+                  <Slider Minimum="4" Maximum="100" Value="{Binding GeoShapeHandleSize}" TickFrequency="1.0" IsSnapToTickEnabled="True"/>
                   <TextBlock Text="{Binding InitialDirectory, StringFormat=InitialDirectory {0:0}}"/>
                   <TextBlock Text="{Binding IsFileNameDescendingOrder, StringFormat=IsFileNameDescendingOrder {0:0}}"/>
                   <TextBlock Text="{Binding IsWakuVisible, StringFormat=IsWakuVisible {0}}"/>

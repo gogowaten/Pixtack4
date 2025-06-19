@@ -81,12 +81,12 @@ namespace Pixtack4
         // マウスクリックで図形追加で使う
         private PointCollection MyPoints { get; set; } = new();
 
-        // フリーハンドで使う
-        private Polyline MyFreehandPolyline { get; set; } = new();
-        private List<Polyline> MyFreehandPolylinesList { get; set; } = [];
-        private List<PointCollection> MyFreehandOriginPointsList { get; set; } = [];
-        private List<PointCollection> MyFreehandMagePointsList = [];
-        //private bool IsDrawingFreehand;
+        //// フリーハンドで使う
+        //private Polyline MyFreehandPolyline { get; set; } = new();
+        //private List<Polyline> MyFreehandPolylinesList { get; set; } = [];
+        //private List<PointCollection> MyFreehandOriginPointsList { get; set; } = [];
+        //private List<PointCollection> MyFreehandMagePointsList = [];
+        ////private bool IsDrawingFreehand;
 
         public MainWindow()
         {
@@ -247,97 +247,9 @@ namespace Pixtack4
 
 
 
-            //// フリーハンド開始、始点
-            //MyMainGridCoverFreehand.MouseLeftButtonDown += (a, b) =>
-            //{
-            //    //MyMainGridCoverFreehand.CaptureMouse(); // 有効にするとGrid範囲外でもクリック扱いになる
-            //    IsDrawingFreehand = true;
-            //    MyFreehandPolyline = MakeFreehandPolyline();// line作成
-            //    MyFreehandPolylinesList.Add(MyFreehandPolyline);// lineをリストに追加
-            //    MyMainGridCoverFreehand.Children.Add(MyFreehandPolyline);// lineをGridに追加
-            //    MyFreehandPolyline.Points.Add(GetIntPosition(b, MyMainGridCoverFreehand));// lineにクリック点を追加
-            //    //MyTempFreehandPointsList.Add(MyTempFreehandPolyline.Points);// 
-            //};
-
-            //// フリーハンド、ドラッグ移動中はPointを追加し続ける
-            //MyMainGridCoverFreehand.MouseMove += (a, b) =>
-            //{
-            //    //アプリのウィンドウがアクティブじゃなくなったら区切り
-            //    if (this.IsActive == false && IsDrawingFreehand == true)
-            //    {
-            //        ProcessMage(); //一つの図形として完成、曲線加工する
-            //        return;
-            //    }
-
-            //    //ドラッグなら座標追加
-            //    if (b.LeftButton == MouseButtonState.Pressed)
-            //    {
-            //        MyFreehandPolyline.Points.Add(GetIntPosition(b, MyMainGridCoverFreehand)); //クリック位置をlineに追加
-            //    }
-            //};
-
-            //// フリーハンド、曲線加工する
-            //MyMainGridCoverFreehand.PreviewMouseLeftButtonUp += (a, b) =>
-            //{
-            //    ProcessMage();
-            //};
-
-            //MyMainGridCoverFreehand.MouseLeave += (a, b) =>
-            //{
-            //    if (IsDrawingFreehand) { ProcessMage(); }
-
-            //};
-
-            //// フリーハンド、右クリックで直前のlineを削除
-            //MyMainGridCoverFreehand.MouseRightButtonDown += (a, b) =>
-            //{
-            //    if (MyFreehandOriginPointsList.Count > 0)
-            //    {
-            //        _ = MyFreehandMagePointsList.Remove(MyFreehandMagePointsList[^1]);
-            //        _ = MyFreehandOriginPointsList.Remove(MyFreehandOriginPointsList[^1]);
-            //        Polyline line = MyFreehandPolylinesList[^1];
-            //        MyMainGridCoverFreehand.Children.Remove(line);
-            //        MyFreehandPolylinesList.Remove(line);
-
-            //    }
-            //};
-
-            // フリーハンド開始
 
 
         }
-
-        //// フリーハンド描画での区切りをいれる、一つの図形としてリストに追加
-        //// 元のPointsを保存しつつ、加工する
-        //private void ProcessMage()
-        //{
-        //    IsDrawingFreehand = false;
-        //    PointCollection origin = MyFreehandPolyline.Points;
-        //    if (origin.Count >= 3)
-        //    {
-        //        // 完了したlineのPointsをリストに追加
-        //        MyFreehandOriginPointsList.Add(origin);
-        //        // 加工
-        //        // 間引き
-        //        //MyAppData.PointChoiceInterval = 30;
-        //        PointCollection allPoints = GeoShape.MakeIntervalPointCollection(origin, interval: MyAppData.PointChoiceInterval);
-        //        // 制御点追加
-        //        allPoints = GeoShape.MakeControlPointCollectionFromAnchors(allPoints);
-        //        // 曲げ
-        //        //       制御点の位置を決めるまでの手順
-        //        // アンカー点から
-        //        // A.前後方向線の長さを取得
-        //        // B.方向線の弧度を取得
-        //        // ABを使って制御点の位置を設定
-        //        //MyAppData.Mage = 0.3;
-        //        GeoShape.SetControlPointLocate(allPoints, MyAppData.DirectionLineLengthType, MyAppData.Mage);
-
-        //        MyFreehandPolyline.Points = allPoints; // 加工したPointsをlineに設定
-        //        MyFreehandMagePointsList.Add(allPoints);
-        //    }
-
-        //}
-
 
 
 
@@ -1336,13 +1248,10 @@ namespace Pixtack4
         #region Item追加
 
         // フリーハンドでの図形を追加
+        // 複数図形ならグループ化して追加
         private void AddFreehandShape(List<PGeoShape> geoShapeList)
         {
-
-            ItemData groupData = new ItemData(ThumbType.Group);
-            GroupThumb group = new(groupData);
-
-            // GeoShape全体の左上座標
+            // 全Pointsの左上座標を取得
             double x = double.MaxValue; double y = double.MaxValue;
             for (int i = 0; i < geoShapeList.Count; i++)
             {
@@ -1355,33 +1264,79 @@ namespace Pixtack4
             // 全体を左上に寄せる
             for (int i = 0; i < geoShapeList.Count; i++)
             {
-
+                PointCollection pc = geoShapeList[i].MyPoints;
+                for (int j = 0; j < pc.Count; j++)
+                {
+                    Point po = pc[j];
+                    pc[j] = new Point(po.X - x, po.Y - y);
+                }
             }
 
+            GroupThumb activeGroup = MyRoot.MyActiveGroupThumb;// 追加先のグループ
+            double scrollX = MyScrollViewer.HorizontalOffset;// スクロール位置X
+            double scrollY = MyScrollViewer.VerticalOffset;// スクロール位置Y
 
-            for (int i = 0; i < geoShapeList.Count; i++)
+            // 複数図形ならグループ化で追加
+            if (geoShapeList.Count >= 2)
             {
-                var item = geoShapeList[i];            
-                // GeoShapeItemのData作成
-                GeoShapeItemData shapeItemData = new()
+                // グループItem作成、座標は全左上にスクロール位置を加算
+                // 追加先のグループの座標を引き算
+                ItemData groupData = new(ThumbType.Group)
                 {
-                    MyShapeType = ShapeType.Bezier,
-                    MyPoints = geoShapeList[i].MyPoints.Clone(),
-                    MyStroke = (Brush)ComboBoxGeoShapeStrokeColor.SelectedValue,
-                    MyStrokeThickness = MyAppData.GeoShapeStrokeThickness,
+                    MyLeft = x + scrollX - activeGroup.MyItemData.MyLeft,
+                    MyTop = y + scrollY - activeGroup.MyItemData.MyTop,
                 };
+                GroupThumb group = new(groupData);
 
+                // 各図形作成、座標は各Pointsの左上にする
+                for (int i = 0; i < geoShapeList.Count; i++)
+                {
+                    // 各座標、Pointsの左上を取得
+                    var (left, top) = GetTopLeftFromPoints(geoShapeList[i].MyPoints);
+                    // ItemData作成
+                    ItemData geoData = new(ThumbType.GeoShape)
+                    {
+                        MyLeft = left,
+                        MyTop = top,
+                        MyZIndex = i,
+                        GeoShapeItemData = SubMakeGeoShapeItemData(geoShapeList[i].MyPoints)
+                    };
+
+                    GeoShapeThumb2 geoshapeitem = new(geoData);
+                    group.MyThumbs.Add(geoshapeitem);
+                }
+                MyRoot.AddThumb(group, activeGroup, true);
+            }
+            // 単体を追加
+            else
+            {
+                var (left, top) = GetTopLeftFromPoints(geoShapeList[0].MyPoints);
                 // ItemData作成
                 ItemData geoData = new(ThumbType.GeoShape)
                 {
-                    GeoShapeItemData = shapeItemData
+                    MyLeft = x + left + scrollX - activeGroup.MyItemData.MyLeft,
+                    MyTop = y + top + scrollY - activeGroup.MyItemData.MyTop,
+                    GeoShapeItemData = SubMakeGeoShapeItemData(geoShapeList[0].MyPoints)
                 };
-
-                GeoShapeThumb2 geoshapeitem = new(geoData);
-                group.MyThumbs.Add(geoshapeitem);
+                GeoShapeThumb2 geoShapeThumb2 = new(geoData);
+                MyRoot.AddThumb(geoShapeThumb2, activeGroup, true);
             }
-            MyRoot.AddThumb(group, MyRoot.MyActiveGroupThumb);
+
+            // GeoShapeItemData作成
+            GeoShapeItemData SubMakeGeoShapeItemData(PointCollection pc)
+            {
+                return new GeoShapeItemData()
+                {
+                    MyShapeType = ShapeType.Bezier,
+                    MyPoints = pc.Clone(),
+                    MyStroke = (Brush)ComboBoxGeoShapeStrokeColor.SelectedValue,
+                    MyStrokeThickness = MyAppData.GeoShapeStrokeThickness,
+                    MyGeoShapeHeadEndCapType = MyAppData.GeoShapeEndHeadType,
+                };
+            }
+
         }
+
 
 
         // 曲線図形新規追加開始、クリックで頂点追加

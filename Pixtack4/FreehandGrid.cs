@@ -100,6 +100,7 @@ namespace Pixtack4
         // 描画完了
         private void DrawEnd()
         {
+            // Points管理クラスのPGeoShapeを作成、リストに追加
             if (IsDrawing && MyDragDrawShape.Points.Count > 0)
             {
                 IsDrawing = false;
@@ -112,13 +113,15 @@ namespace Pixtack4
                 MyBind(pp);
             }
 
+            // マウスドラッグ移動で描画していたPolylineは非表示にする
             IsDrawing = false;
             MyDragDrawShape.Visibility = Visibility.Collapsed;
             MyDragDrawShape.Points.Clear();
 
+            // OriginPointsとPointsのバインド
             void MyBind(PGeoShape pp)
             {
-                var mb = new MultiBinding() { Converter = new MyConvMage() };
+                MultiBinding mb = new() { Converter = new MyConvMage() };
                 mb.Bindings.Add(new Binding() { Source = pp, Path = new PropertyPath(PGeoShape.MyOriginPointsProperty) });
                 mb.Bindings.Add(new Binding() { Source = this, Path = new PropertyPath(MyIntervalProperty) });
                 mb.Bindings.Add(new Binding() { Source = this, Path = new PropertyPath(MyDirectionLineLengthTypeProperty) });
@@ -222,7 +225,7 @@ namespace Pixtack4
 
 
     /// <summary>
-    /// 幾何学的図形とそれに関連付けられた点をカプセル化する依存オブジェクトを表します。
+    /// FreehandGrid用のPoints管理クラス
     /// </summary>
     /// <remarks><see cref="PGeoShape"/> クラスは、<see cref="GeoShape"/> オブジェクトのラッパーを提供し、点のコレクションをバインドして図形の幾何学的形状を定義できるようにします。また、図形の点と原点を管理するための依存プロパティをサポートし、動的な更新とデータバインディングを可能にします。</remarks>
     ///
