@@ -11,14 +11,14 @@ using System.Transactions;
 namespace Pixtack4
 {
     //方向線の長さの決め方の種類
-    public enum DistanceType
-    {
-        Zero0距離,
-        Average平均,
-        Separate別々,
-        Shorter短いほう,
-        FrontBack前後間
-    }
+    //public enum DistanceType
+    //{
+    //    Zero0距離,
+    //    Average平均,
+    //    Separate別々,
+    //    Shorter短いほう,
+    //    FrontBack前後間
+    //}
     //public enum RadianType
     //{
     //    Parallel平行,

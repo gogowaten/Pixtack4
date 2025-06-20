@@ -210,7 +210,7 @@ namespace Pixtack4
 
         //今開いているファイルのパス
         private string _currentOpenFilePath = string.Empty;
-        [DataMember] public string CurrentOpenFilePath { get => _currentOpenFilePath; set => SetProperty(ref _currentOpenFilePath, value); }
+        [IgnoreDataMember] public string CurrentOpenFilePath { get => _currentOpenFilePath; set => SetProperty(ref _currentOpenFilePath, value); }
 
         private void MyInitBind()
         {
@@ -871,8 +871,8 @@ namespace Pixtack4
 
         #region 保存しない系
 
-        private Visibility _isWakuVisible;
-        public Visibility IsWakuVisible { get => _isWakuVisible; set => SetProperty(ref _isWakuVisible, value); }
+        //private Visibility _isWakuVisible;
+        //[IgnoreDataMember] public Visibility IsWakuVisible { get => _isWakuVisible; set => SetProperty(ref _isWakuVisible, value); }
 
         private bool _isActiveGroup;
         public bool IsActiveGroup { get => _isActiveGroup; set => SetProperty(ref _isActiveGroup, value); }

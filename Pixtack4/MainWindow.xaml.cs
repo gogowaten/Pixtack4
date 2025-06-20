@@ -931,10 +931,6 @@ namespace Pixtack4
             MyRoot.AddGroupingFromSelected();// SelectedThumbsからGroupThumbを生成、ActiveThumbに追加
         }
 
-        //private void Button_Click_ItemsTreePanelVisible(object sender, RoutedEventArgs e)
-        //{
-        //    ChangeVisible(MyGridMyItemsTree);// パネルの表示非表示を切り替える、Visible or Collapsed
-        //}
 
         private void Button_Click_SelectedItemsPropertyPanelVisible(object sender, RoutedEventArgs e)
         {
@@ -976,25 +972,6 @@ namespace Pixtack4
             if (SaveItemToImageFile(MyRoot)) { MyStatusMessage.Text = MakeStatusMessage("保存完了"); }
         }
 
-        //破線枠の表示
-        private void Button_Click_SwitchWaku(object sender, RoutedEventArgs e)
-        {
-            //if (MyRoot.IsWakuVisible == Visibility.Visible)
-            //{
-            //    MyRoot.IsWakuVisible = Visibility.Collapsed;
-            //}
-            //else { MyRoot.IsWakuVisible = Visibility.Collapsed; }
-            var neko = MyRoot.IsWakuVisible;
-            if (MyAppData.IsWakuVisible == Visibility.Visible)
-            {
-                MyAppData.IsWakuVisible = Visibility.Collapsed;
-            }
-            else
-            {
-                MyAppData.IsWakuVisible = Visibility.Visible;
-            }
-            var inu = MyRoot.IsWakuVisible;
-        }
 
         private void Button_Click_SaveFocusItem(object sender, RoutedEventArgs e)
         {
@@ -1647,7 +1624,7 @@ namespace Pixtack4
         private void MyInitializeRootThumb()
         {
             MyRoot = new RootThumb(new ItemData(ThumbType.Root));
-            _ = MyRoot.SetBinding(KisoThumb.IsWakuVisibleProperty, new Binding(nameof(AppData.IsWakuVisible)) { Source = MyAppData, Mode = BindingMode.TwoWay });
+            _ = MyRoot.SetBinding(KisoThumb.IsWakuVisibleProperty, new Binding(nameof(AppData.IsWakuVisible)) { Source = MyAppData });
             MyManageExCanvas = new ManageExCanvas(MyRoot, new ManageData(), this);
             MyScrollViewer.Content = MyManageExCanvas;
 
@@ -2682,7 +2659,7 @@ namespace Pixtack4
                    "今の状態を保存してから開く？\n\n\n" +
                    "はい＿：保存してから開く\n\n" +
                    "いいえ：保存しないで開く\n\n" +
-                   "キャンセル：開くのををキャンセル",
+                   "キャンセル：開くのをキャンセル",
                    "px4ファイルを開く前の確認",
                    MessageBoxButton.YesNoCancel, MessageBoxImage.Question, MessageBoxResult.Cancel);
 
@@ -2741,6 +2718,10 @@ namespace Pixtack4
                         MyManageExCanvas.ChangeRootThumb(root);
                         MyRoot = root;
                         MyAppData.CurrentOpenFilePath = filePath;
+                        // バインド
+                        // 枠表示
+                        _ = MyRoot.SetBinding(KisoThumb.IsWakuVisibleProperty, new Binding(nameof(AppData.IsWakuVisible)) { Source = MyAppData });
+                        
                         return true;
                     }
                 }

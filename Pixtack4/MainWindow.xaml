@@ -167,40 +167,9 @@
           </MenuItem>
         </Menu>
 
-        <Expander Header="exp" IsExpanded="False">
+        <Expander Header="exp" IsExpanded="True">
           <TabControl>
-            <TabItem Header="tab1">
-              <StackPanel Orientation="Vertical">
-                <WrapPanel>
-                  <WrapPanel.Resources>
-                    <Style TargetType="{x:Type Button}">
-                      <Setter Property="Margin" Value="2"/>
-                    </Style>
-                  </WrapPanel.Resources>
-                  <Button Content="ウィンドウのリセット" Click="Button_Click_ResetWindow"/>
-                  <Button Content="Rootをリセット" Click="Button_Click_ResetRoot"/>
-                  <Grid Background="Red" Width="10"/>
-                  <Button Content="名前を付けて保存" Click="Button_Click_SaveData"/>
-                  <Button Content="上書き保存" Click="Button_Click_OverwriteSave"/>
-                  <Button Content="FocusItemを名前を付けて保存" Click="Button_Click_SaveFocusItem"/>
-                  <Grid Background="Red" Width="10"/>
-                  <Button Content="ファイルを開く(px4)" Click="Button_Click_OpenPx4File"/>
-                  <Button Content="ファイルから追加" Click="Button_Click_OpenFile"/>
-                  <Grid Background="Red" Width="10"/>
-                  <Button Content="Rootを画像で保存" Click="Button_Click_SaveRootToImageFile"/>
-                  <Button Content="Focusを画像で保存" Click="Button_Click_SaveFocusItemToImageFile"/>
-                  <Grid Background="Red" Width="10"/>
-                  <Button Content="破線枠の表示切替" Click="Button_Click_SwitchWaku"/>
-                  <Button Content="選択Itemを削除" Click="Button_Click_RemoveSelectedItems"/>
-                  <Button Content="全削除" Click="Button_Click_RemoveAllItems"/>
-
-                  <TextBlock Text="👈️👆️できた｜まだ👇️👉️"/>
-
-                  <Button Content="確認" Click="Button_Click"/>
-                </WrapPanel>
-              </StackPanel>
-            </TabItem>
-
+            
             <TabItem Header="AppData" DataContext="{Binding MyAppData}">
               <ScrollViewer>
                 <DockPanel>
@@ -270,15 +239,14 @@
       <!--中間-->
       <DockPanel DockPanel.Dock="Bottom">
         <!--左端ライン-->
-        <Menu DockPanel.Dock="Left">
+        <!--<Menu DockPanel.Dock="Left">
           <Menu.LayoutTransform>
             <RotateTransform Angle="90"/>
           </Menu.LayoutTransform>
           <Button Content="Menu"/>
           <Button Content="テスト用確認" Click="Button_Click"/>
           <Button Content="Root" Click="Button_Click_MyRootStatusPanelVisible"/>
-          <!--<Button Content="ItemsTree" Click="Button_Click_ItemsTreePanelVisible"/>-->
-        </Menu>
+        </Menu>-->
 
         <!--左側1、TreeVew-->
         <!--動作は問題なけどTreeViewにバインドエラーが出る-->
@@ -341,6 +309,7 @@
           </StackPanel>
         </Grid>
 
+        <!--左側3-->
         <Expander DockPanel.Dock="Left" ExpandDirection="Right" IsExpanded="True">
           <TabControl SelectedIndex="3" TabStripPlacement="Left" BorderBrush="SlateBlue" BorderThickness="1" Width="240">
             <TabControl.Resources>
@@ -662,6 +631,34 @@
 
               </GroupBox>
             </TabItem>
+
+            <TabItem Header="Root" DataContext="{Binding}">
+              <GroupBox Header="RootItem">
+                <StackPanel>
+                  <TextBlock Text="{Binding MyThumbType, StringFormat=type {0}}"/>
+                  <TextBlock Text="{Binding ActualWidth, StringFormat=width {0:0}}"/>
+                  <TextBlock Text="{Binding ActualHeight, StringFormat=height {0:0}}"/>
+                  <TextBlock Text="{Binding MyThumbs.Count, StringFormat=ItemsCount _ {0:0}}"/>
+                  <TextBlock Text="{Binding MySelectedThumbs.Count , StringFormat=SelectedCount _ {0:0}}"/>
+                  <Rectangle Width="100" Height="100">
+                    <Rectangle.Fill>
+                      <VisualBrush Stretch="Uniform" Visual="{Binding MyFocusThumb, UpdateSourceTrigger=PropertyChanged}"/>
+                      <!--<BitmapCacheBrush Target="{Binding MyFocusThumb, UpdateSourceTrigger=PropertyChanged}"/>-->
+                    </Rectangle.Fill>
+                  </Rectangle>
+                  <TextBlock Text="FocusItem" HorizontalAlignment="Center"/>
+                  <Separator/>
+                  <Rectangle Width="100" Height="100">
+                    <Rectangle.Fill>
+                      <VisualBrush Stretch="Uniform" Visual="{Binding UpdateSourceTrigger=PropertyChanged}"/>
+                    </Rectangle.Fill>
+                  </Rectangle>
+                  <TextBlock Text="全体" HorizontalAlignment="Center"/>
+                  <Separator/>
+                </StackPanel>
+              </GroupBox>
+            </TabItem>
+            
             <TabItem Header="Group" DataContext="{Binding MyActiveGroupThumb}">
               <GroupBox Header="ActiveGroupItem">
                 <StackPanel>
@@ -793,6 +790,7 @@
                       <Setter Property="TextWrapping" Value="Wrap"/>
                     </Style>
                   </StackPanel.Resources>
+                  <CheckBox Content="Itemの枠表示" IsChecked="{Binding IsWakuVisible, Converter={StaticResource visibleTrue}}"/>
                   <TextBlock Text="{Binding CurrentOpenFilePath, StringFormat=CurrentOpenFilePath {0:0}}"/>
                   <TextBlock Text="{Binding DefaultSaveDataFileName, StringFormat=DefaultSaveDataFileName {0:0}}"/>
                   <TextBlock Text="{Binding DefaultSaveImageFileName, StringFormat=DefaultSaveImageFileName {0:0}}"/>
