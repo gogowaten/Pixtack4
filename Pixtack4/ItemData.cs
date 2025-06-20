@@ -119,6 +119,10 @@ namespace Pixtack4
         public int PointChoiceInterval { get => _pointChoiceInterval; set => SetProperty(ref _pointChoiceInterval, value); }
 
 
+        // 図形の始端形状
+        private HeadType _geoShapeStartHeadType = HeadType.Arrow;
+        [DataMember] public HeadType GeoShapeStartHeadType { get => _geoShapeStartHeadType; set => SetProperty(ref _geoShapeStartHeadType, value); }
+
         // 図形の終端形状
         private HeadType _geoShapeEndHeadType = HeadType.Arrow;
         [DataMember] public HeadType GeoShapeEndHeadType { get => _geoShapeEndHeadType; set => SetProperty(ref _geoShapeEndHeadType, value); }
@@ -727,31 +731,6 @@ namespace Pixtack4
 
         private GeoShapeItemData _GeoShapeItemData = new();
         public GeoShapeItemData GeoShapeItemData { get => _GeoShapeItemData; set => SetProperty(ref _GeoShapeItemData, value); }
-
-
-        //private HeadType _myGeoShapeHeadCapType = HeadType.None;
-        //public HeadType MyGeoShapeHeadCapType { get => _myGeoShapeHeadCapType; set => SetProperty(ref _myGeoShapeHeadCapType, value); }
-
-
-        //private double _myStrokeThickness = 10.0;
-        //public double MyStrokeThickness { get => _myStrokeThickness; set => SetProperty(ref _myStrokeThickness, value); }
-
-
-        //private ShapeType _myShapeType = ShapeType.Line;
-        //public ShapeType MyShapeType { get => _myShapeType; set => SetProperty(ref _myShapeType, value); }
-
-
-
-        ////アンカーポイント群
-        ////通知プロパティだとリアルタイムで動作確認できないので依存関係プロパティにしている
-        //[DataMember]
-        //public PointCollection MyPoints
-        //{
-        //    get { return (PointCollection)GetValue(MyPointsProperty); }
-        //    set { SetValue(MyPointsProperty, value); }
-        //}
-        //public static readonly DependencyProperty MyPointsProperty =
-        //    DependencyProperty.Register(nameof(MyPoints), typeof(PointCollection), typeof(ItemData), new PropertyMetadata(null));
 
 
         #endregion 図形Geometry系

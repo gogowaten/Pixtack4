@@ -162,6 +162,7 @@
             <MenuItem Header="Focusの上下Item表示" IsEnabled="False"/>
             <MenuItem Header="NumericUpDown" IsEnabled="False"/>
             <MenuItem Header="カラーピッカー" IsEnabled="False"/>
+            <MenuItem Header="見た目" IsEnabled="False"/>
 
           </MenuItem>
         </Menu>
@@ -524,6 +525,11 @@
                         </DataTemplate>
                       </ComboBox.ItemTemplate>
                     </ComboBox>
+                    <UniformGrid Columns="2" Margin="4">
+                      <TextBlock Text="始端形状" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="10,0"/>
+                      <ComboBox x:Name="ComboBoxGeoShapeStartCapType"
+                                SelectedValue="{Binding MyAppData.GeoShapeStartHeadType}"/>
+                    </UniformGrid>
                     <UniformGrid Columns="2" Margin="4">
                       <TextBlock Text="終端形状" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="10,0"/>
                       <ComboBox x:Name="ComboBoxGeoShapeEndCapType"
@@ -956,7 +962,11 @@
                 </SolidColorBrush.Color>
               </SolidColorBrush>
             </Grid.Background>
-            <Polyline x:Name="MyTempPolyline" Stroke="{Binding ElementName=ComboBoxGeoShapeStrokeColor, Path=SelectedValue}" StrokeThickness="{Binding MyAppData.GeoShapeStrokeThickness}" Points="0,0,100,100"/>
+            <Polyline
+              x:Name="MyTempPolyline"
+              Stroke="{Binding ElementName=ComboBoxGeoShapeStrokeColor, Path=SelectedValue}"
+              StrokeThickness="{Binding MyAppData.GeoShapeStrokeThickness}"
+              Points="0,0,100,100"/>
           </Grid>
 
           <Grid x:Name="MyMainGridCoverBezier"  Visibility="Collapsed" Cursor="Cross">
@@ -970,7 +980,9 @@
             <local:GeoShape x:Name="MyTempBezier" MyShapeType="Bezier"
                             Stroke="{Binding ElementName=ComboBoxGeoShapeStrokeColor, Path=SelectedValue}"
                             StrokeThickness="{Binding MyAppData.GeoShapeStrokeThickness}"
-                            MyHeadEndType="{Binding MyAppData.GeoShapeEndHeadType}"/>
+                            MyHeadBeginType="{Binding MyAppData.GeoShapeStartHeadType}"
+                            MyHeadEndType="{Binding MyAppData.GeoShapeEndHeadType}"
+                            />
           </Grid>
 
 

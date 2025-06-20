@@ -612,9 +612,14 @@ namespace Pixtack4
             ComboBoxGeoShapeStrokeColor.ItemsSource = brushDictionary;
             ComboBoxGeoShapeStrokeColor.SelectedIndex = 12;
 
+            //始端形状
+            ComboBoxGeoShapeStartCapType.ItemsSource = Enum.GetValues(typeof(HeadType));
+            ComboBoxGeoShapeStartCapType.SelectedValue = MyAppData.GeoShapeEndHeadType;
+
             //終端形状
             ComboBoxGeoShapeEndCapType.ItemsSource = Enum.GetValues(typeof(HeadType));
             ComboBoxGeoShapeEndCapType.SelectedValue = MyAppData.GeoShapeEndHeadType;
+
         }
 
 
@@ -1251,6 +1256,8 @@ namespace Pixtack4
         // 複数図形ならグループ化して追加
         private void AddFreehandShape(List<PGeoShape> geoShapeList)
         {
+            if (geoShapeList.Count == 0) { return; }
+
             // 全Pointsの左上座標を取得
             double x = double.MaxValue; double y = double.MaxValue;
             for (int i = 0; i < geoShapeList.Count; i++)
@@ -1308,7 +1315,7 @@ namespace Pixtack4
                 MyRoot.AddThumb(group, activeGroup, true);
             }
             // 単体を追加
-            else
+            else if (geoShapeList.Count == 1)
             {
                 var (left, top) = GetTopLeftFromPoints(geoShapeList[0].MyPoints);
                 // ItemData作成
@@ -1332,6 +1339,7 @@ namespace Pixtack4
                     MyStroke = (Brush)ComboBoxGeoShapeStrokeColor.SelectedValue,
                     MyStrokeThickness = MyAppData.GeoShapeStrokeThickness,
                     MyGeoShapeHeadEndCapType = MyAppData.GeoShapeEndHeadType,
+                    MyGeoShapeHeadBeginCapType = MyAppData.GeoShapeStartHeadType,
                 };
             }
 
@@ -1466,11 +1474,20 @@ namespace Pixtack4
             data.GeoShapeItemData.MyShapeType = shapeType;
             //data.GeoShapeItemData.MyShapeType = ShapeType.Line;
 
+            // 終端形状
             data.GeoShapeItemData.MyGeoShapeHeadEndCapType = HeadType.None;
             if (ComboBoxGeoShapeEndCapType.SelectedValue is HeadType head)
             {
                 data.GeoShapeItemData.MyGeoShapeHeadEndCapType = head;
             }
+
+            // 始端形状
+            data.GeoShapeItemData.MyGeoShapeHeadBeginCapType = HeadType.None;
+            if (ComboBoxGeoShapeStartCapType.SelectedValue is HeadType startHead)
+            {
+                data.GeoShapeItemData.MyGeoShapeHeadBeginCapType = startHead;
+            }
+
             data.GeoShapeItemData.MyStrokeThickness = MyAppData.GeoShapeStrokeThickness;
             data.GeoShapeItemData.MyStroke = Brushes.Maroon;
             if (ComboBoxGeoShapeStrokeColor.SelectedValue is Brush b)
@@ -1483,7 +1500,8 @@ namespace Pixtack4
             GeoShape geo = new();
             geo.MyPoints = pc;
             geo.StrokeThickness = SliderGeoShapeStrokeThickness.Value;
-            geo.MyHeadEndType = HeadType.Arrow;
+            geo.MyHeadEndType = MyAppData.GeoShapeEndHeadType;
+            geo.MyHeadBeginType = MyAppData.GeoShapeStartHeadType;
             var bounds = geo.GetRenderBounds();
             data.MyLeft += bounds.X;
             data.MyTop += bounds.Y;
