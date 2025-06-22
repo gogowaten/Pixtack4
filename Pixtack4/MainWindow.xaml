@@ -167,7 +167,7 @@
           </MenuItem>
         </Menu>
 
-        <Expander Header="exp" IsExpanded="True">
+        <Expander Header="exp" IsExpanded="False">
           <TabControl>
             
             <TabItem Header="AppData" DataContext="{Binding MyAppData}">
@@ -311,7 +311,7 @@
 
         <!--左側3-->
         <Expander DockPanel.Dock="Left" ExpandDirection="Right" IsExpanded="True">
-          <TabControl SelectedIndex="3" TabStripPlacement="Left" BorderBrush="SlateBlue" BorderThickness="1" Width="240">
+          <TabControl SelectedIndex="4" TabStripPlacement="Left" BorderBrush="SlateBlue" BorderThickness="1" Width="240">
             <TabControl.Resources>
               <Style TargetType="{x:Type TabItem}" x:Key="verticalTab">
                 <Setter Property="LayoutTransform">
@@ -541,8 +541,60 @@
                 </TabItem>
               </TabControl>
             </TabItem>
-            <TabItem Header="特殊" Style="{StaticResource verticalTab}">
+            
+            <TabItem Header="Tool" Style="{StaticResource verticalTab}">
+              <WrapPanel>
+                <WrapPanel.Resources>
+                  <Style TargetType="{x:Type Button}">
+                    <Setter Property="Margin" Value="2"/>
+                  </Style>
+                </WrapPanel.Resources>
+                <Button Content="グループ化" Click="Button_Click_Grouping"/>
+                <Button Content="グループ解除" Click="Button_Click_UnGroup"/>
+                <Grid Background="Red" Width="10"/>
+                <Button Content="グループIN" Click="Button_Click_ChangeActiveGroupToInside"/>
+                <Button Content="グループOUT" Click="Button_Click_ChangeActiveGroupToOutside"/>
+                <Button Content="ClickItemまでIN" Click="Button_Click_ChangeActiveGroupClickedParent"/>
+                <Button Content="RootまでOUT" Click="Button_Click_ChangeActiveGroupRootActivate"/>
+                <Grid Background="Red" Width="10"/>
+                <Button Content="ZUp" Click="Button_Click_ZUp"/>
+                <Button Content="ZDown" Click="Button_Click_ZDown"/>
+                <Button Content="最前面" Click="Button_Click_ZtoTop"/>
+                <Button Content="最背面" Click="Button_Click_ZtoBottom"/>
+                <Button Content="グリッドサイズ変更" Click="Button_Click_ChangeGridSize"/>
+                <TextBlock Text="{Binding MyRoot.MyActiveGroupThumb.MyItemData.GridSize, StringFormat=GridSize {0:0}}"/>
+                <Button Content="クリップボードから画像貼り付け(png)" Click="Button_Click_AddImageFromClipboardPng" ToolTip="通常はこれ"/>
+                <Button Content="クリップボードから画像貼り付け(bmp)" Click="Button_Click_AddImageFromClipboardBmp" ToolTip="半透明無効、エクセルのグラフや図形などはこれ"/>
+                <MenuItem Click="Button_Click_CopyAsImageForRoot">
+                  <MenuItem.Icon>
+                    <Image>
+                      <Image.Source>
+                        <DrawingImage>
+                          <DrawingImage.Drawing>
+                            <GeometryDrawing Brush="Red">
+                              <GeometryDrawing.Geometry>
+                                <RectangleGeometry Rect="0,0,10,10">
+                                  
+                                </RectangleGeometry>
+                              </GeometryDrawing.Geometry>
+                            </GeometryDrawing>
+                          </DrawingImage.Drawing>
+                        </DrawingImage>
+                      </Image.Source>
+                    </Image>
+                  </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="RootItemをクリップボードに画像としてコピー" Click="Button_Click_CopyAsImageForRoot"/>
+                <MenuItem Header="FocusItemをクリップボードに画像としてコピー" Click="Button_Click_CopyAsImageForFocusItem"/>
+                <MenuItem Header="ClickedItemをクリップボードに画像としてコピー" Click="Button_Click_CopyAsImageForClickedItem"/>
 
+                <TextBlock Text="👈️👆️できた｜まだ👇️👉️"/>
+                <Button Content="複製"/>
+                <Button Content="画像として複製"/>
+                <TextBlock Text="{Binding MyAppData.MyJpegQuality, StringFormat=jpeg品質 {0:0}}"/>
+                <Slider Minimum="50" Maximum="100" Value="{Binding MyAppData.MyJpegQuality}" Width="100"/>
+
+              </WrapPanel>
             </TabItem>
           </TabControl>
         </Expander>

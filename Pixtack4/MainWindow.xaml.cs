@@ -56,13 +56,11 @@ namespace Pixtack4
         private AppWindowData MyAppWindowData { get; set; } = null!;
         //アプリのウィンドウDataファイル名
         private const string APP_WINDOW_DATA_FILE_NAME = "Px4AppWindowData.xml";
-        //private const string APP_WINDOW_DATA_FILE_NAME = "AppWindowData.xml";
 
         //アプリの設定Data
         public AppData MyAppData { get; private set; } = null!;// 確認用でパブリックにしている
         //アプリのDataファイル名
         private const string APP_DATA_FILE_NAME = "Px4AppData.xml";
-        //private const string APP_DATA_FILE_NAME = "AppData.xml";
 
 
         //datetime.tostringの書式、これを既定値にする
@@ -81,12 +79,6 @@ namespace Pixtack4
         // マウスクリックで図形追加で使う
         private PointCollection MyPoints { get; set; } = new();
 
-        //// フリーハンドで使う
-        //private Polyline MyFreehandPolyline { get; set; } = new();
-        //private List<Polyline> MyFreehandPolylinesList { get; set; } = [];
-        //private List<PointCollection> MyFreehandOriginPointsList { get; set; } = [];
-        //private List<PointCollection> MyFreehandMagePointsList = [];
-        ////private bool IsDrawingFreehand;
 
         public MainWindow()
         {
@@ -94,7 +86,6 @@ namespace Pixtack4
 
             MyInitialize();
             MyInitialize2();
-            Closing += MainWindow_Closing;
             PreviewKeyDown += MainWindow_PreviewKeyDown;// 主にホットキーの設定
             DataContext = this;
 
@@ -141,51 +132,6 @@ namespace Pixtack4
         }
 
 
-        #region アプリ終了時の処理
-        /// <summary>
-        /// アプリ終了直前の処理
-        /// </summary>
-        private void AppClosing(System.ComponentModel.CancelEventArgs e)
-        {
-            //Itemがある場合は、保存するかを確認する
-            if (MyRoot.MyThumbs.Count > 0)
-            {
-                MessageBoxResult result = MessageBox.Show(
-                    "ファイルに保存してから終了する？\n\n\n" +
-                    "はい：保存して終了\n\n" +
-                    "いいえ：保存しないで終了\n\n" +
-                    "キャンセル：終了をキャンセル",
-                    "アプリ終了前の確認",
-                    MessageBoxButton.YesNoCancel, MessageBoxImage.Question, MessageBoxResult.Cancel);
-
-                if (result == MessageBoxResult.Cancel)
-                {
-                    e.Cancel = true;// 終了をキャンセル
-                }
-                else if (result == MessageBoxResult.Yes)
-                {
-                    SaveRootItemOverwrite();// 上書き保存
-                }
-            }
-
-
-            string filePath = System.IO.Path.Combine(MyAppDirectory, APP_WINDOW_DATA_FILE_NAME);
-            if (!MyAppWindowData.Serialize(filePath))
-            {
-                MessageBox.Show("アプリのWindow設定を保存できなかった");
-            }
-
-            filePath = MyAppData.CurrentOpenFilePath;
-            if (filePath == string.Empty)
-            {
-            }
-            filePath = System.IO.Path.Combine(MyAppDirectory, APP_DATA_FILE_NAME);
-            if (!MyAppData.Serialize(filePath, MyAppData))
-            {
-                MessageBox.Show("アプリの設定を保存できなかった");
-            }
-        }
-        #endregion アプリ終了前の処理
 
         #region 初期処理
 
@@ -199,19 +145,21 @@ namespace Pixtack4
             if (LoadAppData() is AppData appData) { MyAppData = appData; }
             else { MyAppData = new AppData(); }
 
+            // アプリ終了直前の処理
+            Closing += MainWindow_Closing;
+
             // 右クリック位置を記録
             MyMainGridPanel.PreviewMouseRightButtonDown += (a, b) =>
             {
                 MyRightClickDownPoint = b.GetPosition(MyMainGridPanel);
             };
 
-            // 入力用テキストボックスクリック時、テキスト全選択
+            // TextItem入力用テキストボックスクリック時、テキスト全選択
             MyTextBoxAddText.PreviewMouseLeftButtonDown += (a, b) =>
             {
                 MyTextBoxAddText.Focus();
                 b.Handled = true;
             };
-
 
 
             // マウスクリックでCanvasに直線を描画その2、Polyline、WPFとC# - 午後わてんのブログ
@@ -1651,6 +1599,53 @@ namespace Pixtack4
         }
 
         #endregion 初期化、リセット系
+
+        #region アプリ終了時の処理
+        /// <summary>
+        /// アプリ終了直前の処理
+        /// </summary>
+        private void AppClosing(System.ComponentModel.CancelEventArgs e)
+        {
+            //Itemがある場合は、保存するかを確認する
+            if (MyRoot.MyThumbs.Count > 0)
+            {
+                MessageBoxResult result = MessageBox.Show(
+                    "ファイルに保存してから終了する？\n\n\n" +
+                    "はい：保存して終了\n\n" +
+                    "いいえ：保存しないで終了\n\n" +
+                    "キャンセル：終了をキャンセル",
+                    "アプリ終了前の確認",
+                    MessageBoxButton.YesNoCancel, MessageBoxImage.Question, MessageBoxResult.Cancel);
+
+                if (result == MessageBoxResult.Cancel)
+                {
+                    e.Cancel = true;// 終了をキャンセル
+                }
+                else if (result == MessageBoxResult.Yes)
+                {
+                    SaveRootItemOverwrite();// 上書き保存
+                }
+            }
+
+
+            string filePath = System.IO.Path.Combine(MyAppDirectory, APP_WINDOW_DATA_FILE_NAME);
+            if (!MyAppWindowData.Serialize(filePath))
+            {
+                MessageBox.Show("アプリのWindow設定を保存できなかった");
+            }
+
+            filePath = MyAppData.CurrentOpenFilePath;
+            if (filePath == string.Empty)
+            {
+            }
+            filePath = System.IO.Path.Combine(MyAppDirectory, APP_DATA_FILE_NAME);
+            if (!MyAppData.Serialize(filePath, MyAppData))
+            {
+                MessageBox.Show("アプリの設定を保存できなかった");
+            }
+        }
+        #endregion アプリ終了前の処理
+
 
         #region クリップボード
 
