@@ -10,7 +10,7 @@
         ResizeMode="CanResizeWithGrip"
         AllowDrop="True"
         Drop="Window_Drop"
-        >
+        Icon="/MyResource/白詰草05.ico">
   <Window.Resources>
     <local:MyConvVisibleCollapsedIsBoolFalse x:Key="visibleTrue"/>
     <local:MyConvVisibleHiddenIsBoolFalse x:Key="VisibleOrHidden"/>

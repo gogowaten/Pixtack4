@@ -8,4 +8,20 @@
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Remove="MyResource\白詰草01.ico" />
+    <None Remove="MyResource\白詰草02.ico" />
+    <None Remove="MyResource\白詰草03.ico" />
+    <None Remove="MyResource\白詰草04.ico" />
+    <None Remove="MyResource\白詰草05.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="MyResource\白詰草01.ico" />
+    <Resource Include="MyResource\白詰草02.ico" />
+    <Resource Include="MyResource\白詰草03.ico" />
+    <Resource Include="MyResource\白詰草04.ico" />
+    <Resource Include="MyResource\白詰草05.ico" />
+  </ItemGroup>
+
 </Project>
