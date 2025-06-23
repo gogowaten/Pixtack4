@@ -326,6 +326,9 @@
                 <TreeView x:Name="MyThumbsTreeView"
                           ItemsSource="{Binding}"
                           SelectedItemChanged="MyThumbsTreeView_SelectedItemChanged"
+                          MouseDown="MyThumbsTreeView_MouseDown"
+                          PreviewMouseDown="MyThumbsTreeView_PreviewMouseDown"
+                          MouseLeftButtonDown="MyThumbsTreeView_MouseLeftButtonDown"
                           BorderThickness="0">
                   <TreeView.ItemTemplate>
                     <HierarchicalDataTemplate ItemsSource="{Binding MyThumbs}">
@@ -638,7 +641,7 @@
               Width="220"
               DataContext="{Binding MyRoot}"
               TextOptions.TextFormattingMode="Display">
-          <TabControl TabStripPlacement="Right" BorderThickness="0" SelectedIndex="5">
+          <TabControl TabStripPlacement="Right" BorderThickness="0" SelectedIndex="0">
             <TabControl.Resources>
               <Style TargetType="TabItem">
                 <Setter Property="LayoutTransform">

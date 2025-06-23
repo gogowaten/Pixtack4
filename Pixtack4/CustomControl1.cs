@@ -368,8 +368,6 @@ namespace Pixtack4
         protected void KisoThumb_PreviewMouseDown2(object sender, MouseButtonEventArgs e)
         {
             if (this is RootThumb) { return; }
-            var sou = e.Source;
-            var ori = e.OriginalSource;
             //イベントのOriginalSourceからクリックされたThumbとFocusThumb候補を取得
             if (GetClickedCandidateThumb(e) is KisoThumb clickedCandidate
                 && GetSelectableThumb(clickedCandidate) is KisoThumb focusCandidate)
@@ -390,6 +388,20 @@ namespace Pixtack4
             }
 
         }
+
+        //public void TTT(KisoThumb clickedKouhoItem, KisoThumb originSource)
+        //{
+        //    if(GetSelectableThumb(clickedKouhoItem) is KisoThumb focusKouhoItem)
+        //    {
+        //        if (focusKouhoItem.MyItemData.MyGuid == originSource.MyItemData.MyGuid 
+        //            && GetRootThumb() is RootThumb root)
+        //        {
+        //            clickedKouhoItem.Focusable = false;
+        //            focusKouhoItem.Focusable = false;
+        //            root.TestPreviewMouseDown(focusKouhoItem, clickedKouhoItem);
+        //        }
+        //    }
+        //}
 
 
         protected void KisoThumb_PreviewMouseUp2(object sender, MouseButtonEventArgs e)
@@ -1620,20 +1632,21 @@ namespace Pixtack4
         internal void TestPreviewMouseDown(KisoThumb focusCandidate, KisoThumb clickedCandidate)
         {
             MyClickedThumb = clickedCandidate;
-            bool withControlKey = Keyboard.Modifiers == ModifierKeys.Control;
             bool isContains = MySelectedThumbs.Contains(focusCandidate);
-            //選択Thumb以外をクリック、入れ替え
+            //SelectedThumbsの要素以外をクリックの場合、今のSelectedThumbsと入れ替え
             if (!isContains && Keyboard.Modifiers == ModifierKeys.None)
             {
                 SelectedThumbsClearAndAddThumb(focusCandidate);
             }
-            //選択Thumb以外をctrlクリック→追加
+            //SelectedThumbsの要素以外のItemをctrlクリックの場合、SelectedThumbsに追加
             else if (!isContains && Keyboard.Modifiers == ModifierKeys.Control)
             {
                 SelectedThumbsToAdd(focusCandidate);
                 focusCandidate.IsPreviewSelected = true;
             }
         }
+
+
 
         /// <summary>
         /// MySelectedThumbsへの追加
@@ -1648,17 +1661,17 @@ namespace Pixtack4
         /// <summary>
         /// MySelectedThumbsへの入れ替え、クリア後に対象を追加
         /// </summary>
-        /// <param name="kiso">対象Thumb</param>
-        internal void SelectedThumbsClearAndAddThumb(KisoThumb? kiso)
+        /// <param name="item">対象Thumb</param>
+        internal void SelectedThumbsClearAndAddThumb(KisoThumb? item)
         {
-            if (kiso is null)
+            if (item is null)
             {
                 MyFocusThumb = null;
                 return;
             }
-            kiso.IsSelectable = true;
+            item.IsSelectable = true;
             MySelectedThumbs.Clear();
-            SelectedThumbsToAdd(kiso);
+            SelectedThumbsToAdd(item);
         }
 
 
@@ -1666,213 +1679,23 @@ namespace Pixtack4
 
         #region パブリックなメソッド
 
-        #region 画像として保存
-
-        /// <summary>
-        /// FocusThumbを画像として保存する
-        /// </summary>
-        /// <returns></returns>
-        //public bool SaveMyFocusThumbToImageFile()
-        //{
-        //    if (MyFocusThumb != null)
-        //    {
-        //        //枠を一時的に非表示にする
-        //        IsWakuVisible = Visibility.Collapsed;
-        //        UpdateLayout();//再描画？これで枠が消える
-
-        //        if (MakeBitmapFromThumb(MyFocusThumb) is RenderTargetBitmap bitmap)
-        //        {
-        //            //枠表示を元に戻す
-        //            IsWakuVisible = Visibility.Visible;
-
-        //            //bitmap保存
-        //            return SaveBitmap(bitmap, MyFocusThumb.MyItemData);
-        //        }
-
-        //        //枠表示を元に戻す
-        //        IsWakuVisible = Visibility.Visible;
-        //    }
-        //    return false;
-        //}
-
-        //public bool SaveMyRootThumbToImageFile()
-        //{
-        //    if (MyFocusThumb != null)
-        //    {
-        //        //枠を一時的に非表示にする
-        //        IsWakuVisible = Visibility.Collapsed;
-        //        UpdateLayout();//再描画？これで枠が消える
-
-        //        if (MakeBitmapFromThumb(this) is RenderTargetBitmap bitmap)
-        //        {
-        //            //枠表示を元に戻す
-        //            IsWakuVisible = Visibility.Visible;
-
-        //            //bitmap保存
-        //            return SaveBitmap(bitmap, MyFocusThumb.MyItemData);
-        //        }
-
-        //        //枠表示を元に戻す
-        //        IsWakuVisible = Visibility.Visible;
-        //    }
-        //    return false;
-        //}
-
-        //public bool SaveItemToImageFile(KisoThumb item,int jepgQuality = 90)
-        //{
-        //    if(item is null) { return false; }
-
-        //    //枠を一時的に非表示にする
-        //    IsWakuVisible = Visibility.Collapsed;
-        //    UpdateLayout();//再描画？これで枠が消える
-
-        //    //Bitmap作成
-        //    if (MakeBitmapFromThumb(item) is RenderTargetBitmap bitmap)
-        //    {
-        //        //枠表示を元に戻す
-        //        IsWakuVisible = Visibility.Visible;
-
-        //        //bitmap保存
-        //        return SaveBitmap(bitmap, jepgQuality);
-        //    }
-
-        //    //枠表示を元に戻す
-        //    IsWakuVisible = Visibility.Visible;
-        //    return false;
-        //}
-
-
 
         ///// <summary>
-        ///// ThumbをBitmapに変換したものを返す
+        ///// 指定されたItemに基づいて、MyFocusThumbとMyClickedThumbを更新します。
         ///// </summary>
-        ///// <param name="thumb">Bitmapにする要素</param>
-        ///// <param name="clearType">フォントのClearTypeを有効にして保存</param>
-        ///// <returns></returns>
-        //public RenderTargetBitmap? MakeBitmapFromThumb(KisoThumb? thumb, bool clearType = false)
+        ///// <remarks>指定された <paramref name="clickItem"/> から選択可能な項目が見つかった場合、このメソッドは以下を更新します。<list type="bullet"> <item><description>クリックされた項目に <c>MyClickedThumb</c> を設定します。</description></item> <item><description>現在の選択範囲をクリアし、選択可能な項目を選択範囲に追加します。</description></item> <item><description>選択可能な項目に <c>MyFocusThumb</c> を設定します。</description></item> </list> 選択可能な項目が見つからない場合、変更は行われません。</remarks>
+        ///// <param name="clickItem">クリックを想定されたItem。選択可能な項目を決定するための開始点として機能します。</param>
+        /////
+        //public void UpdateFocusAndSelectionFromClick(KisoThumb clickItem)
         //{
-        //    if (thumb == null) { return null; }
-        //    if (thumb.ActualHeight == 0 || thumb.ActualWidth == 0) { return null; }
-
-        //    Rect bounds = VisualTreeHelper.GetDescendantBounds(thumb);
-        //    bounds = thumb.RenderTransform.TransformBounds(bounds);
-        //    DrawingVisual dVisual = new();
-        //    //サイズを四捨五入
-        //    bounds.Width = Math.Round(bounds.Width, MidpointRounding.AwayFromZero);
-        //    bounds.Height = Math.Round(bounds.Height, MidpointRounding.AwayFromZero);
-        //    using (DrawingContext context = dVisual.RenderOpen())
+        //    // ClickItemを起点に選択可能なItemを探索
+        //    if (GetSelectableThumb(clickItem) is KisoThumb selctableItem)
         //    {
-        //        var bru = new BitmapCacheBrush(thumb);
-        //        if (clearType)
-        //        {
-        //            BitmapCache bc = new() { EnableClearType = true };
-        //            bru.BitmapCache = bc;
-        //        }
-        //        context.DrawRectangle(bru, null, new Rect(bounds.Size));
+        //        MyClickedThumb = clickItem;
+        //        SelectedThumbsClearAndAddThumb(selctableItem);
+        //        MyFocusThumb = selctableItem;
         //    }
-        //    RenderTargetBitmap bitmap
-        //        = new((int)Math.Ceiling(bounds.Width), (int)Math.Ceiling(bounds.Height), 96.0, 96.0, PixelFormats.Pbgra32);
-        //    bitmap.Render(dVisual);
-
-        //    return bitmap;
         //}
-
-        ///// <summary>
-        ///// ファイル保存ダイアログ
-        ///// </summary>
-        ///// <param name="bitmap"></param>
-        ///// <returns></returns>
-        //public static bool SaveBitmap(BitmapSource bitmap, int jpegQuality = 90)
-        //{
-        //    Microsoft.Win32.SaveFileDialog dialog = new()
-        //    {
-        //        Filter = "*.png|*.png|*.jpg|*.jpg;*.jpeg|*.bmp|*.bmp|*.gif|*.gif|*.tiff|*.tiff",
-        //        AddExtension = true,
-        //    };
-        //    if (dialog.ShowDialog() == true)
-        //    {
-        //        (BitmapEncoder? encoder, BitmapMetadata? meta) = GetEncoderWithMetaData(dialog.FilterIndex, jpegQuality);
-        //        if (encoder is null) { return false; }
-        //        encoder.Frames.Add(BitmapFrame.Create(bitmap, null, meta, null));
-        //        try
-        //        {
-        //            using FileStream stream = new(dialog.FileName, FileMode.Create, FileAccess.Write);
-        //            encoder.Save(stream);
-        //            return true;
-        //        }
-        //        catch (Exception)
-        //        {
-        //            return false;
-        //        }
-        //    }
-        //    return false;
-        //}
-
-
-        //private static bool SaveBitmap(BitmapSource bitmap, ItemData data)
-        //{
-        //    return SaveBitmap(bitmap, data.MyJpegQuality);
-        //    //return SaveBitmap(bitmap, data.MyJpegQuality);
-        //}
-
-
-        ///// <summary>
-        ///// 画像エンコーダー作成
-        ///// </summary>
-        ///// <param name="filterIndex"></param>
-        ///// <returns></returns>
-        ///// <exception cref="Exception"></exception>
-
-        //private static (BitmapEncoder? encoder, BitmapMetadata? meta) GetEncoderWithMetaData(int filterIndex, int jpegQuality)
-        //{
-        //    BitmapMetadata? meta = null;
-        //    //string software = APP_NAME + "_" + AppVersion;
-        //    string software = "Pixtack4";
-
-        //    switch (filterIndex)
-        //    {
-        //        case 1:
-        //            meta = new BitmapMetadata("png");
-        //            meta.SetQuery("/tEXt/Software", software);
-        //            return (new PngBitmapEncoder(), meta);
-        //        case 2:
-        //            meta = new BitmapMetadata("jpg");
-        //            meta.SetQuery("/app1/ifd/{ushort=305}", software);
-        //            var jpeg = new JpegBitmapEncoder
-        //            {
-        //                //QualityLevel = MyItemData.MyJpegQuality,
-        //                //QualityLevel = jpegQuality
-        //                QualityLevel = jpegQuality
-        //                //QualityLevel = MyAppData.JpegQuality,
-        //            };
-        //            return (jpeg, meta);
-        //        case 3:
-        //            return (new BmpBitmapEncoder(), meta);
-        //        case 4:
-        //            meta = new BitmapMetadata("Gif");
-        //            //tData.SetQuery("/xmp/xmp:CreatorTool", "Pixtrim2");
-        //            //tData.SetQuery("/XMP/XMP:CreatorTool", "Pixtrim2");
-        //            meta.SetQuery("/XMP/XMP:CreatorTool", software);
-
-        //            return (new GifBitmapEncoder(), meta);
-        //        case 5:
-        //            meta = new BitmapMetadata("tiff")
-        //            {
-        //                ApplicationName = software
-        //            };
-        //            return (new TiffBitmapEncoder(), meta);
-        //        default:
-        //            throw new Exception();
-        //    }
-
-        //}
-
-        //private static (BitmapEncoder? encoder, BitmapMetadata? meta) GetEncoderWithMetaData(int filterIndex, ItemData data)
-        //{
-        //    return GetEncoderWithMetaData(filterIndex, data.MyJpegQuality);
-        //}
-
-        #endregion 画像として保存
 
         #region 画像系
 
@@ -2536,7 +2359,7 @@ namespace Pixtack4
             if (IsSelectedWithParent(MyClickedThumb)) { MyClickedThumb = null; }
             MyFocusThumb = null;
 
-            foreach (var item in MySelectedThumbs)
+            foreach (var item in MySelectedThumbs.ToList())
             {
                 item.IsSelectable = false;
                 MyActiveGroupThumb.MyThumbs.Remove(item);
@@ -2560,6 +2383,10 @@ namespace Pixtack4
         }
 
         #endregion 削除
+
+        #endregion Thumb追加と削除
+
+        #region グループ化と解除    
 
         #region グループ化
 
@@ -2727,7 +2554,7 @@ namespace Pixtack4
         }
         #endregion グループ解除
 
-        #endregion Thumb追加と削除
+        #endregion グループ化と解除    
 
         #region ItemData読み書き、ファイルに保存とファイルの読み込み
 

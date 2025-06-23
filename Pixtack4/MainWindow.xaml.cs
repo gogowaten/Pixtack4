@@ -643,10 +643,7 @@ namespace Pixtack4
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            PGeoShape free = MyFreehandGrid.MyListOfPGeoShape[0];
-            var po = free.MyPoints;
-            var geo = free.MyGeoShape.MyPoints;
-            var ori = free.MyOriginPoints;
+            var focus = FocusManager.GetFocusedElement(MyScrollViewer);
             var neko = MyPoints;
             var inu = MyCollectionViewOnlyGroupItems;
         }
@@ -1575,6 +1572,8 @@ namespace Pixtack4
             _ = MyRoot.SetBinding(KisoThumb.IsWakuVisibleProperty, new Binding(nameof(AppData.IsWakuVisible)) { Source = MyAppData });
             MyManageExCanvas = new ManageExCanvas(MyRoot, new ManageData(), this);
             MyScrollViewer.Content = MyManageExCanvas;
+            //KeyboardNavigation.SetTabNavigation(MyRoot, KeyboardNavigationMode.Cycle);
+            
 
             //FocusThumbが変更されたとき
             //MainGridPanelの右クリックメニューをnullにする
@@ -2769,6 +2768,7 @@ namespace Pixtack4
             {
                 // MyRootのClickedThumbとFocusThumbを変更を試みる
                 ChangeFocusThumb(clicked);
+                //e.Handled = true;
             }
         }
 
@@ -2778,12 +2778,52 @@ namespace Pixtack4
         /// <param name="clickedItem"></param>
         private void ChangeFocusThumb(KisoThumb clickedItem)
         {
-            if (MyRoot.GetSelectableThumb(clickedItem) is KisoThumb thumb)
+            clickedItem.BringIntoView();
+
+            if (MyRoot.GetSelectableThumb(clickedItem) is KisoThumb selectableItem)
             {
-                MyRoot.TestPreviewMouseDown(thumb, clickedItem);
-                clickedItem.BringIntoView();
+                ////MyRoot.TestPreviewMouseDown(thumb, clickedItem);
+                //MyRoot.UpdateFocusAndSelectionFromClick(clickedItem);
+                //clickedItem.BringIntoView();
+                ////clickedItem.Focus();
             }
         }
+
+
+        private void MyThumbsTreeView_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+           var item = MyThumbsTreeView.SelectedItem;
+            var vv = MyThumbsTreeView.SelectedValue;
+        }
+
+        private void MyThumbsTreeView_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if(MyThumbsTreeView.SelectedValue is KisoThumb selectableItem)
+            {
+                var neko = selectableItem.MyItemData.MyLeft;
+            }
+            if(MyThumbsTreeView.SelectedItem is KisoThumb kiso)
+            {
+                var inu = kiso.MyItemData.MyLeft;
+            }
+        }
+
+        private void MyThumbsTreeView_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (MyThumbsTreeView.SelectedValue is KisoThumb selectableItem)
+            {
+                var neko = selectableItem.MyItemData.MyLeft;
+            }
+            if (MyThumbsTreeView.SelectedItem is KisoThumb kiso)
+            {
+                var inu = kiso.MyItemData.MyLeft;
+            }
+        }
+
+
+
+
+
         #endregion TreeView
 
         #region ボタンクリック以外のイベントでの動作
@@ -2801,6 +2841,21 @@ namespace Pixtack4
         }
 
 
+
+
+
+
+
         #endregion ボタンクリック以外のイベントでの動作
+
+
+
+
+
+
+
+
+
+
     }
 }
