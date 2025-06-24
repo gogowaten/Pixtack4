@@ -212,6 +212,7 @@ namespace Pixtack4
             Initialized += KisoThumb_Initialized;
             Loaded += KisoThumb_Loaded;
 
+            // マウスイベント順番、PreviewMouseDown、DragStart、DragCompleted、PreviewMouseUp
             PreviewMouseDown += KisoThumb_PreviewMouseDown2;
             PreviewMouseUp += KisoThumb_PreviewMouseUp2;
 
@@ -372,6 +373,8 @@ namespace Pixtack4
         protected void KisoThumb_PreviewMouseDown2(object sender, MouseButtonEventArgs e)
         {
             if (this is RootThumb) { return; }
+
+
             //イベントのOriginalSourceからクリックされたThumbとFocusThumb候補を取得
             if (GetClickedCandidateThumb(e) is KisoThumb clickedCandidate
                 && GetSelectableThumb(clickedCandidate) is KisoThumb focusCandidate)
@@ -384,6 +387,8 @@ namespace Pixtack4
                     clickedCandidate.Focusable = false;
                     focusCandidate.Focusable = false;
                     root.TestPreviewMouseDown(focusCandidate, clickedCandidate);
+                    // キーボードフォーカスをRootにする
+                    Keyboard.Focus(root);
                 }
                 //e.Handled = true;
                 //ここでtrueにするとドラッグ移動が動かなくなってしまう
@@ -591,9 +596,9 @@ namespace Pixtack4
                 if (focus.MyItemData.MyGuid == this.MyItemData.MyGuid
                 && GetRootThumb() is RootThumb root)
                 {
+                    //parentのオートリサイズを有効にして再レイアウト
                     if (focus.MyParentThumb?.MyExCanvas is ExCanvas canvas)
                     {
-                        //parentのオートリサイズを有効に戻す
                         canvas.IsAutoResize = true;
                         focus.MyParentThumb?.ReLayout3();
                     }
@@ -1603,7 +1608,7 @@ namespace Pixtack4
             if (MySelectedThumbs.Count <= 1) { return; }
 
             //移動していない＋通常クリック
-            //選択Thumbクリア後に対象を追加
+            //SelectedThumbsをクリア更新
             else if (!isMoved && Keyboard.Modifiers == ModifierKeys.None)
             {
                 SelectedThumbsClearAndAddThumb(thumb);

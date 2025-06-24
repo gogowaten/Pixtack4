@@ -2765,14 +2765,18 @@ namespace Pixtack4
 
         private void MyThumbsTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            Keyboard.Focus(MyRoot);
+            _ = Keyboard.Focus(MyRoot);// キーボードフォーカス
 
             if (e.NewValue is KisoThumb clicked)
             {
+                clicked.BringIntoView();// 対象Itemが見えるところまでスクロール位置を調整
 
-                // MyRootのClickedThumbとFocusThumbを変更を試みる
-                ChangeFocusThumb(clicked);
-                //e.Handled = true;
+                // 対象ItemをMyFocusThumbに指定したいけど、うまくできない、
+                // 指定はできるけど、グループ化するとExCanvasのサイズ調整でエラーになる、わからん
+
+                //// MyRootのClickedThumbとFocusThumbを変更を試みる
+                //ChangeFocusThumb(clicked);
+                ////e.Handled = true;
             }
         }
 
