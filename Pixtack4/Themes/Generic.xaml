@@ -81,7 +81,7 @@
       <Setter.Value>
         <MultiBinding Converter="{StaticResource wakuConvert2}">
           <Binding Path="MyBrushList" RelativeSource="{RelativeSource Mode=TemplatedParent}"/>
-          <Binding Path="IsFocus" RelativeSource="{RelativeSource Mode=TemplatedParent}"/>
+          <Binding Path="IsMyFocus" RelativeSource="{RelativeSource Mode=TemplatedParent}"/>
           <Binding Path="IsSelected" RelativeSource="{RelativeSource Mode=TemplatedParent}"/>
           <Binding Path="IsSelectable" RelativeSource="{RelativeSource Mode=TemplatedParent}"/>
           <Binding Path="IsActiveGroup" RelativeSource="{RelativeSource Mode=TemplatedParent}"/>

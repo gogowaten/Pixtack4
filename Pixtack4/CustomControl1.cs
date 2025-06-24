@@ -308,8 +308,12 @@ namespace Pixtack4
         {
             if (sender is RootThumb rt && rt.MyClickedThumb != null)
             {
-                //選択Thumbを方向キーで10ピクセル移動
-                MoveThumb(rt.MySelectedThumbs, e.Key, 10);
+                ////選択Thumbを方向キーで10ピクセル移動
+                //MoveThumb(rt.MySelectedThumbs, e.Key, 10);
+                //e.Handled = true;
+
+                //選択Thumbを方向キーでグリッドスナップ移動
+                MoveThumb(rt.MySelectedThumbs, e.Key, rt.MyActiveGroupThumb.MyItemData.GridSize);
                 e.Handled = true;
             }
         }
@@ -388,6 +392,7 @@ namespace Pixtack4
             }
 
         }
+
 
         //public void TTT(KisoThumb clickedKouhoItem, KisoThumb originSource)
         //{
@@ -770,13 +775,13 @@ namespace Pixtack4
             DependencyProperty.Register(nameof(IsSelected), typeof(bool), typeof(KisoThumb), new PropertyMetadata(false));
 
 
-        public bool IsFocus
+        public bool IsMyFocus
         {
-            get { return (bool)GetValue(IsFocusProperty); }
-            set { SetValue(IsFocusProperty, value); }
+            get { return (bool)GetValue(IsMyFocusProperty); }
+            set { SetValue(IsMyFocusProperty, value); }
         }
-        public static readonly DependencyProperty IsFocusProperty =
-            DependencyProperty.Register(nameof(IsFocus), typeof(bool), typeof(KisoThumb), new PropertyMetadata(false));
+        public static readonly DependencyProperty IsMyFocusProperty =
+            DependencyProperty.Register(nameof(IsMyFocus), typeof(bool), typeof(KisoThumb), new PropertyMetadata(false));
 
 
 
@@ -1680,22 +1685,22 @@ namespace Pixtack4
         #region パブリックなメソッド
 
 
-        ///// <summary>
-        ///// 指定されたItemに基づいて、MyFocusThumbとMyClickedThumbを更新します。
-        ///// </summary>
-        ///// <remarks>指定された <paramref name="clickItem"/> から選択可能な項目が見つかった場合、このメソッドは以下を更新します。<list type="bullet"> <item><description>クリックされた項目に <c>MyClickedThumb</c> を設定します。</description></item> <item><description>現在の選択範囲をクリアし、選択可能な項目を選択範囲に追加します。</description></item> <item><description>選択可能な項目に <c>MyFocusThumb</c> を設定します。</description></item> </list> 選択可能な項目が見つからない場合、変更は行われません。</remarks>
-        ///// <param name="clickItem">クリックを想定されたItem。選択可能な項目を決定するための開始点として機能します。</param>
-        /////
-        //public void UpdateFocusAndSelectionFromClick(KisoThumb clickItem)
-        //{
-        //    // ClickItemを起点に選択可能なItemを探索
-        //    if (GetSelectableThumb(clickItem) is KisoThumb selctableItem)
-        //    {
-        //        MyClickedThumb = clickItem;
-        //        SelectedThumbsClearAndAddThumb(selctableItem);
-        //        MyFocusThumb = selctableItem;
-        //    }
-        //}
+        /// <summary>
+        /// 指定されたItemに基づいて、MyFocusThumbとMyClickedThumbを更新します。
+        /// </summary>
+        /// <remarks>指定された <paramref name="clickItem"/> から選択可能な項目が見つかった場合、このメソッドは以下を更新します。<list type="bullet"> <item><description>クリックされた項目に <c>MyClickedThumb</c> を設定します。</description></item> <item><description>現在の選択範囲をクリアし、選択可能な項目を選択範囲に追加します。</description></item> <item><description>選択可能な項目に <c>MyFocusThumb</c> を設定します。</description></item> </list> 選択可能な項目が見つからない場合、変更は行われません。</remarks>
+        /// <param name="clickItem">クリックを想定されたItem。選択可能な項目を決定するための開始点として機能します。</param>
+        ///
+        public void UpdateFocusAndSelectionFromClick(KisoThumb clickItem)
+        {
+            // ClickItemを起点に選択可能なItemを探索
+            if (GetSelectableThumb(clickItem) is KisoThumb selectableItem)
+            {
+                MyClickedThumb = clickItem;
+                SelectedThumbsClearAndAddThumb(selectableItem);
+                //MyFocusThumb = selectableItem;
+            }
+        }
 
         #region 画像系
 
@@ -2295,7 +2300,7 @@ namespace Pixtack4
                     {
                         MyClickedThumb = null;
                     }
-                    if (thumb.IsFocus)
+                    if (thumb.IsMyFocus)
                     {
                         MyFocusThumb = GetNextFocusThumb(thumb);
                     }
@@ -2321,7 +2326,7 @@ namespace Pixtack4
                     {
                         MyClickedThumb = null;
                     }
-                    if (thumb.IsFocus)
+                    if (thumb.IsMyFocus)
                     {
                         MyFocusThumb = GetNextFocusThumb(thumb);
                     }
@@ -2339,7 +2344,7 @@ namespace Pixtack4
                     {
                         MyClickedThumb = null;
                     }
-                    if (thumb.IsFocus)
+                    if (thumb.IsMyFocus)
                     {
                         MyFocusThumb = GetNextFocusThumb(thumb);
                     }
@@ -2829,12 +2834,12 @@ namespace Pixtack4
             {
                 if (e.NewValue is KisoThumb arata)
                 {
-                    arata.IsFocus = true;
+                    arata.IsMyFocus = true;
                     arata.IsEditing = false;
                 }
                 if (e.OldValue is KisoThumb hurui)
                 {
-                    hurui.IsFocus = false;
+                    hurui.IsMyFocus = false;
                     hurui.IsEditing = false;
                 }
                 //変更通知

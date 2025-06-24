@@ -329,7 +329,8 @@
                           MouseDown="MyThumbsTreeView_MouseDown"
                           PreviewMouseDown="MyThumbsTreeView_PreviewMouseDown"
                           MouseLeftButtonDown="MyThumbsTreeView_MouseLeftButtonDown"
-                          BorderThickness="0">
+                          BorderThickness="0"
+                          Focusable="False">
                   <TreeView.ItemTemplate>
                     <HierarchicalDataTemplate ItemsSource="{Binding MyThumbs}">
                       <Border BorderBrush="Silver" BorderThickness="0,0,0,1" Background="WhiteSmoke">
@@ -348,7 +349,8 @@
                               </Rectangle.Fill>
                             </Rectangle>
                           </Viewbox>
-                          <CheckBox Content="現" Margin="10,0,10,0" VerticalAlignment="Center" IsChecked="{Binding Visibility, Converter={StaticResource VisibleOrHidden}}"/>
+                          <CheckBox Content="現" Margin="10,0,10,0" VerticalAlignment="Center" IsChecked="{Binding Visibility, Converter={StaticResource VisibleOrHidden}}"
+                                    Focusable="False"/>
                         </StackPanel>
                       </Border>
                     </HierarchicalDataTemplate>
@@ -755,7 +757,9 @@
                   <TextBlock Text="{Binding MyItemData.MyTop, StringFormat=MyTop  {0:0.0}}"/>
                   <TextBlock Text="{Binding MyItemData.MyZIndex, StringFormat=MyZIndex  {0:0}}"/>
                   <TextBlock Text="{Binding MyItemData.MyGuid, StringFormat=Guid  {0:0}}"/>
-                  <TextBlock Text="{Binding IsFocus, StringFormat=IsFocus  {0:0}}"/>
+                  <TextBlock Text="{Binding IsMyFocus, StringFormat=IsMyFocus  {0:0}}"/>
+                  <TextBlock Text="{Binding IsFocused, StringFormat=IsFocused  {0:0}}"/>
+                  <TextBlock Text="{Binding IsKeyboardFocused, StringFormat=IsKeyboardFocused  {0:0}}"/>
                   <TextBlock Text="{Binding IsEditing, StringFormat=IsEditing  {0:0}}"/>
                   <TextBlock Text="{Binding MyItemData.TextItemData.FontName, StringFormat=FontName  {0:0}}"/>
                   <TextBlock Text="{Binding MyItemData.TextItemData.MyFontSize, StringFormat=MyFontSize  {0:0}}"/>
