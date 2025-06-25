@@ -8,19 +8,33 @@ using System.Windows.Controls;
 namespace Pixtack4
 {
 
-    public class MyConvImageSize : IValueConverter
+    
+    // エラーになる、XAMLではparameterに要素を指定できない、c#ならできる？
+    /// <summary>
+    /// ターゲットビジュアルの DPI スケーリング係数を考慮して、ピクセルベースのサイズをデバイス非依存のサイズに変換します。
+    /// </summary>
+    /// <remarks>このコンバーターは通常、ターゲットデバイスの DPI スケーリングを考慮してピクセルベースの寸法を調整するために使用されます。<paramref name="parameter"/> は、DPI スケーリング係数を決定するために使用されるため、ビジュアルツリーの一部である <see cref="UIElement"/> である必要があります。</remarks>
+    ///
+    public class MyConvPixelToDpiSize : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            PresentationSource sou = PresentationSource.FromVisual(this);
-            var dd = sou.CompositionTarget.TransformToDevice.M11;// dpiX倍率
+            double px = (double)value;// サイズ、ピクセル数
+            var ele = (UIElement)parameter;
+            if (PresentationSource.FromVisual(ele) is PresentationSource sou)
+            {
+                var dd = sou.CompositionTarget.TransformToDevice.M11;// dpiX倍率
+                return (int)(px * dd);
 
+            }
+            else { return px; }
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             throw new NotImplementedException();
         }
+
     }
 
 
@@ -28,8 +42,8 @@ namespace Pixtack4
     {
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            var a =(double)values[0];
-            var b =(double)values[1];
+            var a = (double)values[0];
+            var b = (double)values[1];
             double ritu = 60 / b;
             if (a > b) { ritu = 60 / a; }
             return a * ritu;
@@ -46,7 +60,7 @@ namespace Pixtack4
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             var type = (ThumbType)value;
-            if(type == ThumbType.Group) { return Visibility.Visible; }
+            if (type == ThumbType.Group) { return Visibility.Visible; }
             return Visibility.Collapsed;
         }
 
@@ -64,7 +78,7 @@ namespace Pixtack4
             var coll = (ObservableCollection<KisoThumb>)value;
             string str = coll.Count.ToString();
             str += "個を削除";
-            
+
             return str;
         }
 
@@ -89,7 +103,7 @@ namespace Pixtack4
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             var v = (Visibility)value;
-            if (v== Visibility.Visible) { return true; }
+            if (v == Visibility.Visible) { return true; }
             return false;
         }
     }

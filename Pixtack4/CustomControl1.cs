@@ -1521,13 +1521,8 @@ namespace Pixtack4
             Initialized += RootThumb_Initialized;
             Loaded += RootThumb_Loaded;
 
-            //MyFocusThumb.IsEditingChanged += MyFocusThumb_IsEditingChanged;
         }
 
-        //private void MyFocusThumb_IsEditingChanged()
-        //{
-        //    throw new NotImplementedException();
-        //}
 
 
 
@@ -2798,6 +2793,25 @@ namespace Pixtack4
         }
 
 
+        // FocusThumbの1個上のThumb
+
+        public KisoThumb? MyFocusThumbUpper
+        {
+            get { return (KisoThumb)GetValue(MyFocusThumbUpperProperty); }
+            private set { SetValue(MyFocusThumbUpperProperty, value); }
+        }
+        public static readonly DependencyProperty MyFocusThumbUpperProperty =
+            DependencyProperty.Register(nameof(MyFocusThumbUpper), typeof(KisoThumb), typeof(RootThumb), new PropertyMetadata(null));
+
+        public KisoThumb? MyFocusThumbLower
+        {
+            get { return (KisoThumb)GetValue(MyFocusThumbLowerProperty); }
+            private set { SetValue(MyFocusThumbLowerProperty, value); }
+        }
+        public static readonly DependencyProperty MyFocusThumbLowerProperty =
+            DependencyProperty.Register(nameof(MyFocusThumbLower), typeof(KisoThumb), typeof(RootThumb), new PropertyMetadata(null));
+
+
         //変更通知用
         public event Action<KisoThumb?, KisoThumb?>? MyFocusThumbChenged;
 
@@ -2814,7 +2828,7 @@ namespace Pixtack4
 
 
         /// <summary>
-        /// フォーカスされたThumbが変更されたとき、IsFocusの変更、
+        /// フォーカスされたThumbが変更されたとき、IsFocusの変更、upper, lower
         /// IsEditingをfalse
         /// </summary>
         /// <param name="d"></param>
@@ -2823,18 +2837,40 @@ namespace Pixtack4
         {
             if (d is RootThumb root)
             {
-                if (e.NewValue is KisoThumb arata)
+                if (e.NewValue is KisoThumb newItem)
                 {
-                    arata.IsMyFocus = true;
-                    arata.IsEditing = false;
+                    newItem.IsMyFocus = true;
+                    newItem.IsEditing = false;
+                    int index = root.MyThumbs.IndexOf(newItem);
+                    int upperIndex = index + 1;
+                    if (upperIndex < root.MyThumbs.Count)
+                    {
+                        root.MyFocusThumbUpper = root.MyThumbs[upperIndex];
+                    }
+                    else
+                    {
+                        root.MyFocusThumbUpper = null;
+                    }
+
+                    int lowerIndex = index - 1;
+                    if (lowerIndex >= 0)
+                    {
+                        root.MyFocusThumbLower = root.MyThumbs[lowerIndex];
+                    }
+                    else
+                    {
+                        root.MyFocusThumbLower = null;
+                    }
                 }
-                if (e.OldValue is KisoThumb hurui)
+                if (e.OldValue is KisoThumb oldItem)
                 {
-                    hurui.IsMyFocus = false;
-                    hurui.IsEditing = false;
+                    oldItem.IsMyFocus = false;
+                    oldItem.IsEditing = false;
                 }
                 //変更通知
                 root.MyFocusThumbChenged?.Invoke(e.NewValue as KisoThumb, e.OldValue as KisoThumb);
+
+
             }
         }
 

@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Pixtack4"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance local:MainWindow}"
         Title="MainWindow" Height="600" Width="600"
@@ -14,8 +15,7 @@
   <Window.Resources>
     <local:MyConvVisibleCollapsedIsBoolFalse x:Key="visibleTrue"/>
     <local:MyConvVisibleHiddenIsBoolFalse x:Key="VisibleOrHidden"/>
-    <local:MyConvOnlyGroupItemVisible x:Key="visibleGroup"/>
-    <local:MyConvBoolToVisible x:Key="boolVisible"/>
+    <local:MyConvPixelToDpiSize x:Key="pixelDpiSize"/>
   </Window.Resources>
   <Grid x:Name="MyRootGrid">
     <DockPanel>
@@ -165,6 +165,12 @@
             <MenuItem Header="見た目" IsEnabled="False"/>
 
           </MenuItem>
+          <Button Content="テスト用確認" Click="Button_Click" Background="MidnightBlue" Foreground="White"/>
+          <MenuItem Header="">
+            <MenuItem.Icon>
+              <Image Source="/MyResource/白詰草05.ico"/>
+            </MenuItem.Icon>
+          </MenuItem>
         </Menu>
 
         <Expander Header="exp" IsExpanded="False">
@@ -236,50 +242,10 @@
         </StatusBar>
       </DockPanel>
 
-      <!--中間-->
+      <!--中段-->
       <DockPanel DockPanel.Dock="Bottom">
         <!--左端ライン-->
-        <!--<Menu DockPanel.Dock="Left">
-          <Menu.LayoutTransform>
-            <RotateTransform Angle="90"/>
-          </Menu.LayoutTransform>
-          <Button Content="Menu"/>
-          <Button Content="テスト用確認" Click="Button_Click"/>
-          <Button Content="Root" Click="Button_Click_MyRootStatusPanelVisible"/>
-        </Menu>-->
-
-        <!--左側1、TreeVew-->
-        <!--動作は問題なけどTreeViewにバインドエラーが出る-->
-        <!--<Grid x:Name="MyGridMyItemsTree" DockPanel.Dock="Left" Width="200"
-              DataContext="{Binding MyRoot, UpdateSourceTrigger=PropertyChanged}">
-          <ScrollViewer VerticalScrollBarVisibility="Auto">
-            <TreeView ItemsSource="{Binding MyThumbs}"  Background="WhiteSmoke">
-              <TreeView.ItemTemplate>
-                <HierarchicalDataTemplate  ItemsSource="{Binding MyThumbs}">
-                  <Border BorderBrush="Silver" BorderThickness="1" Margin="1">
-                    <StackPanel Orientation="Horizontal">
-                      <Rectangle Width="40" Height="40">
-                        <Rectangle.Fill>
-                          <VisualBrush Visual="{Binding}" Stretch="Uniform"/>
-                        </Rectangle.Fill>
-                      </Rectangle>
-                      <TextBlock Text="{Binding MyThumbType}" VerticalAlignment="Center"/>
-                    </StackPanel>
-                  </Border>
-                </HierarchicalDataTemplate>
-              </TreeView.ItemTemplate>
-              -->
-        <!--<TreeView.ItemContainerStyle>
-                <Style TargetType="{x:Type TreeViewItem}">
-                  <Setter Property="HorizontalContentAlignment" Value="Center"/>
-                  <Setter Property="VerticalAlignment" Value="Center"/>
-                </Style>
-              </TreeView.ItemContainerStyle>-->
-        <!--
-            </TreeView>
-          </ScrollViewer>
-        </Grid>-->
-
+       
         <!--左側2-->
         <Grid x:Name="MyRootStatusView" DockPanel.Dock="Left"
               Width="240"
@@ -311,7 +277,7 @@
 
         <!--左側3-->
         <Expander DockPanel.Dock="Left" ExpandDirection="Right" IsExpanded="True">
-          <TabControl SelectedIndex="4" TabStripPlacement="Left" BorderBrush="SlateBlue" BorderThickness="1" Width="240">
+          <TabControl x:Name="MyTabControlLeft" SelectedIndex="4" TabStripPlacement="Left" BorderBrush="SlateBlue" BorderThickness="1" Width="240">
             <TabControl.Resources>
               <Style TargetType="{x:Type TabItem}" x:Key="verticalTab">
                 <Setter Property="LayoutTransform">
@@ -568,16 +534,14 @@
                 <Button Content="最背面" Click="Button_Click_ZtoBottom"/>
                 <Button Content="グリッドサイズ変更" Click="Button_Click_ChangeGridSize"/>
                 <TextBlock Text="{Binding MyRoot.MyActiveGroupThumb.MyItemData.GridSize, StringFormat=GridSize {0:0}}"/>
-                <Button Content="クリップボードから画像貼り付け(png)" Click="Button_Click_AddImageFromClipboardPng" ToolTip="通常はこれ"/>
-                <Button Content="クリップボードから画像貼り付け(bmp)" Click="Button_Click_AddImageFromClipboardBmp" ToolTip="半透明無効、エクセルのグラフや図形などはこれ"/>
-                <Button Click="Button_Click_AddImageFromClipboardPng">
+                <Button Click="Button_Click_AddImageFromClipboardPng" ToolTip="通常はこれ">
                   <StackPanel>
                     <Image Source="/MyResource/白詰草05.ico" Stretch="None"/>
                     <TextBlock Text="画貼(png)"/>
                   </StackPanel>
                 </Button>
 
-                <Button Click="Button_Click_AddImageFromClipboardBmp">
+                <Button Click="Button_Click_AddImageFromClipboardBmp" ToolTip="半透明無効、エクセルのグラフや図形などはこれ">
                   <StackPanel>
                     <Image Source="/MyResource/白詰草05.ico" Stretch="None"/>
                     <TextBlock Text="画貼(bmp)"/>
@@ -599,7 +563,7 @@
                 </Button>
 
                 <GroupBox Header="クリップボードへ画像としてコピー" Margin="4">
-                  <WrapPanel>
+                  <WrapPanel Margin="4">
                     <Button Click="Button_Click_CopyAsImageForRoot">
                       <StackPanel>
                         <Image Source="/MyResource/白詰草05.ico" Stretch="None"/>
@@ -620,22 +584,24 @@
                         <TextBlock Text="Clicked"/>
                       </StackPanel>
                     </Button>
-                    
+
                     <Button Click="Button_Click_CopyAsImageForFocusItem">
-                      <StackPanel>
-                        <Rectangle Width="24" Height="24">
+                      <StackPanel DataContext="{Binding}">
+                        <Rectangle
+                          Height="24" Width="24">
                           <Rectangle.Fill>
                             <VisualBrush Visual="{Binding MyRoot.MyFocusThumb}" Stretch="Uniform"/>
                           </Rectangle.Fill>
-                        </Rectangle><TextBlock Text="Focus"/>
+                        </Rectangle>
+                        <TextBlock Text="Focus"/>
                       </StackPanel>
                     </Button>
                   </WrapPanel>
                 </GroupBox>
-
-
               </WrapPanel>
+              
             </TabItem>
+            
           </TabControl>
         </Expander>
 
@@ -659,378 +625,270 @@
         </Grid>-->
 
 
-        <!--右端ライン-->
-        <StatusBar DockPanel.Dock="Right" TextOptions.TextFormattingMode="Display">
-          <StatusBar.LayoutTransform>
-            <RotateTransform Angle="90"/>
-          </StatusBar.LayoutTransform>
-          <StatusBarItem Content="item"/>
-          <Button Content="StatusBar"/>
-          <Button Content="テスト用確認" Click="Button_Click" Background="MidnightBlue" Foreground="White"/>
-          <Button Content="FocusItemPanel" Click="Button_Click_FocusItemPropertyPanelVisible"/>
-          <Button Content="ActiveGroupItemPanel" Click="Button_Click_ActiveGroupItemPropertyPanelVisible"/>
-          <Button Content="SelectedItemsPanel" Click="Button_Click_SelectedItemsPropertyPanelVisible"/>
-        </StatusBar>
 
         <!--右側タブ-->
-        <Grid x:Name="MyPanelRightBase"
+        <Expander DockPanel.Dock="Right" ExpandDirection="Left" IsExpanded="True" Header="">
+          <Grid x:Name="MyPanelRightBase"
               DockPanel.Dock="Right"
               Width="220"
               DataContext="{Binding MyRoot}"
               TextOptions.TextFormattingMode="Display">
-          <TabControl TabStripPlacement="Right" BorderThickness="0" SelectedIndex="0">
-            <TabControl.Resources>
-              <Style TargetType="TabItem">
-                <Setter Property="LayoutTransform">
-                  <Setter.Value>
-                    <RotateTransform Angle="90"/>
-                  </Setter.Value>
-                </Setter>
-              </Style>
-            </TabControl.Resources>
-            <TabItem Header="選択Item" DataContext="{Binding MySelectedThumbs}">
-              <GroupBox Header="選択Item">
-                <ListBox ItemsSource="{Binding}"
+            <TabControl TabStripPlacement="Right" BorderThickness="0" SelectedIndex="0">
+              <TabControl.Resources>
+                <Style TargetType="TabItem">
+                  <Setter Property="LayoutTransform">
+                    <Setter.Value>
+                      <RotateTransform Angle="90"/>
+                    </Setter.Value>
+                  </Setter>
+                </Style>
+              </TabControl.Resources>
+              <TabItem Header="選択Item" DataContext="{Binding MySelectedThumbs}">
+                <GroupBox Header="選択Item">
+                  <ListBox ItemsSource="{Binding}"
                          ScrollViewer.HorizontalScrollBarVisibility="Disabled" BorderThickness="0">
-                  <ListBox.Resources>
-                    <Style TargetType="ListBoxItem">
-                      <Setter Property="HorizontalContentAlignment" Value="Center"/>
-                      <Setter Property="VerticalContentAlignment" Value="Center"/>
-                    </Style>
-                  </ListBox.Resources>
-                  <ListBox.ItemsPanel>
-                    <ItemsPanelTemplate>
-                      <WrapPanel Orientation="Horizontal"/>
-                    </ItemsPanelTemplate>
-                  </ListBox.ItemsPanel>
-                  <ListBox.ItemTemplate>
-                    <DataTemplate>
-                      <Rectangle Width="50" Height="50">
-                        <Rectangle.Fill>
-                          <VisualBrush Stretch="Uniform" Visual="{Binding}"/>
-                        </Rectangle.Fill>
-                      </Rectangle>
-                    </DataTemplate>
-                  </ListBox.ItemTemplate>
-                  <ListBox.ItemContainerStyle>
-                    <Style TargetType="{x:Type ListBoxItem}">
-                      <Setter Property="Padding" Value="0"/>
-                      <Setter Property="HorizontalContentAlignment" Value="Center"/>
-                      <Setter Property="VerticalContentAlignment" Value="Center"/>
-                    </Style>
-                  </ListBox.ItemContainerStyle>
-                </ListBox>
+                    <ListBox.Resources>
+                      <Style TargetType="ListBoxItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                        <Setter Property="VerticalContentAlignment" Value="Center"/>
+                      </Style>
+                    </ListBox.Resources>
+                    <ListBox.ItemsPanel>
+                      <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal"/>
+                      </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
+                    <ListBox.ItemTemplate>
+                      <DataTemplate>
+                        <Rectangle Width="50" Height="50">
+                          <Rectangle.Fill>
+                            <VisualBrush Stretch="Uniform" Visual="{Binding}"/>
+                          </Rectangle.Fill>
+                        </Rectangle>
+                      </DataTemplate>
+                    </ListBox.ItemTemplate>
+                    <ListBox.ItemContainerStyle>
+                      <Style TargetType="{x:Type ListBoxItem}">
+                        <Setter Property="Padding" Value="0"/>
+                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                        <Setter Property="VerticalContentAlignment" Value="Center"/>
+                      </Style>
+                    </ListBox.ItemContainerStyle>
+                  </ListBox>
 
-              </GroupBox>
-            </TabItem>
+                </GroupBox>
+              </TabItem>
 
-            <TabItem Header="Root" DataContext="{Binding}">
-              <GroupBox Header="RootItem">
-                <StackPanel>
-                  <TextBlock Text="{Binding MyThumbType, StringFormat=type {0}}"/>
-                  <TextBlock Text="{Binding ActualWidth, StringFormat=width {0:0}}"/>
-                  <TextBlock Text="{Binding ActualHeight, StringFormat=height {0:0}}"/>
-                  <TextBlock Text="{Binding MyThumbs.Count, StringFormat=ItemsCount _ {0:0}}"/>
-                  <TextBlock Text="{Binding MySelectedThumbs.Count , StringFormat=SelectedCount _ {0:0}}"/>
-                  <Rectangle Width="100" Height="100">
-                    <Rectangle.Fill>
-                      <VisualBrush Stretch="Uniform" Visual="{Binding MyFocusThumb, UpdateSourceTrigger=PropertyChanged}"/>
-                      <!--<BitmapCacheBrush Target="{Binding MyFocusThumb, UpdateSourceTrigger=PropertyChanged}"/>-->
-                    </Rectangle.Fill>
-                  </Rectangle>
-                  <TextBlock Text="FocusItem" HorizontalAlignment="Center"/>
-                  <Separator/>
-                  <Rectangle Width="100" Height="100">
-                    <Rectangle.Fill>
-                      <VisualBrush Stretch="Uniform" Visual="{Binding UpdateSourceTrigger=PropertyChanged}"/>
-                    </Rectangle.Fill>
-                  </Rectangle>
-                  <TextBlock Text="全体" HorizontalAlignment="Center"/>
-                  <Separator/>
-                </StackPanel>
-              </GroupBox>
-            </TabItem>
+              <TabItem Header="Root" DataContext="{Binding}">
+                <GroupBox Header="RootItem">
+                  <StackPanel>
+                    <TextBlock Text="{Binding MyThumbType, StringFormat=type {0}}"/>
+                    <TextBlock Text="{Binding ActualWidth, StringFormat=width {0:0}}"/>
+                    <TextBlock Text="{Binding ActualHeight, StringFormat=height {0:0}}"/>
+                    <TextBlock Text="{Binding MyThumbs.Count, StringFormat=ItemsCount _ {0:0}}"/>
+                    <TextBlock Text="{Binding MySelectedThumbs.Count , StringFormat=SelectedCount _ {0:0}}"/>
+                    <Rectangle Width="100" Height="100">
+                      <Rectangle.Fill>
+                        <VisualBrush Stretch="Uniform" Visual="{Binding MyFocusThumb, UpdateSourceTrigger=PropertyChanged}"/>
+                        <!--<BitmapCacheBrush Target="{Binding MyFocusThumb, UpdateSourceTrigger=PropertyChanged}"/>-->
+                      </Rectangle.Fill>
+                    </Rectangle>
+                    <TextBlock Text="FocusItem" HorizontalAlignment="Center"/>
+                    <Separator/>
+                    <Rectangle Width="100" Height="100">
+                      <Rectangle.Fill>
+                        <VisualBrush Stretch="Uniform" Visual="{Binding UpdateSourceTrigger=PropertyChanged}"/>
+                      </Rectangle.Fill>
+                    </Rectangle>
+                    <TextBlock Text="全体" HorizontalAlignment="Center"/>
+                    <Separator/>
+                  </StackPanel>
+                </GroupBox>
+              </TabItem>
 
-            <TabItem Header="Group" DataContext="{Binding MyActiveGroupThumb}">
-              <GroupBox Header="ActiveGroupItem">
-                <StackPanel>
-                  <Canvas Width="100" Height="100">
-                    <Canvas.Background>
-                      <VisualBrush Visual="{Binding}" Stretch="Uniform"/>
-                    </Canvas.Background>
-                  </Canvas>
-                  <TextBlock Text="{Binding MyThumbType, StringFormat=MyThumbType  {0}}"/>
-                  <TextBlock Text="{Binding ActualWidth, StringFormat=ActualWidth  {0:0}}"/>
-                  <TextBlock Text="{Binding ActualHeight, StringFormat=ActualHeight  {0:0}}"/>
-                  <TextBlock Text="{Binding MyActualTop, StringFormat=ActualTop  {0:0.0}}"/>
-                  <TextBlock Text="{Binding MyActualLeft, StringFormat=ActualLeft  {0:0.0}}"/>
-                  <TextBlock Text="{Binding MyItemData.MyLeft, StringFormat=MyLeft  {0:0.0}}"/>
-                  <TextBlock Text="{Binding MyItemData.MyTop, StringFormat=MyTop  {0:0.0}}"/>
-                  <TextBlock Text="{Binding MyItemData.MyZIndex, StringFormat=MyZIndex  {0:0}}"/>
-                  <TextBlock Text="{Binding MyItemData.GridSize, StringFormat=GridSize  {0:0}}"/>
-                  <UniformGrid Columns="2">
-                    <TextBlock Text="GridSize" HorizontalAlignment="Right"/>
-                    <TextBlock Text="{Binding MyItemData.GridSize}" HorizontalAlignment="Center"/>
-                  </UniformGrid>
-                </StackPanel>
-              </GroupBox>
-            </TabItem>
-            <TabItem Header="Focus" DataContext="{Binding MyFocusThumb}">
-              <GroupBox Header="FocusItem">
-                <StackPanel>
-                  <Canvas Width="100" Height="100">
-                    <Canvas.Background>
-                      <VisualBrush Visual="{Binding}" Stretch="Uniform"/>
-                    </Canvas.Background>
-                  </Canvas>
-                  <TextBlock Text="{Binding MyThumbType, StringFormat=MyThumbType  {0}}"/>
-                  <TextBlock Text="{Binding ActualWidth, StringFormat=ActualWidth  {0:0}}"/>
-                  <TextBlock Text="{Binding ActualHeight, StringFormat=ActualHeight  {0:0}}"/>
-                  <TextBlock Text="{Binding MyActualTop, StringFormat=ActualTop  {0:0.0}}"/>
-                  <TextBlock Text="{Binding MyActualLeft, StringFormat=ActualLeft  {0:0.0}}"/>
-                  <TextBlock Text="{Binding MyItemData.MyLeft, StringFormat=MyLeft  {0:0.0}}"/>
-                  <TextBlock Text="{Binding MyItemData.MyTop, StringFormat=MyTop  {0:0.0}}"/>
-                  <TextBlock Text="{Binding MyItemData.MyZIndex, StringFormat=MyZIndex  {0:0}}"/>
-                  <TextBlock Text="{Binding MyItemData.MyGuid, StringFormat=Guid  {0:0}}"/>
-                  <TextBlock Text="{Binding IsMyFocus, StringFormat=IsMyFocus  {0:0}}"/>
-                  <TextBlock Text="{Binding IsFocused, StringFormat=IsFocused  {0:0}}"/>
-                  <TextBlock Text="{Binding IsKeyboardFocused, StringFormat=IsKeyboardFocused  {0:0}}"/>
-                  <TextBlock Text="{Binding IsEditing, StringFormat=IsEditing  {0:0}}"/>
-                  <TextBlock Text="{Binding MyItemData.TextItemData.FontName, StringFormat=FontName  {0:0}}"/>
-                  <TextBlock Text="{Binding MyItemData.TextItemData.MyFontSize, StringFormat=MyFontSize  {0:0}}"/>
-                  <TextBlock Text="{Binding MyItemData.TextItemData.MyText, StringFormat=MyText  {0:0}}"/>
-                  <TextBlock Text="{Binding MyItemData.TextItemData.FontWeight, StringFormat=FontWeight  {0:0}}"/>
-                  <TextBlock Text="{Binding MyItemData.GeoShapeItemData.MyPoints, StringFormat=Points  {0:0 }}" TextWrapping="Wrap"/>
-                  <TextBlock Text="{Binding IsSelectable, StringFormat=IsSelectable  {0:0}}"/>
-                  <TextBlock Text="{Binding IsSelected, StringFormat=IsSelected  {0:0}}"/>
-                  <TextBlock Text="{Binding MyItemData.MyThumbsItemData.Count, StringFormat=MyThumbsItemData.Count  {0:0}}"/>
-                </StackPanel>
-              </GroupBox>
-            </TabItem>
+              <TabItem Header="Group" DataContext="{Binding MyActiveGroupThumb}">
+                <GroupBox Header="ActiveGroupItem">
+                  <StackPanel>
+                    <Canvas Width="100" Height="100">
+                      <Canvas.Background>
+                        <VisualBrush Visual="{Binding}" Stretch="Uniform"/>
+                      </Canvas.Background>
+                    </Canvas>
+                    <TextBlock Text="{Binding MyThumbType, StringFormat=MyThumbType  {0}}"/>
+                    <TextBlock Text="{Binding ActualWidth, StringFormat=ActualWidth  {0:0}}"/>
+                    <TextBlock Text="{Binding ActualHeight, StringFormat=ActualHeight  {0:0}}"/>
+                    <TextBlock Text="{Binding MyActualTop, StringFormat=ActualTop  {0:0.0}}"/>
+                    <TextBlock Text="{Binding MyActualLeft, StringFormat=ActualLeft  {0:0.0}}"/>
+                    <TextBlock Text="{Binding MyItemData.MyLeft, StringFormat=MyLeft  {0:0.0}}"/>
+                    <TextBlock Text="{Binding MyItemData.MyTop, StringFormat=MyTop  {0:0.0}}"/>
+                    <TextBlock Text="{Binding MyItemData.MyZIndex, StringFormat=MyZIndex  {0:0}}"/>
+                    <TextBlock Text="{Binding MyItemData.GridSize, StringFormat=GridSize  {0:0}}"/>
+                    <UniformGrid Columns="2">
+                      <TextBlock Text="GridSize" HorizontalAlignment="Right"/>
+                      <TextBlock Text="{Binding MyItemData.GridSize}" HorizontalAlignment="Center"/>
+                    </UniformGrid>
+                  </StackPanel>
+                </GroupBox>
+              </TabItem>
+              <TabItem Header="Focus" DataContext="{Binding MyFocusThumb}">
+                <GroupBox Header="FocusItem">
+                  <StackPanel>
+                    <Canvas Width="100" Height="100">
+                      <Canvas.Background>
+                        <VisualBrush Visual="{Binding}" Stretch="Uniform"/>
+                      </Canvas.Background>
+                    </Canvas>
+                    <TextBlock Text="{Binding MyThumbType, StringFormat=MyThumbType  {0}}"/>
+                    <TextBlock Text="{Binding ActualWidth, StringFormat=ActualWidth  {0:0}}"/>
+                    <TextBlock Text="{Binding ActualHeight, StringFormat=ActualHeight  {0:0}}"/>
+                    <TextBlock Text="{Binding MyActualTop, StringFormat=ActualTop  {0:0.0}}"/>
+                    <TextBlock Text="{Binding MyActualLeft, StringFormat=ActualLeft  {0:0.0}}"/>
+                    <TextBlock Text="{Binding MyItemData.MyLeft, StringFormat=MyLeft  {0:0.0}}"/>
+                    <TextBlock Text="{Binding MyItemData.MyTop, StringFormat=MyTop  {0:0.0}}"/>
+                    <TextBlock Text="{Binding MyItemData.MyZIndex, StringFormat=MyZIndex  {0:0}}"/>
+                    <TextBlock Text="{Binding MyItemData.MyGuid, StringFormat=Guid  {0:0}}"/>
+                    <TextBlock Text="{Binding IsMyFocus, StringFormat=IsMyFocus  {0:0}}"/>
+                    <TextBlock Text="{Binding IsFocused, StringFormat=IsFocused  {0:0}}"/>
+                    <TextBlock Text="{Binding IsKeyboardFocused, StringFormat=IsKeyboardFocused  {0:0}}"/>
+                    <TextBlock Text="{Binding IsEditing, StringFormat=IsEditing  {0:0}}"/>
+                    <TextBlock Text="{Binding MyItemData.TextItemData.FontName, StringFormat=FontName  {0:0}}"/>
+                    <TextBlock Text="{Binding MyItemData.TextItemData.MyFontSize, StringFormat=MyFontSize  {0:0}}"/>
+                    <TextBlock Text="{Binding MyItemData.TextItemData.MyText, StringFormat=MyText  {0:0}}"/>
+                    <TextBlock Text="{Binding MyItemData.TextItemData.FontWeight, StringFormat=FontWeight  {0:0}}"/>
+                    <TextBlock Text="{Binding MyItemData.GeoShapeItemData.MyPoints, StringFormat=Points  {0:0 }}" TextWrapping="Wrap"/>
+                    <TextBlock Text="{Binding IsSelectable, StringFormat=IsSelectable  {0:0}}"/>
+                    <TextBlock Text="{Binding IsSelected, StringFormat=IsSelected  {0:0}}"/>
+                    <TextBlock Text="{Binding MyItemData.MyThumbsItemData.Count, StringFormat=MyThumbsItemData.Count  {0:0}}"/>
+                  </StackPanel>
+                </GroupBox>
+              </TabItem>
 
-            <TabItem Header="Clicked" DataContext="{Binding MyClickedThumb}">
-              <GroupBox Header="ClickedItem">
-                <StackPanel>
-                  <Canvas Width="100" Height="100">
-                    <Canvas.Background>
-                      <VisualBrush Visual="{Binding}" Stretch="Uniform"/>
-                    </Canvas.Background>
-                  </Canvas>
-                  <TextBlock Text="{Binding MyThumbType, StringFormat=MyThumbType  {0}}"/>
-                  <TextBlock Text="{Binding ActualWidth, StringFormat=ActualWidth  {0:0}}"/>
-                  <TextBlock Text="{Binding ActualHeight, StringFormat=ActualHeight  {0:0}}"/>
-                  <TextBlock Text="{Binding MyActualTop, StringFormat=ActualTop  {0:0.0}}"/>
-                  <TextBlock Text="{Binding MyActualLeft, StringFormat=ActualLeft  {0:0.0}}"/>
-                  <TextBlock Text="{Binding MyItemData.MyLeft, StringFormat=MyLeft  {0:0.0}}"/>
-                  <TextBlock Text="{Binding MyItemData.MyTop, StringFormat=MyTop  {0:0.0}}"/>
-                  <TextBlock Text="{Binding MyItemData.MyZIndex, StringFormat=MyZIndex  {0:0}}"/>
-                  <TextBlock Text="{Binding MyItemData.MyGuid, StringFormat=Guid  {0:0}}"/>
-                  <TextBlock Text="{Binding IsSelectable, StringFormat=IsSelectable  {0:0}}"/>
-                  <TextBlock Text="{Binding IsSelected, StringFormat=IsSelected  {0:0}}"/>
-                  <TextBlock Text="{Binding MyItemData.MyThumbsItemData.Count, StringFormat=MyThumbsItemData.Count  {0:0}}"/>
-                </StackPanel>
-              </GroupBox>
-            </TabItem>
+              <TabItem Header="Clicked" DataContext="{Binding MyClickedThumb}">
+                <GroupBox Header="ClickedItem">
+                  <StackPanel>
+                    <Canvas Width="100" Height="100">
+                      <Canvas.Background>
+                        <VisualBrush Visual="{Binding}" Stretch="Uniform"/>
+                      </Canvas.Background>
+                    </Canvas>
+                    <TextBlock Text="{Binding MyThumbType, StringFormat=MyThumbType  {0}}"/>
+                    <TextBlock Text="{Binding ActualWidth, StringFormat=ActualWidth  {0:0}}"/>
+                    <TextBlock Text="{Binding ActualHeight, StringFormat=ActualHeight  {0:0}}"/>
+                    <TextBlock Text="{Binding MyActualTop, StringFormat=ActualTop  {0:0.0}}"/>
+                    <TextBlock Text="{Binding MyActualLeft, StringFormat=ActualLeft  {0:0.0}}"/>
+                    <TextBlock Text="{Binding MyItemData.MyLeft, StringFormat=MyLeft  {0:0.0}}"/>
+                    <TextBlock Text="{Binding MyItemData.MyTop, StringFormat=MyTop  {0:0.0}}"/>
+                    <TextBlock Text="{Binding MyItemData.MyZIndex, StringFormat=MyZIndex  {0:0}}"/>
+                    <TextBlock Text="{Binding MyItemData.MyGuid, StringFormat=Guid  {0:0}}"/>
+                    <TextBlock Text="{Binding IsSelectable, StringFormat=IsSelectable  {0:0}}"/>
+                    <TextBlock Text="{Binding IsSelected, StringFormat=IsSelected  {0:0}}"/>
+                    <TextBlock Text="{Binding MyItemData.MyThumbsItemData.Count, StringFormat=MyThumbsItemData.Count  {0:0}}"/>
+                  </StackPanel>
+                </GroupBox>
+              </TabItem>
 
-            <TabItem Header="TestTree" DataContext="{Binding}">
-              <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <TreeView ItemsSource="{Binding MyThumbs}"  Background="WhiteSmoke">
-                  <!--<TreeView.Resources>
+              <TabItem Header="TestTree" DataContext="{Binding}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                  <TreeView ItemsSource="{Binding MyThumbs}"  Background="WhiteSmoke">
+                    <!--<TreeView.Resources>
                 <Style TargetType="{x:Type TreeViewItem}">
                   <Setter Property="HorizontalContentAlignment" Value="Center"/>
                   <Setter Property="VerticalContentAlignment" Value="Center"/>
                 </Style>
               </TreeView.Resources>-->
-                  <TreeView.ItemContainerStyle>
-                    <Style TargetType="TreeViewItem">
-                      <!--<Setter Property="Margin" Value="0,20,0,-30"/>-->
-                      <!--<Setter Property="Padding" Value="20"/>-->
-                    </Style>
-                  </TreeView.ItemContainerStyle>
-                  <TreeView.ItemTemplate>
-                    <HierarchicalDataTemplate  ItemsSource="{Binding MyThumbs}">
-                      <Border BorderBrush="Silver" BorderThickness="0" Margin="0">
-                        <StackPanel Orientation="Horizontal">
-                          <StackPanel.RenderTransform>
-                            <SkewTransform AngleX="20" AngleY="0"/>
-                          </StackPanel.RenderTransform>
-                          <Rectangle Width="60" Height="60" Margin="0,0,0,-20">
-                            <Rectangle.RenderTransform>
-                              <SkewTransform AngleX="0" AngleY="0"/>
-                            </Rectangle.RenderTransform>
-                            <Rectangle.Fill>
-                              <VisualBrush Visual="{Binding}" Stretch="Uniform"/>
-                            </Rectangle.Fill>
-                          </Rectangle>
-                          <TextBlock Text="{Binding MyThumbType}" VerticalAlignment="Bottom"/>
-                        </StackPanel>
-                      </Border>
-                    </HierarchicalDataTemplate>
-                  </TreeView.ItemTemplate>
-                  <!--<TreeView.ItemContainerStyle>
+                    <TreeView.ItemContainerStyle>
+                      <Style TargetType="TreeViewItem">
+                        <!--<Setter Property="Margin" Value="0,20,0,-30"/>-->
+                        <!--<Setter Property="Padding" Value="20"/>-->
+                      </Style>
+                    </TreeView.ItemContainerStyle>
+                    <TreeView.ItemTemplate>
+                      <HierarchicalDataTemplate  ItemsSource="{Binding MyThumbs}">
+                        <Border BorderBrush="Silver" BorderThickness="0" Margin="0">
+                          <StackPanel Orientation="Horizontal">
+                            <StackPanel.RenderTransform>
+                              <SkewTransform AngleX="20" AngleY="0"/>
+                            </StackPanel.RenderTransform>
+                            <Rectangle Width="60" Height="60" Margin="0,0,0,-20">
+                              <Rectangle.RenderTransform>
+                                <SkewTransform AngleX="0" AngleY="0"/>
+                              </Rectangle.RenderTransform>
+                              <Rectangle.Fill>
+                                <VisualBrush Visual="{Binding}" Stretch="Uniform"/>
+                              </Rectangle.Fill>
+                            </Rectangle>
+                            <TextBlock Text="{Binding MyThumbType}" VerticalAlignment="Bottom"/>
+                          </StackPanel>
+                        </Border>
+                      </HierarchicalDataTemplate>
+                    </TreeView.ItemTemplate>
+                    <!--<TreeView.ItemContainerStyle>
                 <Style TargetType="{x:Type TreeViewItem}">
                   <Setter Property="HorizontalContentAlignment" Value="Center"/>
                   <Setter Property="VerticalAlignment" Value="Center"/>
                 </Style>
               </TreeView.ItemContainerStyle>-->
-                </TreeView>
-              </ScrollViewer>
-            </TabItem>
-            <TabItem Header="AppData">
-              <GroupBox Header="アプリの設定">
-                <StackPanel DataContext="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=local:MainWindow}, Path=MyAppData}">
-                  <StackPanel.Resources>
-                    <Style TargetType="TextBlock">
-                      <Setter Property="TextWrapping" Value="Wrap"/>
-                    </Style>
-                  </StackPanel.Resources>
-                  <CheckBox Content="Itemの枠表示" IsChecked="{Binding IsWakuVisible, Converter={StaticResource visibleTrue}}"/>
-                  <TextBlock Text="{Binding CurrentOpenFilePath, StringFormat=CurrentOpenFilePath {0:0}}"/>
-                  <TextBlock Text="{Binding DefaultSaveDataFileName, StringFormat=DefaultSaveDataFileName {0:0}}"/>
-                  <TextBlock Text="{Binding DefaultSaveImageFileName, StringFormat=DefaultSaveImageFileName {0:0}}"/>
-                  <TextBlock Text="{Binding FontComboBoxSelectedIndex, StringFormat=FontComboBoxSelectedIndex {0:0}}"/>
-                  <TextBlock Text="{Binding FontWeightComboBoxSelectedIndex, StringFormat=FontWeightComboBoxSelectedIndex {0:0}}"/>
-                  <TextBlock Text="{Binding GeoShapeHandleSize, StringFormat=GeoShapeHandleSize {0:0}}"/>
-                  <Slider Minimum="4" Maximum="100" Value="{Binding GeoShapeHandleSize}" TickFrequency="1.0" IsSnapToTickEnabled="True"/>
-                  <TextBlock Text="{Binding InitialDirectory, StringFormat=InitialDirectory {0:0}}"/>
-                  <TextBlock Text="{Binding IsFileNameDescendingOrder, StringFormat=IsFileNameDescendingOrder {0:0}}"/>
-                  <TextBlock Text="{Binding IsWakuVisible, StringFormat=IsWakuVisible {0}}"/>
-                  <TextBlock Text="{Binding MaxGridSize, StringFormat=MaxGridSize {0:0}}"/>
-                  <TextBlock Text="{Binding MinGridSize, StringFormat=MinGridSize {0:0}}"/>
+                  </TreeView>
+                </ScrollViewer>
+              </TabItem>
+              <TabItem Header="AppData">
+                <GroupBox Header="アプリの設定">
+                  <StackPanel DataContext="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=local:MainWindow}, Path=MyAppData}">
+                    <StackPanel.Resources>
+                      <Style TargetType="TextBlock">
+                        <Setter Property="TextWrapping" Value="Wrap"/>
+                      </Style>
+                    </StackPanel.Resources>
+                    <CheckBox Content="Itemの枠表示" IsChecked="{Binding IsWakuVisible, Converter={StaticResource visibleTrue}}"/>
+                    <TextBlock Text="{Binding CurrentOpenFilePath, StringFormat=CurrentOpenFilePath {0:0}}"/>
+                    <TextBlock Text="{Binding DefaultSaveDataFileName, StringFormat=DefaultSaveDataFileName {0:0}}"/>
+                    <TextBlock Text="{Binding DefaultSaveImageFileName, StringFormat=DefaultSaveImageFileName {0:0}}"/>
+                    <TextBlock Text="{Binding FontComboBoxSelectedIndex, StringFormat=FontComboBoxSelectedIndex {0:0}}"/>
+                    <TextBlock Text="{Binding FontWeightComboBoxSelectedIndex, StringFormat=FontWeightComboBoxSelectedIndex {0:0}}"/>
+                    <TextBlock Text="{Binding GeoShapeHandleSize, StringFormat=GeoShapeHandleSize {0:0}}"/>
+                    <Slider Minimum="4" Maximum="100" Value="{Binding GeoShapeHandleSize}" TickFrequency="1.0" IsSnapToTickEnabled="True"/>
+                    <TextBlock Text="{Binding InitialDirectory, StringFormat=InitialDirectory {0:0}}"/>
+                    <TextBlock Text="{Binding IsFileNameDescendingOrder, StringFormat=IsFileNameDescendingOrder {0:0}}"/>
+                    <TextBlock Text="{Binding IsWakuVisible, StringFormat=IsWakuVisible {0}}"/>
+                    <TextBlock Text="{Binding MaxGridSize, StringFormat=MaxGridSize {0:0}}"/>
+                    <TextBlock Text="{Binding MinGridSize, StringFormat=MinGridSize {0:0}}"/>
 
-                  <UniformGrid Columns="2" Margin="4" ToolTip="既定値は90" ToolTipService.InitialShowDelay="100">
-                    <TextBlock Text="{Binding MyJpegQuality, StringFormat=jpeg品質 {0:0}}" Margin="10,0"/>
-                    <Slider Minimum="50" Maximum="100" Value="{Binding MyJpegQuality}"/>
-                  </UniformGrid>
-                </StackPanel>
-              </GroupBox>
-            </TabItem>
-          </TabControl>
-        </Grid>
-        <!--右側1-->
-        <Grid x:Name="MyPanelSelectedItemsProperty" DockPanel.Dock="Right" Width="200"
-              DataContext="{Binding MyRoot.MySelectedThumbs}" Visibility="Collapsed">
-          <GroupBox Header="SelectedItems">
-            <ListBox ItemsSource="{Binding}" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-              <ListBox.Resources>
-                <Style TargetType="ListBoxItem">
-                  <Setter Property="HorizontalContentAlignment" Value="Center"/>
-                  <Setter Property="VerticalContentAlignment" Value="Center"/>
-                </Style>
-              </ListBox.Resources>
-              <ListBox.ItemsPanel>
-                <ItemsPanelTemplate>
-                  <WrapPanel Orientation="Horizontal"/>
-                </ItemsPanelTemplate>
-              </ListBox.ItemsPanel>
-              <ListBox.ItemTemplate>
-                <DataTemplate>
-                  <Rectangle Width="50" Height="50">
-                    <Rectangle.Fill>
-                      <VisualBrush Stretch="Uniform" Visual="{Binding}"/>
-                    </Rectangle.Fill>
-                  </Rectangle>
-                </DataTemplate>
-              </ListBox.ItemTemplate>
-              <ListBox.ItemContainerStyle>
-                <Style TargetType="{x:Type ListBoxItem}">
-                  <Setter Property="Padding" Value="0"/>
-                  <Setter Property="HorizontalContentAlignment" Value="Center"/>
-                  <Setter Property="VerticalContentAlignment" Value="Center"/>
-                </Style>
-              </ListBox.ItemContainerStyle>
-            </ListBox>
-
-            <!--<ScrollViewer>
-              <TreeView ItemsSource="{Binding}">
-                <TreeView.ItemTemplate>
-                  <HierarchicalDataTemplate DataType="local:RootThumb" ItemsSource="{Binding}">
-                    <StackPanel Orientation="Vertical">
-                      <TextBlock Text="{Binding MyThumbType}" VerticalAlignment="Center" Margin="10"/>
-                      <Rectangle Width="50" Height="50">
-                        <Rectangle.Fill>
-                          <VisualBrush Visual="{Binding}" Stretch="Uniform"/>
-                        </Rectangle.Fill>
-                      </Rectangle>
-                    </StackPanel>
-                  </HierarchicalDataTemplate>
-                </TreeView.ItemTemplate>
-              </TreeView>
-            </ScrollViewer>-->
-            <!--<ListBox ItemsSource="{Binding}" d:ItemsSource="{d:SampleData ItemCount=5}">
-              <ListBox.ItemTemplate>
-                <DataTemplate>
-                  <WrapPanel Orientation="Horizontal">
-                    <Rectangle Width="50" Height="50">
+                    <UniformGrid Columns="2" Margin="4" ToolTip="既定値は90" ToolTipService.InitialShowDelay="100">
+                      <TextBlock Text="{Binding MyJpegQuality, StringFormat=jpeg品質 {0:0}}" Margin="10,0"/>
+                      <Slider Minimum="50" Maximum="100" Value="{Binding MyJpegQuality}"/>
+                    </UniformGrid>
+                  </StackPanel>
+                </GroupBox>
+              </TabItem>
+              <TabItem Header="test">
+                <GroupBox Header="test" DataContext="{Binding}">
+                  <StackPanel>
+                    <Rectangle Width="100" Height="100">
                       <Rectangle.Fill>
-                        <VisualBrush Visual="{Binding}" Stretch="Uniform"/>
+                        <VisualBrush Visual="{Binding MyFocusThumbLower}" Stretch="Uniform"/>
                       </Rectangle.Fill>
                     </Rectangle>
-                  </WrapPanel>
-                </DataTemplate>
-              </ListBox.ItemTemplate>
-              <ListBox.ItemsPanel>
-                <ItemsPanelTemplate>
-                  <WrapPanel Orientation="Horizontal" VerticalAlignment="Top"/>
-                </ItemsPanelTemplate>
-              </ListBox.ItemsPanel>
-            </ListBox>-->
-          </GroupBox>
-        </Grid>
+                    
+                    <Rectangle Width="100" Height="100">
+                      <Rectangle.Fill>
+                        <VisualBrush Visual="{Binding MyFocusThumb}" Stretch="Uniform"/>
+                      </Rectangle.Fill>
+                    </Rectangle>
+                    
+                    <Rectangle Width="100" Height="100">
+                      <Rectangle.Fill>
+                        <VisualBrush Visual="{Binding MyFocusThumbUpper}" Stretch="Uniform"/>
+                      </Rectangle.Fill>
+                    </Rectangle>
+                    
+                  </StackPanel>
+                </GroupBox>
+              </TabItem>
+            </TabControl>
+          </Grid>
+        </Expander>
+        <!--右側1-->
 
-        <!--右側2-->
-        <Grid
-          x:Name="MyPanelActiveGroupItemProperty"
-          DockPanel.Dock="Right"
-          Width="200"
-          DataContext="{Binding MyRoot.MyActiveGroupThumb}" Visibility="Collapsed">
-          <GroupBox Header="ActiveGroupItem">
-            <StackPanel>
-              <Canvas Width="100" Height="100">
-                <Canvas.Background>
-                  <VisualBrush Visual="{Binding}" Stretch="Uniform"/>
-                </Canvas.Background>
-              </Canvas>
-              <TextBlock Text="{Binding MyThumbType, StringFormat=MyThumbType  {0}}"/>
-              <TextBlock Text="{Binding ActualWidth, StringFormat=ActualWidth  {0:0}}"/>
-              <TextBlock Text="{Binding ActualHeight, StringFormat=ActualHeight  {0:0}}"/>
-              <TextBlock Text="{Binding MyActualTop, StringFormat=ActualTop  {0:0.0}}"/>
-              <TextBlock Text="{Binding MyActualLeft, StringFormat=ActualLeft  {0:0.0}}"/>
-              <TextBlock Text="{Binding MyItemData.MyLeft, StringFormat=MyLeft  {0:0.0}}"/>
-              <TextBlock Text="{Binding MyItemData.MyTop, StringFormat=MyTop  {0:0.0}}"/>
-              <TextBlock Text="{Binding MyItemData.MyZIndex, StringFormat=MyZIndex  {0:0}}"/>
-              <TextBlock Text="{Binding MyItemData.GridSize, StringFormat=GridSize  {0:0}}"/>
-              <UniformGrid Columns="2">
-                <TextBlock Text="GridSize" HorizontalAlignment="Right"/>
-                <TextBlock Text="{Binding MyItemData.GridSize}" HorizontalAlignment="Center"/>
-              </UniformGrid>
-            </StackPanel>
-          </GroupBox>
-        </Grid>
-
-        <!--右側3-->
-        <Grid x:Name="MyPanelFocusItemProperty" DockPanel.Dock="Right" Width="200" DataContext="{Binding MyRoot.MyFocusThumb}" Visibility="Collapsed">
-          <GroupBox Header="FocusItem">
-            <StackPanel>
-              <Canvas Width="100" Height="100">
-                <Canvas.Background>
-                  <VisualBrush Visual="{Binding}" Stretch="Uniform"/>
-                </Canvas.Background>
-              </Canvas>
-              <TextBlock Text="{Binding MyThumbType, StringFormat=MyThumbType  {0}}"/>
-              <TextBlock Text="{Binding ActualWidth, StringFormat=ActualWidth  {0:0}}"/>
-              <TextBlock Text="{Binding ActualHeight, StringFormat=ActualHeight  {0:0}}"/>
-              <TextBlock Text="{Binding MyActualTop, StringFormat=ActualTop  {0:0.0}}"/>
-              <TextBlock Text="{Binding MyActualLeft, StringFormat=ActualLeft  {0:0.0}}"/>
-              <TextBlock Text="{Binding MyItemData.MyLeft, StringFormat=MyLeft  {0:0.0}}"/>
-              <TextBlock Text="{Binding MyItemData.MyTop, StringFormat=MyTop  {0:0.0}}"/>
-              <TextBlock Text="{Binding MyItemData.MyZIndex, StringFormat=MyZIndex  {0:0}}"/>
-              <TextBlock Text="{Binding MyItemData.MyGuid, StringFormat=Guid  {0:0}}"/>
-              <TextBlock Text="{Binding MyItemData.MyThumbsItemData.Count, StringFormat=MyThumbsItemData.Count  {0:0}}"/>
-
-            </StackPanel>
-          </GroupBox>
-        </Grid>
 
         <!--右側4、メインパネル-->
         <Grid x:Name="MyMainGridPanel" DockPanel.Dock="Right" Background="Transparent">

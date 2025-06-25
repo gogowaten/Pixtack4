@@ -9,6 +9,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -77,8 +78,13 @@ namespace Pixtack4
         private Point MyRightClickDownPoint { get; set; }
 
         // マウスクリックで図形追加で使う
-        private PointCollection MyPoints { get; set; } = new();
+        private PointCollection MyPoints { get; set; } = [];
 
+        // dpiスケール
+        public double MyDpiScale { get; private set; } = 1.0;
+        //public double MyImageSize24 { get;private set; } = 24.0;
+        public static double MyImageSize24 { get; private set; } = 24.0;
+        public static double MyImageSize32 { get; private set; } = 32.0;
 
         public MainWindow()
         {
@@ -88,7 +94,17 @@ namespace Pixtack4
             MyInitialize2();
             PreviewKeyDown += MainWindow_PreviewKeyDown;// 主にホットキーの設定
             DataContext = this;
+            Loaded += MainWindow_Loaded;
+        }
 
+        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+
+            // dpiスケール取得
+            if (PresentationSource.FromVisual(this) is PresentationSource sou)
+            {
+                MyDpiScale = sou.CompositionTarget.TransformToDevice.M11;
+            }
         }
 
 
@@ -192,8 +208,6 @@ namespace Pixtack4
             {
                 AddGeoShapeBezierFromMouseClickEnd(MyPoints, 0.3);
             };
-
-
 
 
 
@@ -882,22 +896,6 @@ namespace Pixtack4
             MyRoot.AddGroupingFromSelected();// SelectedThumbsからGroupThumbを生成、ActiveThumbに追加
         }
 
-
-        private void Button_Click_SelectedItemsPropertyPanelVisible(object sender, RoutedEventArgs e)
-        {
-            ChangeVisible(MyPanelSelectedItemsProperty);// パネルの表示非表示を切り替える、Visible or Collapsed
-        }
-
-        private void Button_Click_ActiveGroupItemPropertyPanelVisible(object sender, RoutedEventArgs e)
-        {
-            ChangeVisible(MyPanelActiveGroupItemProperty);// パネルの表示非表示を切り替える、Visible or Collapsed
-        }
-
-        private void Button_Click_FocusItemPropertyPanelVisible(object sender, RoutedEventArgs e)
-        {
-            ChangeVisible(MyPanelFocusItemProperty);// パネルの表示非表示を切り替える、Visible or Collapsed
-        }
-
         private void Button_Click_RemoveAllItems(object sender, RoutedEventArgs e)
         {
             MyRoot.RemoveAll();// 全Item削除
@@ -932,11 +930,6 @@ namespace Pixtack4
                 (_, string message) = SaveItem(MyRoot.MyFocusThumb);
                 MyStatusMessage.Text = message;
             }
-        }
-
-        private void Button_Click_MyRootStatusPanelVisible(object sender, RoutedEventArgs e)
-        {
-            MyRootStatusPanelVisible();
         }
 
         private void Button_Click_OpenPx4File(object sender, RoutedEventArgs e)
@@ -2754,16 +2747,6 @@ namespace Pixtack4
 
         #endregion メソッド
 
-        #region テスト用
-        private void MyRootStatusPanelVisible()
-        {
-            if (MyRootStatusView.Visibility == Visibility.Visible)
-            {
-                MyRootStatusView.Visibility = Visibility.Collapsed;
-            }
-            else { MyRootStatusView.Visibility = Visibility.Visible; }
-        }
-        #endregion テスト用
 
         #region TreeView
 
@@ -2863,13 +2846,66 @@ namespace Pixtack4
 
 
 
+
+
+
+
+
+
+
+
+
         #endregion ボタンクリック以外のイベントでの動作
 
+        //private void TabItem_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        //{
+        //    var height = GetTabItemHeaderHeight((TabItem)MyTabControlLeft.Items[0]);
+        //    if (MyTabControlLeft.Width == 240)
+        //    {
+        //        MyTabControlLeft.Width = height;
+        //    }
+        //    else
+        //    {
+        //        MyTabControlLeft.Width = 240;
+        //    }
+        //}
 
+        //private double GetTabItemHeaderHeight(TabItem tabItem)
+        //{
+        //    // TabControlの親からTabPanelを探す
+        //    var tabControl = ItemsControl.ItemsControlFromItemContainer(tabItem) as TabControl;
+        //    if (tabControl == null) return 32.0;
+        //    TabPanel tabPanel = FindVisualChild<TabPanel>(tabControl);
+        //    if (tabPanel == null) return 32.0;
 
+        //    // TabPanel内のTabItemのインデックスを取得
+        //    int index = tabControl.ItemContainerGenerator.IndexFromContainer(tabItem);
+        //    if (index < 0 || index >= tabPanel.Children.Count) return 32.0;
 
+        //    // TabPanel内の該当するUIElement（TabItemのHeader部分）を取得
+        //    if (tabPanel.Children[index] is UIElement headerElement)
+        //    {
+        //        double headerHeight = headerElement.RenderSize.Height;
+        //        return headerHeight;
+        //        //MessageBox.Show($"Header Height: {headerHeight}");
+        //    }
+        //    else { return 32.0; }// 適当な値、0よりマシ
+        //}
 
-
+        //// VisualTreeをたどるヘルパー
+        //private T FindVisualChild<T>(DependencyObject parent) where T : DependencyObject
+        //{
+        //    for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+        //    {
+        //        var child = VisualTreeHelper.GetChild(parent, i);
+        //        if (child is T t)
+        //            return t;
+        //        var result = FindVisualChild<T>(child);
+        //        if (result != null)
+        //            return result;
+        //    }
+        //    return null;
+        //}
 
 
 
