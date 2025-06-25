@@ -385,7 +385,7 @@ namespace Pixtack4
             menuPanel.Children.Add(item);
 
             item = new() { Header = "画像として複製" };
-            item.Click += (a, b) => { MyRoot.DupulicateAsImage(MyRoot.MyFocusThumb); };
+            item.Click += (a, b) => { MyRoot.DuplicateAsImage(MyRoot.MyFocusThumb); };
             menuPanel.Children.Add(item);
 
             item = new() { Header = "名前を付けて保存" };
@@ -643,6 +643,11 @@ namespace Pixtack4
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
+            var iconH = Icon.Height;// 24
+            PresentationSource sou = PresentationSource.FromVisual(this);
+            var dd = sou.CompositionTarget.TransformToDevice.M11;// dpiX倍率
+            var dd2 = sou.CompositionTarget.TransformToDevice.M22;
+
             var focus = FocusManager.GetFocusedElement(this);
             var keyfo = Keyboard.FocusedElement;
             var neko = MyPoints;
@@ -779,9 +784,9 @@ namespace Pixtack4
             MyManageExCanvas.AreaThumbVisibleSwitch();// 範囲選択Itemの表示非表示、
         }
 
-        private void Button_Click_DupulicateAsImageForFocusItem(object sender, RoutedEventArgs e)
+        private void Button_Click_DuplicateAsImageForFocusItem(object sender, RoutedEventArgs e)
         {
-            _ = MyRoot.DupulicateAsImage(MyRoot.MyFocusThumb);// 指定されたItemを画像として複製
+            _ = MyRoot.DuplicateAsImage(MyRoot.MyFocusThumb);// 指定されたItemを画像として複製
         }
 
         private void Button_Click_DuplicateFocusItem(object sender, RoutedEventArgs e)

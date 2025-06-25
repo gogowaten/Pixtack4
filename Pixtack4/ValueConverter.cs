@@ -8,6 +8,22 @@ using System.Windows.Controls;
 namespace Pixtack4
 {
 
+    public class MyConvImageSize : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            PresentationSource sou = PresentationSource.FromVisual(this);
+            var dd = sou.CompositionTarget.TransformToDevice.M11;// dpiX倍率
+
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+
     public class MyConvBitmapCasheBrushAspect : IMultiValueConverter
     {
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)

@@ -101,7 +101,7 @@
 
           <MenuItem Header="編集(_E)">
             <MenuItem Header="範囲選択Item表示" Click="Button_Click_AreaItemVisibleSwitch"/>
-            <MenuItem Header="画像として複製" Click="Button_Click_DupulicateAsImageForFocusItem"/>
+            <MenuItem Header="画像として複製" Click="Button_Click_DuplicateAsImageForFocusItem"/>
             <MenuItem Header="複製" Click="Button_Click_DuplicateFocusItem" InputGestureText="Ctrl+D"/>
             <MenuItem Header="クリップボード">
               <MenuItem Header="RootItemをクリップボードに画像としてコピー" Click="Button_Click_CopyAsImageForRoot"/>
@@ -169,7 +169,7 @@
 
         <Expander Header="exp" IsExpanded="False">
           <TabControl>
-            
+
             <TabItem Header="AppData" DataContext="{Binding MyAppData}">
               <ScrollViewer>
                 <DockPanel>
@@ -546,7 +546,7 @@
                 </TabItem>
               </TabControl>
             </TabItem>
-            
+
             <TabItem Header="Tool" Style="{StaticResource verticalTab}">
               <WrapPanel>
                 <WrapPanel.Resources>
@@ -570,34 +570,69 @@
                 <TextBlock Text="{Binding MyRoot.MyActiveGroupThumb.MyItemData.GridSize, StringFormat=GridSize {0:0}}"/>
                 <Button Content="クリップボードから画像貼り付け(png)" Click="Button_Click_AddImageFromClipboardPng" ToolTip="通常はこれ"/>
                 <Button Content="クリップボードから画像貼り付け(bmp)" Click="Button_Click_AddImageFromClipboardBmp" ToolTip="半透明無効、エクセルのグラフや図形などはこれ"/>
-                <MenuItem Click="Button_Click_CopyAsImageForRoot">
-                  <MenuItem.Icon>
-                    <Image>
-                      <Image.Source>
-                        <DrawingImage>
-                          <DrawingImage.Drawing>
-                            <GeometryDrawing Brush="Red">
-                              <GeometryDrawing.Geometry>
-                                <RectangleGeometry Rect="0,0,10,10">
-                                  
-                                </RectangleGeometry>
-                              </GeometryDrawing.Geometry>
-                            </GeometryDrawing>
-                          </DrawingImage.Drawing>
-                        </DrawingImage>
-                      </Image.Source>
-                    </Image>
-                  </MenuItem.Icon>
-                </MenuItem>
-                <MenuItem Header="RootItemをクリップボードに画像としてコピー" Click="Button_Click_CopyAsImageForRoot"/>
-                <MenuItem Header="FocusItemをクリップボードに画像としてコピー" Click="Button_Click_CopyAsImageForFocusItem"/>
-                <MenuItem Header="ClickedItemをクリップボードに画像としてコピー" Click="Button_Click_CopyAsImageForClickedItem"/>
+                <Button Click="Button_Click_AddImageFromClipboardPng">
+                  <StackPanel>
+                    <Image Source="/MyResource/白詰草05.ico" Stretch="None"/>
+                    <TextBlock Text="画貼(png)"/>
+                  </StackPanel>
+                </Button>
 
-                <TextBlock Text="👈️👆️できた｜まだ👇️👉️"/>
-                <Button Content="複製"/>
-                <Button Content="画像として複製"/>
-                <TextBlock Text="{Binding MyAppData.MyJpegQuality, StringFormat=jpeg品質 {0:0}}"/>
-                <Slider Minimum="50" Maximum="100" Value="{Binding MyAppData.MyJpegQuality}" Width="100"/>
+                <Button Click="Button_Click_AddImageFromClipboardBmp">
+                  <StackPanel>
+                    <Image Source="/MyResource/白詰草05.ico" Stretch="None"/>
+                    <TextBlock Text="画貼(bmp)"/>
+                  </StackPanel>
+                </Button>
+
+                <Button Click="Button_Click_DuplicateFocusItem">
+                  <StackPanel>
+                    <Image Source="/MyResource/白詰草05.ico" Stretch="None"/>
+                    <TextBlock Text="複製"/>
+                  </StackPanel>
+                </Button>
+
+                <Button Click="Button_Click_DuplicateAsImageForFocusItem">
+                  <StackPanel>
+                    <Image Source="/MyResource/白詰草05.ico" Stretch="None"/>
+                    <TextBlock Text="複製(画)"/>
+                  </StackPanel>
+                </Button>
+
+                <GroupBox Header="クリップボードへ画像としてコピー" Margin="4">
+                  <WrapPanel>
+                    <Button Click="Button_Click_CopyAsImageForRoot">
+                      <StackPanel>
+                        <Image Source="/MyResource/白詰草05.ico" Stretch="None"/>
+                        <TextBlock Text="root(全体)"/>
+                      </StackPanel>
+                    </Button>
+
+                    <Button Click="Button_Click_CopyAsImageForFocusItem">
+                      <StackPanel>
+                        <Image Source="/MyResource/白詰草05.ico" Stretch="None"/>
+                        <TextBlock Text="Focus"/>
+                      </StackPanel>
+                    </Button>
+
+                    <Button Click="Button_Click_CopyAsImageForClickedItem">
+                      <StackPanel>
+                        <Image Source="/MyResource/白詰草05.ico" Stretch="None"/>
+                        <TextBlock Text="Clicked"/>
+                      </StackPanel>
+                    </Button>
+                    
+                    <Button Click="Button_Click_CopyAsImageForFocusItem">
+                      <StackPanel>
+                        <Rectangle Width="24" Height="24">
+                          <Rectangle.Fill>
+                            <VisualBrush Visual="{Binding MyRoot.MyFocusThumb}" Stretch="Uniform"/>
+                          </Rectangle.Fill>
+                        </Rectangle><TextBlock Text="Focus"/>
+                      </StackPanel>
+                    </Button>
+                  </WrapPanel>
+                </GroupBox>
+
 
               </WrapPanel>
             </TabItem>
@@ -715,7 +750,7 @@
                 </StackPanel>
               </GroupBox>
             </TabItem>
-            
+
             <TabItem Header="Group" DataContext="{Binding MyActiveGroupThumb}">
               <GroupBox Header="ActiveGroupItem">
                 <StackPanel>
@@ -862,7 +897,11 @@
                   <TextBlock Text="{Binding IsWakuVisible, StringFormat=IsWakuVisible {0}}"/>
                   <TextBlock Text="{Binding MaxGridSize, StringFormat=MaxGridSize {0:0}}"/>
                   <TextBlock Text="{Binding MinGridSize, StringFormat=MinGridSize {0:0}}"/>
-                  <TextBlock Text="{Binding MyJpegQuality, StringFormat=MyJpegQuality {0:0}}"/>
+
+                  <UniformGrid Columns="2" Margin="4" ToolTip="既定値は90" ToolTipService.InitialShowDelay="100">
+                    <TextBlock Text="{Binding MyJpegQuality, StringFormat=jpeg品質 {0:0}}" Margin="10,0"/>
+                    <Slider Minimum="50" Maximum="100" Value="{Binding MyJpegQuality}"/>
+                  </UniformGrid>
                 </StackPanel>
               </GroupBox>
             </TabItem>

@@ -399,20 +399,6 @@ namespace Pixtack4
         }
 
 
-        //public void TTT(KisoThumb clickedKouhoItem, KisoThumb originSource)
-        //{
-        //    if(GetSelectableThumb(clickedKouhoItem) is KisoThumb focusKouhoItem)
-        //    {
-        //        if (focusKouhoItem.MyItemData.MyGuid == originSource.MyItemData.MyGuid 
-        //            && GetRootThumb() is RootThumb root)
-        //        {
-        //            clickedKouhoItem.Focusable = false;
-        //            focusKouhoItem.Focusable = false;
-        //            root.TestPreviewMouseDown(focusKouhoItem, clickedKouhoItem);
-        //        }
-        //    }
-        //}
-
 
         protected void KisoThumb_PreviewMouseUp2(object sender, MouseButtonEventArgs e)
         {
@@ -1552,7 +1538,7 @@ namespace Pixtack4
         /// <param name="thumb">複製するItem</param>
         /// <returns><see langword="true"/> の場合、Itemが正常に複製され、ルートコンテナに追加されました。
         /// それ以外の場合は <see langword="false"/> です。</returns>
-        public bool DupulicateAsImage(KisoThumb? thumb)
+        public bool DuplicateAsImage(KisoThumb? thumb)
         {
             if (MakeBitmapFromThumb(thumb) is RenderTargetBitmap bmp)
             {
