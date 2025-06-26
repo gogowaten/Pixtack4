@@ -54,7 +54,7 @@ namespace Pixtack4
             MyAreaThumb.DragStarted += (a, b) => { MyAreaThumb.MyParentExCanvas.IsAutoResize = false; };
             MyAreaThumb.DragCompleted += (a, b) => { MyAreaThumb.MyParentExCanvas.IsAutoResize = true; };
             MyAreaThumb.DragDelta += MyAreaThumb_DragDelta;
-            
+
         }
 
         /// <summary>
@@ -70,7 +70,7 @@ namespace Pixtack4
                 int yoko = (int)(e.HorizontalChange / gSize) * gSize;
                 int tate = (int)(e.VerticalChange / gSize) * gSize;
                 SetLeft(area, GetLeft(area) + yoko);
-                SetTop(area,GetTop(area) + tate);
+                SetTop(area, GetTop(area) + tate);
                 e.Handled = true;
             }
         }

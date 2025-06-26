@@ -186,7 +186,7 @@ namespace Pixtack4
     /// <summary>
     /// 基礎Thumb、すべてのCustomControlThumbの派生元
     /// </summary>
-    [DebuggerDisplay("{MyThumbType}")]
+    //[DebuggerDisplay("{MyThumbType}")]
     public abstract class KisoThumb : Thumb
     {
         //クリックダウンとドラッグ移動完了時に使う、直前に選択されたものかの判断用
@@ -372,56 +372,123 @@ namespace Pixtack4
         // このままだと右クリックでも発生する
         protected void KisoThumb_PreviewMouseDown2(object sender, MouseButtonEventArgs e)
         {
+            //if (this is RootThumb) { return; }
+
+
+            ////イベントのOriginalSourceからクリックされたThumbとFocusThumb候補を取得
+            //if (GetClickedCandidateThumb(e) is KisoThumb clickedCandidate
+            //    && GetSelectableThumb(clickedCandidate) is KisoThumb focusCandidate)
+            //{
+            //    //フォーカス候補とthisが一致したときだけ処理する、
+            //    //こうしないとグループ内の他のThumbまで処理してしまう
+            //    if (focusCandidate.MyItemData.MyGuid == this.MyItemData.MyGuid
+            //    && GetRootThumb() is RootThumb root)
+            //    {
+            //        clickedCandidate.Focusable = false;
+            //        focusCandidate.Focusable = false;
+            //        root.TestPreviewMouseDown(focusCandidate, clickedCandidate);
+            //        // キーボードフォーカスをRootにする
+            //        Keyboard.Focus(root);
+            //    }
+            //    //e.Handled = true;
+            //    //ここでtrueにするとドラッグ移動が動かなくなってしまう
+            //    //ここでtrueにしないとグループの入れ子の数だけイベントが発生して、
+            //    //同じ処理を繰り返すことになってしまう
+            //}
+
             if (this is RootThumb) { return; }
-
-
-            //イベントのOriginalSourceからクリックされたThumbとFocusThumb候補を取得
-            if (GetClickedCandidateThumb(e) is KisoThumb clickedCandidate
-                && GetSelectableThumb(clickedCandidate) is KisoThumb focusCandidate)
-            {
-                //フォーカス候補とthisが一致したときだけ処理する、
-                //こうしないとグループ内の他のThumbまで処理してしまう
-                if (focusCandidate.MyItemData.MyGuid == this.MyItemData.MyGuid
-                && GetRootThumb() is RootThumb root)
-                {
-                    clickedCandidate.Focusable = false;
-                    focusCandidate.Focusable = false;
-                    root.TestPreviewMouseDown(focusCandidate, clickedCandidate);
-                    // キーボードフォーカスをRootにする
-                    Keyboard.Focus(root);
-                }
-                //e.Handled = true;
-                //ここでtrueにするとドラッグ移動が動かなくなってしまう
-                //ここでtrueにしないとグループの入れ子の数だけイベントが発生して、
-                //同じ処理を繰り返すことになってしまう
-            }
-
+            KisoThumbPrevewMouseDown(e);
         }
+
+        /// <summary>
+        /// KisoThumb要素のマウスダウンイベントを処理します。
+        /// </summary>
+        /// <remarks>このメソッドは、マウスイベントがKisoThumb要素から発生したかどうかを判定し、発生した場合はクリックされた要素のイベントを処理します。</remarks>
+        /// <param name="e">マウスボタンイベントのイベントデータ。イベントの元のソースに関する情報が含まれます。</param>
+        public void KisoThumbPrevewMouseDown(MouseButtonEventArgs e)
+        {
+            //イベントのOriginalSourceからクリックされたThumbとFocusThumb候補を取得
+            //フォーカス候補とthisが一致したときだけ処理する、
+            //こうしないとグループ内の他のThumbまで処理してしまう
+            if (GetClickedCandidateThumb(e) is KisoThumb clickedCandidate
+                && GetSelectableThumb(clickedCandidate) is KisoThumb focusCandidate
+                && focusCandidate.MyItemData.MyGuid == this.MyItemData.MyGuid)
+            {
+                KisoThumbPrevewMouseDown(focusCandidate, clickedCandidate);
+            }
+        }
+
+
+        public void KisoThumbPrevewMouseDown(KisoThumb focusCandidate, KisoThumb clickedCandidate)
+        {
+            clickedCandidate.Focusable = false;
+            focusCandidate.Focusable = false;
+            if (GetRootThumb() is RootThumb root)
+            {
+                root.TestPreviewMouseDown(focusCandidate, clickedCandidate);
+                Keyboard.Focus(root);// キーボードフォーカスをRootにする
+            }
+        }
+
+
+
+
+
 
 
 
         protected void KisoThumb_PreviewMouseUp2(object sender, MouseButtonEventArgs e)
         {
+            //if (this is RootThumb) { return; }
+
+            //if (GetClickedCandidateThumb((DependencyObject)e.OriginalSource) is KisoThumb clicked
+            //    && GetSelectableThumb(clicked) is KisoThumb focus)
+            //{
+            //    if (focus.MyItemData.MyGuid == this.MyItemData.MyGuid)
+            //    {
+            //        clicked.Focusable = true;
+            //        focus.Focusable = true;
+            //        //重要、BringIntoViewこれがないとすっ飛んでいく
+            //        clicked.BringIntoView();
+
+            //        //こちらだとグループ全体が表示されるスクロールになる
+            //        //focus.BringIntoView();
+
+            //        //trueにすると、なぜか移動後のレイアウト更新が実行されなくなる
+            //        //e.Handled = true;
+            //    }
+            //}
+
+            KisoThumbPreviewMouseUp(e);
+        }
+
+        public void KisoThumbPreviewMouseUp(MouseButtonEventArgs e)
+        {
             if (this is RootThumb) { return; }
 
             if (GetClickedCandidateThumb((DependencyObject)e.OriginalSource) is KisoThumb clicked
-                && GetSelectableThumb(clicked) is KisoThumb focus)
+                && GetSelectableThumb(clicked) is KisoThumb focus
+                && focus.MyItemData.MyGuid == this.MyItemData.MyGuid)
             {
-                if (focus.MyItemData.MyGuid == this.MyItemData.MyGuid)
-                {
-                    clicked.Focusable = true;
-                    focus.Focusable = true;
-                    //重要、BringIntoViewこれがないとすっ飛んでいく
-                    clicked.BringIntoView();
-
-                    //こちらだとグループ全体が表示されるスクロールになる
-                    //focus.BringIntoView();
-
-                    //trueにすると、なぜか移動後のレイアウト更新が実行されなくなる
-                    //e.Handled = true;
-                }
+                KisoThumbPreviewMouseUp(clicked, focus);
             }
         }
+
+        public void KisoThumbPreviewMouseUp(KisoThumb clicked, KisoThumb focus)
+        {
+            if (this is RootThumb) { return; }
+
+            clicked.Focusable = true;
+            focus.Focusable = true;
+            //重要、BringIntoViewこれがないとすっ飛んでいく
+            clicked.BringIntoView();
+        }
+
+
+
+
+
+
 
 
         /// <summary>
@@ -555,44 +622,60 @@ namespace Pixtack4
                 }
             }
         }
-        //internal void Thumb_DragDelta3(object sender, DragDeltaEventArgs e)
-        //{
-        //    if (sender is KisoThumb thumb && thumb.IsSelectable)
-        //    {
-        //        if (GetRootThumb() is RootThumb root)
-        //        {
-        //            foreach (var item in root.MySelectedThumbs)
-        //            {
-        //                item.MyItemData.MyLeft += (int)(e.HorizontalChange + 0.5);
-        //                item.MyItemData.MyTop += (int)(e.VerticalChange + 0.5);
-        //            }
-        //            e.Handled = true;
-        //        }
-        //    }
-        //}
+
 
         // ドラッグ移動終了時
         protected void KisoThumb_DragCompleted3(object sender, DragCompletedEventArgs e)
         {
             if (this is RootThumb) { return; }
 
+            //if (GetClickedCandidateThumb((DependencyObject)e.OriginalSource) is KisoThumb clicked
+            //    && GetSelectableThumb(clicked) is KisoThumb focus)
+            //{
+            //    if (focus.MyItemData.MyGuid == this.MyItemData.MyGuid
+            //    && GetRootThumb() is RootThumb root)
+            //    {
+            //        //parentのオートリサイズを有効にして再レイアウト
+            //        if (focus.MyParentThumb?.MyExCanvas is ExCanvas canvas)
+            //        {
+            //            canvas.IsAutoResize = true;
+            //            focus.MyParentThumb?.ReLayout3();
+            //        }
+            //        root.TestDragCompleted(focus, e.HorizontalChange != 0 || e.VerticalChange != 0);
+            //        e.Handled = true;
+            //    }
+            //}
+
+            KisoThumbDragCompleted(e);
+        }
+
+        protected void KisoThumbDragCompleted(DragCompletedEventArgs e)
+        {
+            if (this is RootThumb) { return; }
+
             if (GetClickedCandidateThumb((DependencyObject)e.OriginalSource) is KisoThumb clicked
-                && GetSelectableThumb(clicked) is KisoThumb focus)
+                && GetSelectableThumb(clicked) is KisoThumb focus
+                && focus.MyItemData.MyGuid == this.MyItemData.MyGuid)
             {
-                if (focus.MyItemData.MyGuid == this.MyItemData.MyGuid
-                && GetRootThumb() is RootThumb root)
-                {
-                    //parentのオートリサイズを有効にして再レイアウト
-                    if (focus.MyParentThumb?.MyExCanvas is ExCanvas canvas)
-                    {
-                        canvas.IsAutoResize = true;
-                        focus.MyParentThumb?.ReLayout3();
-                    }
-                    root.TestDragCompleted(focus, e.HorizontalChange != 0 || e.VerticalChange != 0);
-                    e.Handled = true;
-                }
+                KisoThumbDragCompleted(focus, e.HorizontalChange != 0 || e.VerticalChange != 0);
+                e.Handled = true;
             }
         }
+
+        public void KisoThumbDragCompleted(KisoThumb focus, bool isMoved)
+        {
+            if (GetRootThumb() is RootThumb root)
+            {
+                //parentのオートリサイズを有効にして再レイアウト
+                if (focus.MyParentThumb?.MyExCanvas is ExCanvas canvas)
+                {
+                    canvas.IsAutoResize = true;
+                    focus.MyParentThumb?.ReLayout3();
+                }
+                root.TestDragCompleted(focus, isMoved);
+            }
+        }
+
 
 
         /// <summary>
@@ -851,13 +934,13 @@ namespace Pixtack4
             return null;
         }
 
-
+        // 使用場所：ZIndex更新時
         /// <summary>
         /// ZIndexの修正、MyThumbsのIndexに合わせる
         /// </summary>
         /// <param name="start"></param>
         /// <param name="end"></param>
-        private void FixZIndex(int start, int end)
+        private void FixZIndex(int start, int end, RootThumb root)
         {
             if (MyParentThumb is GroupThumb gt)
             {
@@ -866,6 +949,7 @@ namespace Pixtack4
                     gt.MyThumbs[i].MyItemData.MyZIndex = i;
                 }
             }
+
         }
 
 
@@ -889,77 +973,77 @@ namespace Pixtack4
         #region public
 
 
-        #region ZIndex
-        //ZIndexの変更
-        //変更するThumb自体と、その前後のThumbも変更する必要がある、さらに
-        //親のMyThumbsと、親のMyItemData.MyThumbsItemDataも変更する必要がある
+        //#region ZIndex
+        ////ZIndexの変更
+        ////変更するThumb自体と、その前後のThumbも変更する必要がある、さらに
+        ////親のMyThumbsと、親のMyItemData.MyThumbsItemDataも変更する必要がある
 
-        /// <summary>
-        /// ZIndex変更、自身を一つ上げる
-        /// </summary>
-        public void ZIndexUp()
-        {
-            if (MyParentThumb is GroupThumb gt)
-            {
-                int moto = gt.MyThumbs.IndexOf(this);
-                int limit = gt.MyThumbs.Count - 1;
-                if (moto >= limit) { return; }
-                int saki = moto + 1;
-                gt.MyThumbs.Move(moto, saki);
-                gt.MyItemData.MyThumbsItemData.Move(moto, saki);
-                FixZIndex(moto, saki);
-            }
-        }
+        ///// <summary>
+        ///// ZIndex変更、自身を一つ上げる
+        ///// </summary>
+        //public void ZIndexUp()
+        //{
+        //    if (MyParentThumb is GroupThumb gt)
+        //    {
+        //        int moto = gt.MyThumbs.IndexOf(this);
+        //        int limit = gt.MyThumbs.Count - 1;
+        //        if (moto >= limit) { return; }
+        //        int saki = moto + 1;
+        //        gt.MyThumbs.Move(moto, saki);
+        //        gt.MyItemData.MyThumbsItemData.Move(moto, saki);
+        //        FixZIndex(moto, saki);
+        //    }
+        //}
 
-        /// <summary>
-        /// ZIndex変更、最前面へ移動
-        /// </summary>
-        public void ZIndexTop()
-        {
-            if (MyParentThumb is GroupThumb gt)
-            {
-                int moto = gt.MyThumbs.IndexOf(this);
-                int limit = gt.MyThumbs.Count - 1;
-                if (moto >= limit) { return; }
-                gt.MyThumbs.Move(moto, limit);
-                gt.MyItemData.MyThumbsItemData.Move(moto, limit);
-                FixZIndex(moto, limit);
-            }
-        }
+        ///// <summary>
+        ///// ZIndex変更、最前面へ移動
+        ///// </summary>
+        //public void ZIndexTop()
+        //{
+        //    if (MyParentThumb is GroupThumb gt)
+        //    {
+        //        int moto = gt.MyThumbs.IndexOf(this);
+        //        int limit = gt.MyThumbs.Count - 1;
+        //        if (moto >= limit) { return; }
+        //        gt.MyThumbs.Move(moto, limit);
+        //        gt.MyItemData.MyThumbsItemData.Move(moto, limit);
+        //        FixZIndex(moto, limit);
+        //    }
+        //}
 
-        /// <summary>
-        /// ZIndex変更、自身を一つ下げる
-        /// </summary>
-        public void ZIndexDown()
-        {
-            if (MyParentThumb is GroupThumb gt)
-            {
-                int moto = gt.MyThumbs.IndexOf(this);
-                if (moto == 0) { return; }
-                int saki = moto - 1;
-                gt.MyThumbs.Move(moto, saki);
-                gt.MyItemData.MyThumbsItemData.Move(moto, saki);
-                FixZIndex(saki, moto);
-            }
-        }
+        ///// <summary>
+        ///// ZIndex変更、自身を一つ下げる
+        ///// </summary>
+        //public void ZIndexDown()
+        //{
+        //    if (MyParentThumb is GroupThumb gt)
+        //    {
+        //        int moto = gt.MyThumbs.IndexOf(this);
+        //        if (moto == 0) { return; }
+        //        int saki = moto - 1;
+        //        gt.MyThumbs.Move(moto, saki);
+        //        gt.MyItemData.MyThumbsItemData.Move(moto, saki);
+        //        FixZIndex(saki, moto);
+        //    }
+        //}
 
-        /// <summary>
-        /// ZIndex変更、最背面へ移動
-        /// </summary>
-        public void ZIndexBottom()
-        {
-            if (MyParentThumb is GroupThumb gt)
-            {
-                int moto = gt.MyThumbs.IndexOf(this);
-                if (moto == 0) { return; }
-                int saki = 0;
-                gt.MyThumbs.Move(moto, 0);
-                gt.MyItemData.MyThumbsItemData.Move(moto, 0);
-                FixZIndex(saki, moto);
-            }
-        }
+        ///// <summary>
+        ///// ZIndex変更、最背面へ移動
+        ///// </summary>
+        //public void ZIndexBottom()
+        //{
+        //    if (MyParentThumb is GroupThumb gt)
+        //    {
+        //        int moto = gt.MyThumbs.IndexOf(this);
+        //        if (moto == 0) { return; }
+        //        int saki = 0;
+        //        gt.MyThumbs.Move(moto, 0);
+        //        gt.MyItemData.MyThumbsItemData.Move(moto, 0);
+        //        FixZIndex(saki, moto);
+        //    }
+        //}
 
-        #endregion ZIndex
+        //#endregion ZIndex
 
         #endregion public
 
@@ -968,6 +1052,15 @@ namespace Pixtack4
 
         #endregion メソッド
 
+        public override string ToString()
+        {
+            string str = "";
+            str += $"type = {MyThumbType}, ";
+            str += $"left = {MyItemData.MyLeft}, ";
+            str += $"top = {MyItemData.MyTop}";
+            return str;
+            //return base.ToString();
+        }
     }
 
 
@@ -1671,6 +1764,76 @@ namespace Pixtack4
         #region パブリックなメソッド
 
 
+        #region ZIndex
+        // MyFocusThumbのZIndex変更
+        // 変更するThumb自体と、その前後のThumbも変更する必要がある、さらに
+        // 親のMyThumbsと、親のMyItemData.MyThumbsItemDataも変更する必要がある
+
+        /// <summary>
+        /// MyFocusThumbのZ軸移動、前面か最前面へ移動させる
+        /// </summary>
+        /// <remarks>このメソッドは、フォーカスされているサムの Z-index を更新し、隣接するサムと関連する親データ構造の Z-index もそれに応じて更新します。フォーカスされているサムが既に最上位にある場合は、変更は行われません。</remarks>
+        /// <param name="isUp"><see langword="true"/> 1つ上に移動します。<see langword="false"/> は最上位に移動します。</param>
+        public void ZIndexUpOrTop(bool isUp)
+        {
+            if (MyFocusThumb?.MyParentThumb is GroupThumb gt)
+            {
+                int moto = gt.MyThumbs.IndexOf(MyFocusThumb);
+                int limit = gt.MyThumbs.Count - 1;
+                if (moto >= limit) { return; }
+                int saki = limit;
+                if (isUp) { saki = moto + 1; }
+                gt.MyThumbs.Move(moto, saki);
+                gt.MyItemData.MyThumbsItemData.Move(moto, saki);
+                FixZIndex(gt, moto, saki);// 前後の更新
+                UpdateUpperLowerItem(this, MyFocusThumb);// MyFocusThumbの前後のitemの更新
+            }
+        }
+
+        /// <summary>
+        /// MyFocusThumbのZ軸移動、背面か最背面へ移動させる
+        /// </summary>
+        /// <remarks>このメソッドは、Itemの Z インデックスを親グループ内で調整します。フォーカスされているサムが既に一番下の位置にある場合は、何も行われません。このメソッドは、影響を受けるサムとそれに関連付けられた項目の Z インデックスと関連データも更新します。</remarks>
+        /// <param name="isDown"> <see langword="true"/>背面へ移動。<see langword="false"/>最背面へ移動</param>
+        public void ZIndexDownOrBottom(bool isDown)
+        {
+            if (MyFocusThumb?.MyParentThumb is GroupThumb gt)
+            {
+                int moto = gt.MyThumbs.IndexOf(MyFocusThumb);
+                if (moto == 0) { return; }
+                int saki = 0;
+                if (isDown) { saki = moto - 1; }
+                gt.MyThumbs.Move(moto, saki);
+                gt.MyItemData.MyThumbsItemData.Move(moto, saki);
+                FixZIndex(gt, saki, moto);// 前後の更新
+                UpdateUpperLowerItem(this, MyFocusThumb);// MyFocusThumbの前後のitemの更新
+            }
+        }
+
+
+
+        // 使用場所：ZIndex更新時
+        /// <summary>
+        /// ZIndexの修正、MyThumbsのIndexに合わせる
+        /// </summary>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        private void FixZIndex(GroupThumb gt, int start, int end)
+        {
+            for (int i = start; i <= end; i++)
+            {
+                gt.MyThumbs[i].MyItemData.MyZIndex = i;
+            }
+        }
+
+
+        #endregion ZIndex
+
+
+
+
+
+
         /// <summary>
         /// 指定されたItemに基づいて、MyFocusThumbとMyClickedThumbを更新します。
         /// </summary>
@@ -1981,44 +2144,18 @@ namespace Pixtack4
             return AddNewThumbFromItemData(data, MyActiveGroupThumb);
         }
 
-        ///// <summary>
-        ///// Thumbを指定Groupに追加、追加座標はFocusThumbに準じる
-        ///// </summary>
-        ///// <param name="thumb"></param>
-        ///// <param name="group"></param>
-        //public void AddThumb(KisoThumb thumb, GroupThumb group)
-        //{
-        //    thumb.MyItemData.MyLeft = 0;
-        //    thumb.MyItemData.MyTop = 0;
-        //    if (MyFocusThumb is null)
-        //    {
-        //        group.MyThumbs.Add(thumb);
-        //    }
-        //    else
-        //    {
-        //        //グリッドスナップ、FocusThumbの位置を基準に追加位置を決める
-        //        //常に0から遠い方へ丸める割り算
-        //        ItemData groupData = group.MyItemData;
-        //        ItemData focus = MyFocusThumb.MyItemData;
-        //        var atoLeft = GetIntLocate(groupData.GridSize, groupData.MyAddOffsetLeft + focus.MyLeft);
-        //        var atoTop = GetIntLocate(groupData.GridSize, groupData.MyAddOffsetTop + focus.MyTop);
-
-        //        thumb.MyItemData.MyLeft = atoLeft;
-        //        thumb.MyItemData.MyTop = atoTop;
-        //        group.MyThumbs.Add(thumb);
-        //    }
-
-        //    thumb.IsSelectable = true;
-        //    MySelectedThumbs.Clear();
-        //    SelectedThumbsToAdd(thumb);
-        //}
 
         /// <summary>
-        /// 指定された <see cref="GroupThumb"/> に、グループのグリッド設定とオフセットによって決まる位置に <see cref="KisoThumb"/> を追加します。
+        /// Adds a thumb to the specified group at a calculated position.
         /// </summary>
-        /// <remarks>フォーカスされているサムが存在する場合、新しいサムの位置は、フォーカスされているサムの位置を基準として計算され、グループのグリッドサイズとオフセット設定によって調整されます。フォーカスされているサムが存在しない場合は、グループのデフォルトの位置にサムが追加されます。</remarks>
-        /// <param name="thumb">グループに追加する <see cref="KisoThumb"/>。このサムは追加後に選択可能になります。</param>
-        /// <param name="group"><paramref name="thumb"/> が追加される <see cref="GroupThumb"/>。グループのグリッドとオフセット設定によってサムの配置が決まります。</param>
+        /// <remarks>If <paramref name="isTopLeft"/> is <see langword="false"/> and there is no focused
+        /// thumb in the group,  the position will default to the group's calculated offsets.</remarks>
+        /// <param name="thumb">The thumb to be added. Cannot be <see langword="null"/>.</param>
+        /// <param name="group">The group to which the thumb will be added. Cannot be <see langword="null"/>.</param>
+        /// <param name="isTopLeft">A value indicating whether the thumb should be positioned at its top-left coordinates.  If <see
+        /// langword="true"/>, the thumb's position is determined by its own data.  If <see langword="false"/>, the
+        /// position is calculated relative to the focused thumb in the group.</param>
+        /// <returns><see langword="true"/> if the thumb was successfully added to the group; otherwise, <see langword="false"/>.</returns>
         public bool AddThumb(KisoThumb? thumb, GroupThumb? group, bool isTopLeft = false)
         {
             if (thumb == null || group == null) { return false; }
@@ -2114,8 +2251,9 @@ namespace Pixtack4
 
 
         /// <summary>
-        /// ActiveGroupThumbにThumbを追加、オフセット位置を指定して追加
-        /// 追加場所はFocusThumbがあればそれが基準になる、Z座標は一番上
+        /// ActiveGroupThumbにThumbを追加、オフセット座標を指定して追加。
+        /// 追加座標の基準はFocusThumbになる、FocusThumbがないときは0,0に追加。
+        /// Z座標は一番上
         /// 最初の追加要素ならすべて0で配置
         /// </summary>
         /// <param name="thumb"></param>
@@ -2150,6 +2288,7 @@ namespace Pixtack4
         public void AddThumbInsertToActiveGroup(KisoThumb thumb, int insertIndex, double left = 0, double top = 0)
         {
             thumb.IsSelectable = true;
+            // 位置調整
             if (MyFocusThumb != null)
             {
                 thumb.MyItemData.MyLeft = MyFocusThumb.MyItemData.MyLeft + left;
@@ -2159,7 +2298,9 @@ namespace Pixtack4
             {
                 thumb.MyItemData.MyLeft = 0; thumb.MyItemData.MyTop = 0;
             }
-            MyActiveGroupThumb.MyThumbs.Insert(insertIndex, thumb);
+
+            // 追加
+            //MyActiveGroupThumb.MyThumbs.Insert(insertIndex, thumb); // ここでエラー発生
             SelectedThumbsClearAndAddThumb(thumb);
             ReLayout3();
         }
@@ -2405,8 +2546,16 @@ namespace Pixtack4
             //MyFocusThumb = group;
 
             //ActiveGroupに新グループ追加
-            AddThumbInsertToActiveGroup(group, group.MyItemData.MyZIndex);
+            //AddThumbInsertToActiveGroup(group, group.MyItemData.MyZIndex);// ツリービューから選択したあとだとエラーになる
 
+            //AddThumb(group, MyActiveGroupThumb, true);
+            //AddThumbToActiveGroup3(group);
+
+            MyActiveGroupThumb.MyThumbs.Insert(group.MyItemData.MyZIndex, group);
+            
+
+            SelectedThumbsClearAndAddThumb(group);
+            ReLayout3();
         }
 
         /// <summary>
@@ -2841,26 +2990,7 @@ namespace Pixtack4
                 {
                     newItem.IsMyFocus = true;
                     newItem.IsEditing = false;
-                    int index = root.MyThumbs.IndexOf(newItem);
-                    int upperIndex = index + 1;
-                    if (upperIndex < root.MyThumbs.Count)
-                    {
-                        root.MyFocusThumbUpper = root.MyThumbs[upperIndex];
-                    }
-                    else
-                    {
-                        root.MyFocusThumbUpper = null;
-                    }
-
-                    int lowerIndex = index - 1;
-                    if (lowerIndex >= 0)
-                    {
-                        root.MyFocusThumbLower = root.MyThumbs[lowerIndex];
-                    }
-                    else
-                    {
-                        root.MyFocusThumbLower = null;
-                    }
+                    UpdateUpperLowerItem(root, newItem);// 上側と下側のフォーカスItemを更新します。
                 }
                 if (e.OldValue is KisoThumb oldItem)
                 {
@@ -2870,10 +3000,40 @@ namespace Pixtack4
                 //変更通知
                 root.MyFocusThumbChenged?.Invoke(e.NewValue as KisoThumb, e.OldValue as KisoThumb);
 
-
             }
         }
 
+        // 使用場所：MyFocusThumb更新時、MyFocusThumbのZIndex更新時
+        /// <summary>
+        /// フォーカスItemを基準として、上側と下側のフォーカスItemを更新します。
+        /// </summary>
+        /// <remarks>このメソッドは、コレクション内の <paramref name="focusItem"/> の直後の項目に <c>MyFocusThumbUpper</c> プロパティを設定します。<paramref name="focusItem"/> が最後の項目の場合は <see langword="null"/> を設定します。同様に、<c>MyFocusThumbLower</c> プロパティを <paramref name="focusItem"/> の直前の項目に設定します。<paramref name="focusItem"/> が最初の項目の場合は <see langword="null"/> に設定します。</remarks>
+        /// <param name="root">RootThumb</param>
+        /// <param name="focusItem">上側と下側のItemを決定するItem</param>
+        ///
+        private static void UpdateUpperLowerItem(RootThumb root, KisoThumb focusItem)
+        {
+            int index = root.MyThumbs.IndexOf(focusItem);
+            int upperIndex = index + 1;
+            if (upperIndex < root.MyThumbs.Count)
+            {
+                root.MyFocusThumbUpper = root.MyThumbs[upperIndex];
+            }
+            else
+            {
+                root.MyFocusThumbUpper = null;
+            }
+
+            int lowerIndex = index - 1;
+            if (lowerIndex >= 0)
+            {
+                root.MyFocusThumbLower = root.MyThumbs[lowerIndex];
+            }
+            else
+            {
+                root.MyFocusThumbLower = null;
+            }
+        }
 
 
         #endregion 依存関係プロパティ

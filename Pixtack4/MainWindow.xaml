@@ -245,7 +245,7 @@
       <!--中段-->
       <DockPanel DockPanel.Dock="Bottom">
         <!--左端ライン-->
-       
+
         <!--左側2-->
         <Grid x:Name="MyRootStatusView" DockPanel.Dock="Left"
               Width="240"
@@ -292,9 +292,6 @@
                 <TreeView x:Name="MyThumbsTreeView"
                           ItemsSource="{Binding}"
                           SelectedItemChanged="MyThumbsTreeView_SelectedItemChanged"
-                          MouseDown="MyThumbsTreeView_MouseDown"
-                          PreviewMouseDown="MyThumbsTreeView_PreviewMouseDown"
-                          MouseLeftButtonDown="MyThumbsTreeView_MouseLeftButtonDown"
                           BorderThickness="0"
                           Focusable="False">
                   <TreeView.ItemTemplate>
@@ -304,8 +301,7 @@
                           <StackPanel.RenderTransform>
                             <SkewTransform AngleX="0" AngleY="0"/>
                           </StackPanel.RenderTransform>
-                          <!--<StackPanel Margin="0,0,0,0" Visibility="{Binding MyThumbType, Converter={StaticResource visibleGroup}}">-->
-                          <Viewbox Stretch="Uniform" Width="60" Height="60" PreviewMouseLeftButtonDown="Viewbox_PreviewMouseLeftButtonDown">
+                          <Viewbox Stretch="Uniform" Width="60" Height="60">
                             <Viewbox.RenderTransform>
                               <SkewTransform AngleX="20"/>
                             </Viewbox.RenderTransform>
@@ -599,9 +595,9 @@
                   </WrapPanel>
                 </GroupBox>
               </WrapPanel>
-              
+
             </TabItem>
-            
+
           </TabControl>
         </Expander>
 
@@ -633,7 +629,7 @@
               Width="220"
               DataContext="{Binding MyRoot}"
               TextOptions.TextFormattingMode="Display">
-            <TabControl TabStripPlacement="Right" BorderThickness="0" SelectedIndex="0">
+            <TabControl TabStripPlacement="Right" BorderThickness="0" SelectedIndex="7">
               <TabControl.Resources>
                 <Style TargetType="TabItem">
                   <Setter Property="LayoutTransform">
@@ -860,27 +856,43 @@
                   </StackPanel>
                 </GroupBox>
               </TabItem>
-              <TabItem Header="test">
+              <TabItem Header="test" UseLayoutRounding="True">
                 <GroupBox Header="test" DataContext="{Binding}">
                   <StackPanel>
-                    <Rectangle Width="100" Height="100">
-                      <Rectangle.Fill>
-                        <VisualBrush Visual="{Binding MyFocusThumbLower}" Stretch="Uniform"/>
-                      </Rectangle.Fill>
-                    </Rectangle>
-                    
-                    <Rectangle Width="100" Height="100">
-                      <Rectangle.Fill>
-                        <VisualBrush Visual="{Binding MyFocusThumb}" Stretch="Uniform"/>
-                      </Rectangle.Fill>
-                    </Rectangle>
-                    
-                    <Rectangle Width="100" Height="100">
-                      <Rectangle.Fill>
-                        <VisualBrush Visual="{Binding MyFocusThumbUpper}" Stretch="Uniform"/>
-                      </Rectangle.Fill>
-                    </Rectangle>
-                    
+                    <StackPanel.Resources>
+                      <Style TargetType="Border">
+                        <Setter Property="Padding" Value="0"/>
+                        <Setter Property="BorderBrush" Value="Silver"/>
+                        <Setter Property="BorderThickness" Value="1"/>
+                        <Setter Property="Background" Value="White"/>
+                      </Style>
+                    </StackPanel.Resources>
+                    <local:ExCanvas>
+                      <Border Panel.ZIndex="2">
+                        <Rectangle Width="80" Height="60">
+                          <Rectangle.Fill>
+                            <VisualBrush Visual="{Binding MyFocusThumbUpper}" Stretch="Uniform"/>
+                          </Rectangle.Fill>
+                        </Rectangle>
+                      </Border>
+                      <Border Canvas.Left="60" Canvas.Top="40" Panel.ZIndex="1" MouseWheel="Border_MouseWheel">
+                        <Rectangle Width="100" Height="75">
+                          <Rectangle.Fill>
+                            <VisualBrush Visual="{Binding MyFocusThumb}" Stretch="Uniform"/>
+                          </Rectangle.Fill>
+                        </Rectangle>
+                      </Border>
+                      <Border Canvas.Left="0" Canvas.Top="100">
+                        <Rectangle Width="80" Height="60">
+                          <Rectangle.Fill>
+                            <VisualBrush Visual="{Binding MyFocusThumbLower}" Stretch="Uniform"/>
+                          </Rectangle.Fill>
+                        </Rectangle>
+                      </Border>
+                      <Button Content="age" Canvas.Left="164" Canvas.Top="40" Click="Button_Click_ZUp"/>
+                      <Button Content="sage" Canvas.Left="164" Canvas.Top="80" Click="Button_Click_ZDown"/>
+                      
+                    </local:ExCanvas>
                   </StackPanel>
                 </GroupBox>
               </TabItem>

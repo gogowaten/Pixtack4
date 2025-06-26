@@ -117,8 +117,8 @@ namespace Pixtack4
 
             if (Keyboard.Modifiers == ModifierKeys.None)
             {
-                if (e.Key == Key.PageDown) { MyRoot.MyFocusThumb?.ZIndexDown(); }// PageDown：背面
-                else if (e.Key == Key.PageUp) { MyRoot.MyFocusThumb?.ZIndexUp(); }// PageUp：前面                
+                if (e.Key == Key.PageDown) { MyRoot.ZIndexDownOrBottom(isDown: true); }// PageDown：背面
+                else if (e.Key == Key.PageUp) { MyRoot.ZIndexUpOrTop(isUp: true); }// PageUp：前面                
                 else if (e.Key == Key.F4) { MyRoot.RemoveSelectedThumbs(); }// F4：削除
             }
             else if (Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift))
@@ -437,15 +437,16 @@ namespace Pixtack4
 
             item = new() { Header = "最前面" };
             menuPanel.Children.Add(item);
-            item.Click += (a, b) => { MyRoot.MyFocusThumb?.ZIndexTop(); };
+            //item.Click += (a, b) => { MyRoot.MyFocusThumb?.ZIndexTop(); };
+            item.Click += (a, b) => { MyRoot.ZIndexUpOrTop(false); };
             item = new() { Header = "前面", InputGestureText = "PageUp" };
             menuPanel.Children.Add(item);
-            item.Click += (a, b) => { MyRoot.MyFocusThumb?.ZIndexUp(); };
+            item.Click += (a, b) => { MyRoot.ZIndexUpOrTop(isUp: true); };
             item = new() { Header = "背面", InputGestureText = "PageDown" };
             menuPanel.Children.Add(item);
-            item.Click += (a, b) => { MyRoot.MyFocusThumb?.ZIndexDown(); };
+            item.Click += (a, b) => { MyRoot.ZIndexDownOrBottom(isDown: true); };
             item = new() { Header = "最背面" };
-            item.Click += (a, b) => { MyRoot.MyFocusThumb?.ZIndexBottom(); };
+            item.Click += (a, b) => { MyRoot.ZIndexDownOrBottom(isDown: false); };
             menuPanel.Children.Add(item);
 
             item = new() { Header = "Focusを画像としてコピー" };
@@ -851,19 +852,22 @@ namespace Pixtack4
 
         private void Button_Click_ZUp(object sender, RoutedEventArgs e)
         {
-            MyRoot.MyFocusThumb?.ZIndexUp();
+            //MyRoot.MyFocusThumb?.ZIndexUp();
+            MyRoot.ZIndexUpOrTop(isUp: true);
         }
         private void Button_Click_ZDown(object sender, RoutedEventArgs e)
         {
-            MyRoot.MyFocusThumb?.ZIndexDown();
+            //MyRoot.MyFocusThumb?.ZIndexDown();
+            MyRoot.ZIndexDownOrBottom(isDown: true);
         }
         private void Button_Click_ZtoTop(object sender, RoutedEventArgs e)
         {
-            MyRoot.MyFocusThumb?.ZIndexTop();
+            MyRoot.ZIndexUpOrTop(isUp: false);
         }
         private void Button_Click_ZtoBottom(object sender, RoutedEventArgs e)
         {
-            MyRoot.MyFocusThumb?.ZIndexBottom();
+            //MyRoot.MyFocusThumb?.ZIndexBottom();
+            MyRoot.ZIndexDownOrBottom(isDown: false);
         }
 
         private void Button_Click_ChangeActiveGroupRootActivate(object sender, RoutedEventArgs e)
@@ -2750,14 +2754,22 @@ namespace Pixtack4
 
         #region TreeView
 
-
+        // ツリービューでのItemChangeされたときの動作
+        // 対象Itemをクリックされたことにして処理したいけど、これはエラーになる、
+        // ExCanvasの自動リサイズとTreeVewとの相性が良くないみたい
         private void MyThumbsTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
+           var sou= e.Source;
+            var ori = e.OriginalSource;
             _ = Keyboard.Focus(MyRoot);// キーボードフォーカス
-
             if (e.NewValue is KisoThumb clicked)
             {
                 clicked.BringIntoView();// 対象Itemが見えるところまでスクロール位置を調整
+
+                MyRoot.MyFocusThumb = clicked;
+                MyRoot.SelectedThumbsClearAndAddThumb(clicked);
+                //MyRoot.UpdateFocusAndSelectionFromClick(clicked);
+
 
                 // 対象ItemをMyFocusThumbに指定したいけど、うまくできない、
                 // 指定はできるけど、グループ化するとExCanvasのサイズ調整でエラーになる、わからん
@@ -2765,7 +2777,17 @@ namespace Pixtack4
                 //// MyRootのClickedThumbとFocusThumbを変更を試みる
                 //ChangeFocusThumb(clicked);
                 ////e.Handled = true;
+
+                //ItemClickEmulate(clicked);
             }
+            
+        }
+
+        private void ItemClickEmulate(KisoThumb clicked)
+        {
+            clicked.KisoThumbPrevewMouseDown(clicked, clicked);
+            clicked.KisoThumbDragCompleted(clicked, false);
+            clicked.KisoThumbPreviewMouseUp(clicked, clicked);
         }
 
         /// <summary>
@@ -2789,56 +2811,48 @@ namespace Pixtack4
         }
 
 
-        private void MyThumbsTreeView_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            var item = MyThumbsTreeView.SelectedItem;
-            var vv = MyThumbsTreeView.SelectedValue;
-        }
-
-        private void MyThumbsTreeView_PreviewMouseDown(object sender, MouseButtonEventArgs e)
-        {
-            if (MyThumbsTreeView.SelectedValue is KisoThumb selectableItem)
-            {
-                var neko = selectableItem.MyItemData.MyLeft;
-                //Keyboard.Focus(selectableItem);
-            }
-            if (MyThumbsTreeView.SelectedItem is KisoThumb kiso)
-            {
-                var inu = kiso.MyItemData.MyLeft;
-            }
-        }
-
-        private void MyThumbsTreeView_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            if (MyThumbsTreeView.SelectedValue is KisoThumb selectableItem)
-            {
-                var neko = selectableItem.MyItemData.MyLeft;
-            }
-            if (MyThumbsTreeView.SelectedItem is KisoThumb kiso)
-            {
-                var inu = kiso.MyItemData.MyLeft;
-            }
-        }
-
-
-
 
 
         #endregion TreeView
 
         #region ボタンクリック以外のイベントでの動作
 
-        private void Viewbox_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            var ori = e.OriginalSource;
-            var sou = e.Source;
-        }
 
         // 入力用テキストボックスクリック時、テキスト全選択
         private void MyTextBoxAddText_GotFocus(object sender, RoutedEventArgs e)
         {
             MyTextBoxAddText.SelectAll();
         }
+
+
+        private void Border_MouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            _ = Keyboard.Focus(MyRoot);// キーボードフォーカス
+            
+            MouseWheel_ChangeMyFocusThumb(e);// マウスホイールの変化で、MyFocusThumbを変更する
+            if (MyRoot.MyFocusThumb != null)
+            {
+                MyRoot.UpdateFocusAndSelectionFromClick(MyRoot.MyFocusThumb);
+                MyRoot.MyFocusThumb.BringIntoView();// スクロールバーの位置調整
+            }
+        }
+
+        /// <summary>
+        /// マウスホイールの変化で、MyFocusThumbを変更する
+        /// </summary>
+        /// <param name="e"></param>
+        private void MouseWheel_ChangeMyFocusThumb(MouseWheelEventArgs e)
+        {
+            if (e.Delta < 0 && MyRoot.MyFocusThumbLower is KisoThumb lower)
+            {
+                MyRoot.MyFocusThumb = lower;
+            }
+            else if (e.Delta > 0 && MyRoot.MyFocusThumbUpper is KisoThumb upper)
+            {
+                MyRoot.MyFocusThumb = upper;
+            }
+        }
+
 
 
 
