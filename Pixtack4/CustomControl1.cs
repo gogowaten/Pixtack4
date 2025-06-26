@@ -2300,8 +2300,8 @@ namespace Pixtack4
             }
 
             // 追加
-            //MyActiveGroupThumb.MyThumbs.Insert(insertIndex, thumb); // ここでエラー発生
-            SelectedThumbsClearAndAddThumb(thumb);
+            MyActiveGroupThumb.MyThumbs.Insert(insertIndex, thumb); // ここでエラー発生
+            InvalidateVisual();
             ReLayout3();
         }
 
@@ -2546,13 +2546,13 @@ namespace Pixtack4
             //MyFocusThumb = group;
 
             //ActiveGroupに新グループ追加
-            //AddThumbInsertToActiveGroup(group, group.MyItemData.MyZIndex);// ツリービューから選択したあとだとエラーになる
+            AddThumbInsertToActiveGroup(group, group.MyItemData.MyZIndex);// ツリービューから選択したあとだとエラーになる
 
             //AddThumb(group, MyActiveGroupThumb, true);
             //AddThumbToActiveGroup3(group);
 
-            MyActiveGroupThumb.MyThumbs.Insert(group.MyItemData.MyZIndex, group);
-            
+            //MyActiveGroupThumb.MyThumbs.Insert(group.MyItemData.MyZIndex, group);
+
 
             SelectedThumbsClearAndAddThumb(group);
             ReLayout3();

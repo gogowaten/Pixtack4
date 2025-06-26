@@ -2759,15 +2759,15 @@ namespace Pixtack4
         // ExCanvasの自動リサイズとTreeVewとの相性が良くないみたい
         private void MyThumbsTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-           var sou= e.Source;
+            var sou = e.Source;
             var ori = e.OriginalSource;
             _ = Keyboard.Focus(MyRoot);// キーボードフォーカス
             if (e.NewValue is KisoThumb clicked)
             {
                 clicked.BringIntoView();// 対象Itemが見えるところまでスクロール位置を調整
 
-                MyRoot.MyFocusThumb = clicked;
-                MyRoot.SelectedThumbsClearAndAddThumb(clicked);
+                //MyRoot.MyFocusThumb = clicked;
+                //MyRoot.SelectedThumbsClearAndAddThumb(clicked);
                 //MyRoot.UpdateFocusAndSelectionFromClick(clicked);
 
 
@@ -2780,7 +2780,7 @@ namespace Pixtack4
 
                 //ItemClickEmulate(clicked);
             }
-            
+
         }
 
         private void ItemClickEmulate(KisoThumb clicked)
@@ -2828,7 +2828,7 @@ namespace Pixtack4
         private void Border_MouseWheel(object sender, MouseWheelEventArgs e)
         {
             _ = Keyboard.Focus(MyRoot);// キーボードフォーカス
-            
+
             MouseWheel_ChangeMyFocusThumb(e);// マウスホイールの変化で、MyFocusThumbを変更する
             if (MyRoot.MyFocusThumb != null)
             {
