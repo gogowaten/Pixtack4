@@ -307,15 +307,16 @@ namespace Pixtack4
 
         private void KisoThumb_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            if (sender is RootThumb rt && rt.MyClickedThumb != null)
+            if (sender is RootThumb root && root.MyClickedThumb != null)
             {
                 ////選択Thumbを方向キーで10ピクセル移動
                 //MoveThumb(rt.MySelectedThumbs, e.Key, 10);
                 //e.Handled = true;
 
                 //選択Thumbを方向キーでグリッドスナップ移動
-                MoveThumb(rt.MySelectedThumbs, e.Key, rt.MyActiveGroupThumb.MyItemData.GridSize);
+                MoveThumb(root.MySelectedThumbs, e.Key, root.MyActiveGroupThumb.MyItemData.GridSize);
                 e.Handled = true;
+                root.MyFocusThumb?.BringIntoView();
             }
         }
 
@@ -2508,6 +2509,8 @@ namespace Pixtack4
         {
             MyThumbs.Clear();
             MyFocusThumb = null;
+            MyFocusThumbLower = null;
+            MyFocusThumbUpper = null;
             MyClickedThumb = null;
             MyActiveGroupThumb = this;
             MySelectedThumbs.Clear();

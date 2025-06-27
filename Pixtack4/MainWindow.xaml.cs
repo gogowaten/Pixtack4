@@ -29,6 +29,8 @@ namespace Pixtack4
     /// </summary>
     public partial class MainWindow : Window
     {
+        #region フィールド
+        #endregion コンストラクタ、フィールド
         private ManageExCanvas MyManageExCanvas { get; set; } = null!;
 
         public RootThumb MyRoot
@@ -153,6 +155,10 @@ namespace Pixtack4
 
         private void MyInitialize()
         {
+#if DEBUG
+            MyTestButton.Visibility = Visibility.Visible;
+            MyTestAppDataExpander.Visibility = Visibility.Visible;
+#endif
             //アプリのパスとバージョン取得
             MyAppDirectory = Environment.CurrentDirectory;
             MyAppVersion = GetAppVersion();
@@ -662,7 +668,8 @@ namespace Pixtack4
             PresentationSource sou = PresentationSource.FromVisual(this);
             var dd = sou.CompositionTarget.TransformToDevice.M11;// dpiX倍率
             var dd2 = sou.CompositionTarget.TransformToDevice.M22;
-
+            var items = MyRoot.MyThumbs.Count;
+            var rootdata = MyRoot.MyItemData;
             var focus = FocusManager.GetFocusedElement(this);
             var keyfo = Keyboard.FocusedElement;
             var neko = MyPoints;
@@ -1538,10 +1545,10 @@ namespace Pixtack4
         /// </summary>
         private string ResetRootThumb()
         {
-            if (MyRoot.MyThumbs.Count == 0)
-            {
-                return MakeStatusMessage("Item数が0だったのでリセットの必要がなかった");
-            }
+            //if (MyRoot.MyThumbs.Count == 0)
+            //{
+            //    return MakeStatusMessage("Item数が0だったのでリセットの必要がなかった");
+            //}
 
             MessageBoxResult result = MessageBox.Show(
                 "今の状態を保存してからリセットする？\n\n\n" +
@@ -2016,6 +2023,13 @@ namespace Pixtack4
 
 
         #region その他
+
+        // FocusItemを表示する位置までスクロール
+        private void BringIntoMyFocusItem()
+        {
+            MyRoot.MyFocusThumb?.BringIntoView();
+        }
+
 
         // WPF、ベジェ曲線、違和感なく滑らかになるような制御点座標はどこ？その3(終) - 午後わてんのブログ
         //        https://gogowaten.hatenablog.com/entry/15735391
@@ -2833,9 +2847,16 @@ namespace Pixtack4
             if (MyRoot.MyFocusThumb != null)
             {
                 MyRoot.UpdateFocusAndSelectionFromClick(MyRoot.MyFocusThumb);
-                MyRoot.MyFocusThumb.BringIntoView();// スクロールバーの位置調整
+                //MyRoot.MyFocusThumb.BringIntoView();// スクロールバーの位置調整
             }
         }
+
+        private void MouseDown_BringIntoMyFocusItem(object sender, MouseButtonEventArgs e)
+        {
+            BringIntoMyFocusItem();// FocusItemを表示する位置までスクロール
+        }
+
+
 
         /// <summary>
         /// マウスホイールの変化で、MyFocusThumbを変更する

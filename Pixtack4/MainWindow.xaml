@@ -165,7 +165,7 @@
             <MenuItem Header="見た目" IsEnabled="False"/>
 
           </MenuItem>
-          <Button Content="テスト用確認" Click="Button_Click" Background="MidnightBlue" Foreground="White"/>
+          <Button x:Name="MyTestButton" Content="テスト用確認" Click="Button_Click" Background="MidnightBlue" Foreground="White" Visibility="Collapsed"/>
           <MenuItem Header="">
             <MenuItem.Icon>
               <Image Source="/MyResource/白詰草05.ico"/>
@@ -173,9 +173,8 @@
           </MenuItem>
         </Menu>
 
-        <Expander Header="exp" IsExpanded="False">
+        <Expander x:Name="MyTestAppDataExpander" Header="exp" IsExpanded="True" Visibility="Collapsed">
           <TabControl>
-
             <TabItem Header="AppData" DataContext="{Binding MyAppData}">
               <ScrollViewer>
                 <DockPanel>
@@ -189,46 +188,6 @@
               </ScrollViewer>
             </TabItem>
 
-            <TabItem Header="Group_Zindex">
-              <WrapPanel Orientation="Horizontal">
-                <WrapPanel.Resources>
-                  <Style TargetType="{x:Type Button}">
-                    <Setter Property="Margin" Value="2"/>
-                  </Style>
-                </WrapPanel.Resources>
-                <Button Content="グループ化" Click="Button_Click_Grouping"/>
-                <Button Content="グループ解除" Click="Button_Click_UnGroup"/>
-                <Grid Background="Red" Width="10"/>
-                <Button Content="グループIN" Click="Button_Click_ChangeActiveGroupToInside"/>
-                <Button Content="グループOUT" Click="Button_Click_ChangeActiveGroupToOutside"/>
-                <Button Content="ClickItemまでIN" Click="Button_Click_ChangeActiveGroupClickedParent"/>
-                <Button Content="RootまでOUT" Click="Button_Click_ChangeActiveGroupRootActivate"/>
-                <Grid Background="Red" Width="10"/>
-                <Button Content="ZUp" Click="Button_Click_ZUp"/>
-                <Button Content="ZDown" Click="Button_Click_ZDown"/>
-                <Button Content="最前面" Click="Button_Click_ZtoTop"/>
-                <Button Content="最背面" Click="Button_Click_ZtoBottom"/>
-
-                <TextBlock Text="👈️👆️できた｜まだ👇️👉️"/>
-                <Button Content="グリッドサイズ変更" Click="Button_Click_ChangeGridSize"/>
-                <TextBlock Text="{Binding MyRoot.MyActiveGroupThumb.MyItemData.GridSize, StringFormat=GridSize {0:0}}"/>
-                <Button Content="クリップボードから画像貼り付け"/>
-                <Button Content="クリップボードに画像としてコピー"/>
-                <Button Content="複製"/>
-                <Button Content="画像として複製"/>
-                <TextBlock Text="{Binding MyAppData.MyJpegQuality, StringFormat=jpeg品質 {0:0}}"/>
-                <Slider Minimum="50" Maximum="100" Value="{Binding MyAppData.MyJpegQuality}" Width="100"/>
-
-
-
-                <TextBlock Text="{Binding MyRoot.MyActiveGroupThumb.MyItemData.MyAddOffsetLeft, StringFormat=MyAddOffsetLeft {0:0}}"/>
-                <Slider Minimum="-128" Maximum="128" Value="{Binding MyRoot.MyActiveGroupThumb.MyItemData.MyAddOffsetLeft}" Width="100"/>
-
-                <TextBlock Text="{Binding MyRoot.MyActiveGroupThumb.MyItemData.MyAddOffsetTop, StringFormat=MyAddOffsetTop {0:0}}"/>
-                <Slider Minimum="-128" Maximum="128" Value="{Binding MyRoot.MyActiveGroupThumb.MyItemData.MyAddOffsetTop}" Width="100"/>
-
-              </WrapPanel>
-            </TabItem>
           </TabControl>
         </Expander>
       </DockPanel>
@@ -594,6 +553,41 @@
                     </Button>
                   </WrapPanel>
                 </GroupBox>
+
+                <CheckBox IsChecked="{Binding MyAppData.IsWakuVisible, Converter={StaticResource visibleTrue}}">
+                  <CheckBox.Template>
+                    <ControlTemplate TargetType="CheckBox">
+                      <StackPanel Orientation="Horizontal">
+                        <!-- チェック枠とマーク -->
+                        <Border x:Name="Border"
+                Width="16" Height="16"
+                BorderBrush="Gray" BorderThickness="1"
+                Background="White" Margin="0,0,4,0">
+                          <Path x:Name="CheckMark"
+                Visibility="Collapsed"
+                Stroke="Black" StrokeThickness="2"
+                Data="M2,8 L6,12 L14,4"/>
+                        </Border>
+                        <!-- アイコン -->
+                        <Image Source="/MyResource/白詰草05.ico" Width="24" Height="24" Margin="0,0,4,0"/>
+                        <!-- テキスト -->
+                        <ContentPresenter VerticalAlignment="Center"/>
+                      </StackPanel>
+                      <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                          <Setter TargetName="CheckMark" Property="Visibility" Value="Visible"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                          <Setter TargetName="Border" Property="Opacity" Value="0.5"/>
+                          <Setter TargetName="CheckMark" Property="Opacity" Value="0.5"/>
+                        </Trigger>
+                      </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                  </CheckBox.Template>
+                  <TextBlock Text="枠表示"/>
+                </CheckBox>
+
+
               </WrapPanel>
 
             </TabItem>
@@ -857,44 +851,88 @@
                 </GroupBox>
               </TabItem>
               <TabItem Header="test" UseLayoutRounding="True">
-                <GroupBox Header="test" DataContext="{Binding}">
-                  <StackPanel>
-                    <StackPanel.Resources>
-                      <Style TargetType="Border">
-                        <Setter Property="Padding" Value="0"/>
-                        <Setter Property="BorderBrush" Value="Silver"/>
-                        <Setter Property="BorderThickness" Value="1"/>
-                        <Setter Property="Background" Value="White"/>
-                      </Style>
-                    </StackPanel.Resources>
-                    <local:ExCanvas>
-                      <Border Panel.ZIndex="2">
-                        <Rectangle Width="80" Height="60">
-                          <Rectangle.Fill>
-                            <VisualBrush Visual="{Binding MyFocusThumbUpper}" Stretch="Uniform"/>
-                          </Rectangle.Fill>
-                        </Rectangle>
-                      </Border>
-                      <Border Canvas.Left="60" Canvas.Top="40" Panel.ZIndex="1" MouseWheel="Border_MouseWheel">
-                        <Rectangle Width="100" Height="75">
-                          <Rectangle.Fill>
-                            <VisualBrush Visual="{Binding MyFocusThumb}" Stretch="Uniform"/>
-                          </Rectangle.Fill>
-                        </Rectangle>
-                      </Border>
-                      <Border Canvas.Left="0" Canvas.Top="100">
-                        <Rectangle Width="80" Height="60">
-                          <Rectangle.Fill>
-                            <VisualBrush Visual="{Binding MyFocusThumbLower}" Stretch="Uniform"/>
-                          </Rectangle.Fill>
-                        </Rectangle>
-                      </Border>
-                      <Button Content="age" Canvas.Left="164" Canvas.Top="40" Click="Button_Click_ZUp"/>
-                      <Button Content="sage" Canvas.Left="164" Canvas.Top="80" Click="Button_Click_ZDown"/>
-                      
-                    </local:ExCanvas>
-                  </StackPanel>
-                </GroupBox>
+                <StackPanel>
+                  <StackPanel.Resources>
+                    <Style TargetType="Border">
+                      <Setter Property="Padding" Value="0"/>
+                      <Setter Property="BorderBrush" Value="Silver"/>
+                      <Setter Property="BorderThickness" Value="1"/>
+                      <Setter Property="Background" Value="White"/>
+                    </Style>
+                  </StackPanel.Resources>
+                  <GroupBox Header="test" DataContext="{Binding}">
+                    <StackPanel>
+                      <local:ExCanvas>
+                        <Border Panel.ZIndex="2">
+                          <Rectangle Width="80" Height="60">
+                            <Rectangle.Fill>
+                              <VisualBrush Visual="{Binding MyFocusThumbUpper}" Stretch="Uniform"/>
+                            </Rectangle.Fill>
+                          </Rectangle>
+                        </Border>
+                        <Border
+                          Canvas.Left="60" Canvas.Top="40" Panel.ZIndex="1"
+                          MouseWheel="Border_MouseWheel"
+                          MouseDown="MouseDown_BringIntoMyFocusItem">
+                          <Rectangle Width="100" Height="75">
+                            <Rectangle.Fill>
+                              <VisualBrush Visual="{Binding MyFocusThumb}" Stretch="Uniform"/>
+                            </Rectangle.Fill>
+                          </Rectangle>
+                        </Border>
+                        <Border Canvas.Left="0" Canvas.Top="100">
+                          <Rectangle Width="80" Height="60">
+                            <Rectangle.Fill>
+                              <VisualBrush Visual="{Binding MyFocusThumbLower}" Stretch="Uniform"/>
+                            </Rectangle.Fill>
+                          </Rectangle>
+                        </Border>
+                        <Button Content="age" Canvas.Left="164" Canvas.Top="40" Click="Button_Click_ZUp"/>
+                        <Button Content="sage" Canvas.Left="164" Canvas.Top="80" Click="Button_Click_ZDown"/>
+                        <TextBlock Text="Focus" Canvas.Left="100" Canvas.Top="120"/>
+                      </local:ExCanvas>
+                    </StackPanel>
+                  </GroupBox>
+                  <Expander Header="ActiveGroup" IsExpanded="True" DataContext="{Binding MyActiveGroupThumb}">
+                    <StackPanel>
+                      <local:ExCanvas>
+                        <Border Canvas.Left="0" Canvas.Top="20" Panel.ZIndex="2">
+                          <Rectangle Width="80" Height="60">
+                            <Rectangle.Fill>
+                              <VisualBrush Visual="{Binding MyParentThumb}" Stretch="Uniform"/>
+                            </Rectangle.Fill>
+                          </Rectangle>
+                        </Border>
+
+                        <Border Canvas.Left="60" Canvas.Top="40">
+                          <Rectangle Width="100" Height="75">
+                            <Rectangle.Fill>
+                              <VisualBrush Visual="{Binding}" Stretch="Uniform"/>
+                            </Rectangle.Fill>
+                          </Rectangle>
+                        </Border>
+
+                        <TextBlock Text="Parent" Canvas.Left="10" Canvas.Top="0"/>
+                        <TextBlock Text="ActiveGroup" Canvas.Left="90" Canvas.Top="116"/>
+                      </local:ExCanvas>
+                      <StackPanel>
+                        <UniformGrid Columns="2" Margin="4">
+                          <TextBlock Text="{Binding MyItemData.MyAddOffsetLeft, StringFormat=OffsetLeft {0:0}}" Margin="10,0"/>
+                          <Slider Minimum="-128" Maximum="128" Value="{Binding MyItemData.MyAddOffsetLeft}"
+                                  TickFrequency="1" IsSnapToTickEnabled="True"/>
+                        </UniformGrid>
+                        <UniformGrid Columns="2" Margin="4">
+                          <TextBlock Text="{Binding MyItemData.MyAddOffsetTop, StringFormat=OffsetTop {0:0}}"
+                                     Margin="10,0"/>
+                          <Slider Minimum="-128" Maximum="128" Value="{Binding MyItemData.MyAddOffsetTop}"
+                                  TickFrequency="1" IsSnapToTickEnabled="True"/>
+                        </UniformGrid>
+
+                      </StackPanel>
+                    </StackPanel>
+                  </Expander>
+                </StackPanel>
+
               </TabItem>
             </TabControl>
           </Grid>
