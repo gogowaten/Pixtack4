@@ -623,7 +623,7 @@
               Width="220"
               DataContext="{Binding MyRoot}"
               TextOptions.TextFormattingMode="Display">
-            <TabControl TabStripPlacement="Right" BorderThickness="0" SelectedIndex="7">
+            <TabControl TabStripPlacement="Right" BorderThickness="0" SelectedIndex="8">
               <TabControl.Resources>
                 <Style TargetType="TabItem">
                   <Setter Property="LayoutTransform">
@@ -633,6 +633,7 @@
                   </Setter>
                 </Style>
               </TabControl.Resources>
+
               <TabItem Header="選択Item" DataContext="{Binding MySelectedThumbs}">
                 <GroupBox Header="選択Item">
                   <ListBox ItemsSource="{Binding}"
@@ -720,6 +721,7 @@
                   </StackPanel>
                 </GroupBox>
               </TabItem>
+
               <TabItem Header="Focus" DataContext="{Binding MyFocusThumb}">
                 <GroupBox Header="FocusItem">
                   <StackPanel>
@@ -933,6 +935,53 @@
                   </Expander>
                 </StackPanel>
 
+              </TabItem>
+
+              <TabItem Header="TestProperty">
+                <GroupBox Header="FocusItemProperty" DataContext="{Binding MyFocusThumb}">
+                  <StackPanel>
+                    <Rectangle Width="100" Height="100">
+                      <Rectangle.Fill>
+                        <VisualBrush Stretch="Uniform" Visual="{Binding}"/>
+                      </Rectangle.Fill>
+                    </Rectangle>
+                    <StackPanel>
+                      <TextBox Text="{Binding MyItemData.MyThumbType, StringFormat=Type {0:0}}"/>
+                      <TabControl BorderThickness="0">
+                        <TabItem Header="text">
+                          <StackPanel DataContext="{Binding MyItemData}">
+                            <TextBox Text="{Binding TextItemData.MyText, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True"/>
+                            <DockPanel>
+                              <TextBlock DockPanel.Dock="Right" Text="{Binding TextItemData.MyFontSize, StringFormat=FontSize {0:0}}"/>
+                              <Slider DockPanel.Dock="Right" Minimum="1" Maximum="100" Value="{Binding TextItemData.MyFontSize}"/>
+                            </DockPanel>
+                            <UniformGrid Columns="2">
+                              <TextBlock Text="{Binding MyForegroundA, StringFormat=A {0:000}}" HorizontalAlignment="Center"/>
+                              <Slider Minimum="0" Maximum="255" Value="{Binding MyForegroundA}"/>
+                            </UniformGrid>
+                            
+                            <UniformGrid Columns="2">
+                              <TextBlock Text="{Binding MyForegroundR, StringFormat=R {0:000}}" HorizontalAlignment="Center"/>
+                              <Slider Minimum="0" Maximum="255" Value="{Binding MyForegroundR}"/>
+                            </UniformGrid>
+                            
+                            <UniformGrid Columns="2">
+                              <TextBlock Text="{Binding MyForegroundG, StringFormat=G {0:000}}" HorizontalAlignment="Center"/>
+                              <Slider Minimum="0" Maximum="255" Value="{Binding MyForegroundG}"/>
+                            </UniformGrid>
+                            
+                            <UniformGrid Columns="2">
+                              <TextBlock Text="{Binding MyForegroundB, StringFormat=B {0:000}}" HorizontalAlignment="Center"/>
+                              <Slider Minimum="0" Maximum="255" Value="{Binding MyForegroundB}"/>
+                            </UniformGrid>
+                            
+                          </StackPanel>
+
+                        </TabItem>
+                      </TabControl>
+                    </StackPanel>
+                  </StackPanel>
+                </GroupBox>
               </TabItem>
             </TabControl>
           </Grid>

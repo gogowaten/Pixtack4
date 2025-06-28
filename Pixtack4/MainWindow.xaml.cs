@@ -30,7 +30,7 @@ namespace Pixtack4
     public partial class MainWindow : Window
     {
         #region フィールド
-        #endregion コンストラクタ、フィールド
+        #endregion フィールド
         private ManageExCanvas MyManageExCanvas { get; set; } = null!;
 
         public RootThumb MyRoot
@@ -67,7 +67,8 @@ namespace Pixtack4
 
 
         //datetime.tostringの書式、これを既定値にする
-        private const string DATE_TIME_STRING_FORMAT = "HHmmss";
+        private const string DATE_TIME_STRING_FORMAT = "HH':'mm':'ss";
+        //private const string DATE_TIME_STRING_FORMAT = "HHmmss";
         //private const string DATE_TIME_STRING_FORMAT = "yyyMMdd'_'HHmmss'.'fff";
 
         //タブ型右クリックメニュー、メインメニュー
@@ -1534,10 +1535,11 @@ namespace Pixtack4
         {
             var ar = GetFontNames();
             List<string> ll = ar.ToList();
-            ll.Insert(0, string.Empty);// 戦闘に空白をいれる、規定のフォント指定用
+            ll.Insert(0, string.Empty);// 先頭に空白をいれる、既定のフォント指定用
             MyAppData.FontNameList = ll;
 
             MyAppData.FontComboBoxSelectedIndex = 0;
+            MyStatusMessage.Text = "フォントリスト更新完了";
         }
 
         /// <summary>
