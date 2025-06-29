@@ -947,7 +947,7 @@
                     </Rectangle>
                     <StackPanel>
                       <TextBox Text="{Binding MyItemData.MyThumbType, StringFormat=Type {0:0}}"/>
-                      <TabControl BorderThickness="0">
+                      <TabControl BorderThickness="0" SelectedIndex="1">
                         <TabItem Header="text">
                           <StackPanel DataContext="{Binding MyItemData}">
                             <TextBox Text="{Binding TextItemData.MyText, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True"/>
@@ -977,6 +977,22 @@
                             
                           </StackPanel>
 
+                        </TabItem>
+                        <TabItem Header="geo">
+                          <StackPanel DataContext="{Binding MyItemData.GeoShapeItemData}">
+                            <TextBlock Text="{Binding MyGeoShapeHeadBeginCapType}"/>
+                            <UniformGrid Columns="2" Margin="4">
+                              <TextBlock Text="始端形状" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="10,0"/>
+                              <ComboBox x:Name="ComboBoxGeoShapeStartCapTypeForFocusItem"
+                                SelectedValue="{Binding MyGeoShapeHeadBeginCapType}"/>
+                            </UniformGrid>
+                            <UniformGrid Columns="2" Margin="4">
+                              <TextBlock Text="終端形状" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="10,0"/>
+                              <ComboBox x:Name="ComboBoxGeoShapeEndCapTypeForFocusItem"
+                                SelectedValue="{Binding MyGeoShapeHeadEndCapType}"/>
+                            </UniformGrid>
+
+                          </StackPanel>
                         </TabItem>
                       </TabControl>
                     </StackPanel>

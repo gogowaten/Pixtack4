@@ -585,11 +585,12 @@ namespace Pixtack4
             //始端形状
             ComboBoxGeoShapeStartCapType.ItemsSource = Enum.GetValues(typeof(HeadType));
             ComboBoxGeoShapeStartCapType.SelectedValue = MyAppData.GeoShapeEndHeadType;
+            ComboBoxGeoShapeStartCapTypeForFocusItem.ItemsSource = Enum.GetValues(typeof(HeadType));
 
             //終端形状
             ComboBoxGeoShapeEndCapType.ItemsSource = Enum.GetValues(typeof(HeadType));
             ComboBoxGeoShapeEndCapType.SelectedValue = MyAppData.GeoShapeEndHeadType;
-
+            ComboBoxGeoShapeEndCapTypeForFocusItem.ItemsSource = Enum.GetValues(typeof(HeadType));
         }
 
 
